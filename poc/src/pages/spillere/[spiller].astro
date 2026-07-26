@@ -1,0 +1,129 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import { spillere, getHold, getSponsor, spillerSlug } from '../../data/akademi';
+import { initials } from '../../lib/slug';
+
+export const getStaticPaths = (() =>
+  spillere.map((s) => ({ params: { spiller: spillerSlug(s) }, props: { s } }))
+) satisfies GetStaticPaths;
+
+const { s } = Astro.props;
+const h = getHold(s.holdId);
+const sponsor = getSponsor(s.sponsorId);
+---
+
+<Base titel={s.navn}
+      beskrivelse={`${s.navn} spiller ${s.position} for ${h?.navn} på Mors-Thy Håndbold Akademi.`}>
+  <div class="wrap">
+    <nav class="krumme" aria-label="Sti">
+      <a href="/">Forside</a> <span>/</span>
+      <a href={`/hold/${s.holdId}`}>{h?.navn}</a> <span>/</span>
+      <span>{s.navn}</span>
+    </nav>
+
+    <article class="profil">
+      <div class="profil__foto">
+        <span class="profil__init" aria-hidden="true">{initials(s.navn)}</span>
+        <span class="profil__nr num" aria-hidden="true">{s.rygnummer}</span>
+      </div>
+
+      <div class="profil__info">
+        <span class="eyebrow">{h?.navn} · Årgang {h?.aargang}</span>
+        <h1>{s.navn}</h1>
+
+        <dl class="fakta">
+          <div><dt>Position</dt><dd>{s.position}</dd></div>
+          <div><dt>Rygnummer</dt><dd class="num">{s.rygnummer}</dd></div>
+          <div><dt>Fødselsår</dt><dd class="num">{s.foedselsaar}</dd></div>
+          <div><dt>Moderklub</dt><dd>{s.moderklub}</dd></div>
+          <div><dt>Uddannelse</dt><dd>{s.uddannelse}</dd></div>
+        </dl>
+
+        {sponsor && (
+          <aside class="sponsorboks">
+            <span class="eyebrow">Personlig sponsor</span>
+            <strong>{sponsor.navn}</strong>
+            <p>
+              Sponsoren er en henvisning til sponsorregistret. Skifter de navn
+              eller logo, opdateres det ét sted og slår igennem på alle de
+              spillere de støtter — og i sidefoden.
+            </p>
+          </aside>
+        )}
+
+        <p class="demo">
+          Position, rygnummer, moderklub, uddannelse og sponsor er eksempeldata
+          i denne prototype. Navn og årgang er offentlige oplysninger fra m-tha.dk.
+        </p>
+
+        <a href={`/hold/${s.holdId}`} class="btn btn--ghost">← Hele truppen</a>
+      </div>
+    </article>
+  </div>
+</Base>
+
+<style>
+  .krumme { display: flex; flex-wrap: wrap; gap: 0.4rem; padding-top: 1rem;
+            font-size: 0.8rem; color: var(--text-faint); }
+  .krumme a { color: var(--text-dim); text-decoration: none; }
+  .krumme a:hover { text-decoration: underline; }
+
+  .profil {
+    display: grid; gap: 1.8rem; padding-block: 1.6rem 1rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 760px) { .profil { grid-template-columns: 17rem minmax(0, 1fr); } }
+
+  .profil__foto {
+    aspect-ratio: 3 / 4;
+    background: linear-gradient(168deg, var(--navy-600), var(--navy-900));
+    border-radius: var(--radius);
+    display: grid; place-items: center; position: relative;
+    max-width: 17rem;
+  }
+  .profil__init {
+    font-family: var(--font-display); font-size: 5rem; font-weight: 700;
+    color: rgb(255 255 255 / 22%); letter-spacing: 0.04em;
+  }
+  .profil__nr {
+    position: absolute; left: 0.8rem; bottom: 0.5rem;
+    font-family: var(--font-display); font-size: 3rem; font-weight: 700;
+    color: var(--orange); line-height: 1;
+  }
+
+  .profil__info { display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+  .profil h1 { font-size: clamp(1.9rem, 4.6vw, 3rem); }
+
+  .fakta {
+    margin: 0.4rem 0 0; width: 100%;
+    display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 132px), 1fr));
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft); border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .fakta > div { background: var(--surface); padding: 0.7rem 0.85rem;
+                 display: flex; flex-direction: column; gap: 0.1rem; }
+  .fakta dt {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 0.62rem; font-weight: 600;
+    color: var(--text-faint);
+  }
+  .fakta dd { margin: 0; font-weight: 600; font-size: 0.95rem; }
+
+  .sponsorboks {
+    width: 100%; margin-top: 0.5rem;
+    background: var(--orange-100);
+    border: 1px solid var(--line-soft);
+    border-left: 3px solid var(--orange);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    display: flex; flex-direction: column; gap: 0.25rem;
+  }
+  .sponsorboks strong { font-family: var(--font-display); font-size: 1.15rem;
+                        text-transform: uppercase; letter-spacing: 0.02em; }
+  .sponsorboks p { font-size: 0.85rem; color: var(--text-dim); }
+
+  .demo { font-size: 0.8rem; color: var(--text-faint); max-width: 60ch; }
+</style>

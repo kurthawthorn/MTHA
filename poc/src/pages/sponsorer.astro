@@ -1,0 +1,123 @@
+---
+import Base from '../layouts/Base.astro';
+import { sponsorer, spillere, getSponsor } from '../data/akademi';
+
+const hoved = sponsorer.filter((s) => s.niveau === 'hovedsponsor');
+const top = sponsorer.filter((s) => s.niveau === 'topsponsor');
+const oevrige = sponsorer.filter((s) => s.niveau === 'sponsor');
+
+// Antal spillere pr. personlig sponsor — udregnet, ikke vedligeholdt i haanden
+const personlige = new Map<string, number>();
+for (const s of spillere) {
+  if (s.sponsorId) personlige.set(s.sponsorId, (personlige.get(s.sponsorId) ?? 0) + 1);
+}
+---
+
+<Base titel="Sponsorer"
+      beskrivelse="Mors-Thy Håndbold Akademi støttes af Thisted Forsikring og over 50 lokale virksomheder.">
+  <div class="wrap">
+    <header class="top">
+      <span class="eyebrow">Uden dem, intet akademi</span>
+      <h1>Sponsorer</h1>
+      <p class="lead">
+        Alle sponsorer ligger i ét register. Et logo uploades én gang og vises
+        automatisk her, i sidefoden og på de spillerkort, sponsoren støtter.
+      </p>
+    </header>
+
+    <section class="section">
+      <div class="section__head"><h2>Hovedsponsor</h2></div>
+      {hoved.map((s) => (
+        <a class="card hoved" href={s.url} rel="noopener" target="_blank">
+          <img src={s.logo} alt={s.navn} width="314" height="173" />
+          <div>
+            <h3>{s.navn}</h3>
+            <p>Hovedsponsor for Mors-Thy Håndbold Akademi.</p>
+          </div>
+        </a>
+      ))}
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Topsponsorer</h2></div>
+      <div class="grid grid--3">
+        {top.map((s) => (
+          <div class="card niveau">
+            <h3>{s.navn}</h3>
+            <span class="pill pill--orange">Topsponsor</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__head">
+        <h2>Sponsorer</h2>
+        <span class="antal num">{oevrige.length} virksomheder</span>
+      </div>
+      <ul class="liste">
+        {oevrige.map((s) => {
+          const antal = personlige.get(s.id);
+          return (
+            <li>
+              <span>{s.navn}</span>
+              {antal && <em class="num">personlig sponsor for {antal} spillere</em>}
+            </li>
+          );
+        })}
+      </ul>
+      <p class="note">
+        Tallene til højre er talt op automatisk ud fra spillernes profiler —
+        de skal ikke vedligeholdes i hånden.
+      </p>
+    </section>
+
+    <section class="section">
+      <div class="card cta">
+        <h2>Bliv sponsor</h2>
+        <p>
+          Vil I støtte talentudviklingen på Mors og i Thy — som virksomhed eller
+          som personlig sponsor for en enkelt elev?
+        </p>
+        <a href="mailto:info@m-tha.dk" class="btn btn--primary">Skriv til akademiet</a>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .top { display: flex; flex-direction: column; gap: 0.5rem;
+         padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+
+  .hoved {
+    flex-direction: row; align-items: center; gap: 1.4rem;
+    padding: 1.3rem 1.5rem; flex-wrap: wrap;
+  }
+  .hoved img { width: auto; height: 74px; background: #fff;
+               border-radius: var(--radius); padding: 0.3rem 0.5rem; }
+  .hoved h3 { font-size: 1.25rem; }
+  .hoved p { color: var(--text-dim); font-size: 0.92rem; }
+
+  .niveau { padding: 1.1rem 1.2rem; gap: 0.5rem; align-items: flex-start; }
+  .niveau h3 { font-size: 1.05rem; }
+
+  .antal { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-faint); }
+
+  .liste { list-style: none; margin: 0; padding: 0;
+           border-top: 1px solid var(--line-soft); }
+  .liste li {
+    display: flex; flex-wrap: wrap; gap: 0.3rem 1rem;
+    justify-content: space-between; align-items: baseline;
+    padding: 0.6rem 0.2rem; border-bottom: 1px solid var(--line-soft);
+  }
+  .liste span { font-weight: 600; }
+  .liste em { font-style: normal; font-size: 0.8rem; color: var(--text-faint); }
+  .note { font-size: 0.82rem; color: var(--text-faint); margin-top: 0.8rem; }
+
+  .cta { padding: 1.6rem 1.7rem; gap: 0.6rem; align-items: flex-start;
+         background: var(--surface-2); }
+  .cta h2 { font-size: 1.3rem; }
+  .cta p { color: var(--text-dim); max-width: 56ch; }
+  .cta .btn { margin-top: 0.4rem; }
+</style>

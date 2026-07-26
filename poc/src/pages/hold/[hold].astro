@@ -1,0 +1,157 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import SpillerKort from '../../components/SpillerKort.astro';
+import { hold, truppen } from '../../data/akademi';
+
+export const getStaticPaths = (() =>
+  hold.map((h) => ({ params: { hold: h.id }, props: { h } }))) satisfies GetStaticPaths;
+
+const { h } = Astro.props;
+const trup = truppen(h.id);
+
+// Filtrene bygges ud fra de positioner der faktisk findes i truppen.
+// Det er hele pointen med at have data i felter frem for i billedfiler.
+const positioner = [...new Set(trup.map((s) => s.position))];
+const aargange = [...new Set(trup.map((s) => s.foedselsaar))].sort();
+---
+
+<Base titel={`${h.navn} — årgang ${h.aargang}`}
+      beskrivelse={`Truppen for ${h.navn} på Mors-Thy Håndbold Akademi, årgang ${h.aargang}.`}>
+  <div class="wrap">
+    <nav class="krumme" aria-label="Sti">
+      <a href="/">Forside</a> <span>/</span> <span>Hold</span>
+    </nav>
+
+    <header class="holdtop">
+      <div>
+        <span class="eyebrow">Årgang {h.aargang} · {h.raekke}</span>
+        <h1>{h.navn}</h1>
+        <p class="lead num">{trup.length} spillere i truppen</p>
+      </div>
+      <div class="holdtop__skift">
+        {hold.map((a) => (
+          <a href={`/hold/${a.id}`} class={`btn ${a.id === h.id ? 'btn--primary' : 'btn--ghost'}`}>
+            {a.navn}
+          </a>
+        ))}
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="filtre">
+        <fieldset>
+          <legend>Position</legend>
+          <button type="button" class="chip is-on" data-filter="position" data-value="">Alle</button>
+          {positioner.map((p) => (
+            <button type="button" class="chip" data-filter="position" data-value={p}>{p}</button>
+          ))}
+        </fieldset>
+        <fieldset>
+          <legend>Årgang</legend>
+          <button type="button" class="chip is-on" data-filter="aar" data-value="">Alle</button>
+          {aargange.map((a) => (
+            <button type="button" class="chip num" data-filter="aar" data-value={String(a)}>{a}</button>
+          ))}
+        </fieldset>
+        <p class="filtre__count" aria-live="polite" data-count>
+          Viser {trup.length} af {trup.length}
+        </p>
+      </div>
+
+      <div class="grid trupgrid" data-trup>
+        {trup.map((s) => <SpillerKort spiller={s} />)}
+      </div>
+      <p class="tom" data-tom hidden>Ingen spillere matcher filtrene.</p>
+    </section>
+  </div>
+</Base>
+
+<script>
+  // Filtrering paa klienten. Under 1 kB JavaScript — resten af siden er
+  // faerdigbygget HTML og kraever intet script for at kunne laeses.
+  const grid = document.querySelector<HTMLElement>('[data-trup]');
+  const tom = document.querySelector<HTMLElement>('[data-tom]');
+  const tael = document.querySelector<HTMLElement>('[data-count]');
+  if (grid && tom && tael) {
+    const kort = [...grid.querySelectorAll<HTMLElement>('[data-position]')];
+    const valgt: Record<string, string> = { position: '', aar: '' };
+
+    const anvend = () => {
+      let synlige = 0;
+      for (const k of kort) {
+        const ok =
+          (!valgt.position || k.dataset.position === valgt.position) &&
+          (!valgt.aar || k.dataset.aar === valgt.aar);
+        k.hidden = !ok;
+        if (ok) synlige++;
+      }
+      tom.hidden = synlige > 0;
+      tael.textContent = `Viser ${synlige} af ${kort.length}`;
+    };
+
+    for (const knap of document.querySelectorAll<HTMLElement>('.chip')) {
+      knap.addEventListener('click', () => {
+        const gruppe = knap.dataset.filter!;
+        valgt[gruppe] = knap.dataset.value!;
+        document
+          .querySelectorAll(`.chip[data-filter="${gruppe}"]`)
+          .forEach((s) => s.classList.toggle('is-on', s === knap));
+        anvend();
+      });
+    }
+  }
+</script>
+
+<style>
+  .krumme {
+    display: flex; gap: 0.4rem; padding-top: 1rem;
+    font-size: 0.8rem; color: var(--text-faint);
+  }
+  .krumme a { color: var(--text-dim); text-decoration: none; }
+  .krumme a:hover { text-decoration: underline; }
+
+  .holdtop {
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    justify-content: space-between; align-items: flex-end;
+    padding-block: 1.1rem 0;
+    border-bottom: 2px solid var(--navy);
+  }
+  .holdtop h1 { font-size: clamp(1.8rem, 4.6vw, 2.9rem); }
+  .holdtop .lead { font-size: 0.98rem; }
+  .holdtop__skift { display: flex; gap: 0.5rem; flex-wrap: wrap; padding-bottom: 0.9rem; }
+
+  .filtre {
+    display: flex; flex-wrap: wrap; gap: 0.9rem 1.6rem;
+    align-items: flex-end; margin-bottom: 1.3rem;
+  }
+  .filtre fieldset {
+    border: 0; margin: 0; padding: 0;
+    display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center;
+  }
+  .filtre legend {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 0.64rem; font-weight: 600;
+    color: var(--text-faint); padding: 0; margin-bottom: 0.3rem;
+  }
+  .chip {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.07em; font-size: 0.7rem; font-weight: 600;
+    background: none; color: var(--text-dim);
+    border: 1px solid var(--line); border-radius: 20px;
+    padding: 0.26rem 0.68rem; cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .chip:hover { border-color: var(--navy-300); color: var(--text); }
+  .chip.is-on { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .filtre__count {
+    margin-left: auto; font-family: var(--font-mono);
+    font-size: 0.74rem; color: var(--text-faint);
+  }
+
+  .trupgrid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 158px), 1fr));
+    gap: 0.85rem;
+  }
+  .tom { color: var(--text-faint); padding-block: 2rem; text-align: center; }
+</style>

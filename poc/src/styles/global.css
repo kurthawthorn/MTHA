@@ -1,0 +1,195 @@
+/* ==========================================================================
+   MTHA — designtokens
+   Farverne er samplet direkte ud af det officielle logo
+   (assets/brand/mtha-logo.png), ikke gaettet:
+     navy   #2E308D   figuren og teksten
+     orange #E0893E   bolden
+   Thisted Forsikring: #0762A1 / #61A4D8 — bruges kun omkring hovedsponsoren,
+   aldrig som akademiets egen farve.
+   ========================================================================== */
+
+:root {
+  --navy-900: #1B1D5C;
+  --navy-800: #23256F;
+  --navy: #2E308D;
+  --navy-600: #4245A8;
+  --navy-300: #A9AAD6;
+  --navy-100: #E7E7F4;
+
+  --orange: #E0893E;
+  --orange-600: #C4712A;
+  --orange-100: #FBEEE1;
+
+  --thisted: #0762A1;
+  --thisted-light: #61A4D8;
+
+  /* Neutraler traekker en smule mod navy, saa de ikke virker tilfaeldige */
+  --paper: #FBFBFD;
+  --surface: #FFFFFF;
+  --surface-2: #F3F3F9;
+  --line: #DEDEEC;
+  --line-soft: #EAEAF3;
+  --text: #171838;
+  --text-dim: #55577C;
+  --text-faint: #8385A6;
+
+  --good: #2E7A54;
+
+  --font-display: 'Bahnschrift SemiCondensed', 'Bahnschrift', 'DIN Condensed',
+                  'Oswald', 'Arial Narrow', system-ui, sans-serif;
+  --font-body: 'Segoe UI Variable Text', 'Segoe UI', system-ui,
+               -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Cascadia Code', Consolas, ui-monospace, 'SF Mono', monospace;
+
+  --wrap: 1140px;
+  --radius: 4px;
+  --shadow: 0 1px 2px rgb(23 24 56 / 6%), 0 10px 30px -16px rgb(23 24 56 / 22%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0E0F26;
+    --surface: #171935;
+    --surface-2: #1F2144;
+    --line: #313463;
+    --line-soft: #262953;
+    --text: #EDEDF6;
+    --text-dim: #A9ABCC;
+    --text-faint: #7C7FA4;
+    --navy-100: #23256F;
+    --navy-300: #6E71BE;
+    --orange-100: #3A2612;
+    --good: #4FAE80;
+    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 10px 30px -16px rgb(0 0 0 / 55%);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.015em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+p { margin: 0; }
+img { max-width: 100%; height: auto; display: block; }
+
+a { color: var(--navy-600); text-underline-offset: 2px; }
+@media (prefers-color-scheme: dark) { a { color: var(--navy-300); } }
+
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+
+.wrap { width: min(100% - 2.5rem, var(--wrap)); margin-inline: auto; }
+.num { font-variant-numeric: tabular-nums; }
+
+.eyebrow {
+  display: block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--orange-600);
+}
+@media (prefers-color-scheme: dark) { .eyebrow { color: var(--orange); } }
+
+.section { padding-block: clamp(2.4rem, 5vw, 4rem); }
+.section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.4rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 2px solid var(--navy);
+}
+.section__head h2 { font-size: clamp(1.35rem, 2.8vw, 1.9rem); }
+.section__head a { font-family: var(--font-display); text-transform: uppercase;
+                   letter-spacing: 0.09em; font-size: 0.78rem; font-weight: 600; }
+
+/* Knapper --------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.62rem 1.15rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn--primary { background: var(--orange); color: #241304; }
+.btn--primary:hover { background: var(--orange-600); color: #fff; }
+.btn--ghost { border-color: currentColor; color: var(--text); background: none; }
+.btn--ghost:hover { background: var(--surface-2); }
+.btn--onnavy { border-color: rgb(255 255 255 / 45%); color: #fff; }
+.btn--onnavy:hover { background: rgb(255 255 255 / 12%); }
+
+/* Kort ------------------------------------------------------------------ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+a.card { text-decoration: none; color: inherit; }
+a.card:hover {
+  border-color: var(--navy-300);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.grid { display: grid; gap: 1.1rem; }
+.grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+.grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+
+.pill {
+  display: inline-block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 2px;
+  background: var(--navy);
+  color: #fff;
+}
+.pill--orange { background: var(--orange); color: #241304; }
+
+.prose { max-width: 65ch; display: flex; flex-direction: column; gap: 1rem; }
+.prose p { color: var(--text-dim); }
+.prose h2 { font-size: 1.3rem; margin-top: 0.6rem; }
+.prose ul { margin: 0; padding-left: 1.2rem; color: var(--text-dim); }
+.lead { font-size: 1.1rem; color: var(--text-dim); max-width: 62ch; }

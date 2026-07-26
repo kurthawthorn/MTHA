@@ -1,0 +1,125 @@
+---
+import { hovedsponsor } from '../data/akademi';
+
+const nav = [
+  { href: '/nyheder', label: 'Nyheder' },
+  { href: '/hold/u17', label: 'Hold' },
+  { href: '/om-akademiet', label: 'Om akademiet' },
+  { href: '/sponsorer', label: 'Sponsorer' },
+];
+const sponsor = hovedsponsor();
+const path = Astro.url.pathname;
+---
+
+<header class="hdr">
+  <!-- Hovedsponsor-baand: adskilt fra akademiets egen identitet -->
+  <div class="hdr__sponsor">
+    <div class="wrap hdr__sponsor-in">
+      <span>Hovedsponsor</span>
+      <a href={sponsor.url} rel="noopener" target="_blank">
+        <img src={sponsor.logo} alt={sponsor.navn} width="132" height="72" />
+      </a>
+    </div>
+  </div>
+
+  <div class="hdr__main">
+    <div class="wrap hdr__main-in">
+      <a href="/" class="hdr__logo" aria-label="Mors-Thy Håndbold Akademi — forside">
+        <img src="/brand/mtha-logo-transparent.png" alt="Mors-Thy Håndbold Akademi"
+             width="240" height="179" />
+      </a>
+
+      <nav aria-label="Hovedmenu">
+        <ul>
+          {nav.map((i) => (
+            <li>
+              <a href={i.href}
+                 aria-current={path.startsWith(i.href) ? 'page' : undefined}>{i.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <a href="/bliv-elev" class="btn btn--primary hdr__cta">Bliv elev</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .hdr { background: var(--navy); color: #fff; }
+
+  .hdr__sponsor {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  .hdr__sponsor-in {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.85rem;
+    padding-block: 0.4rem;
+  }
+  .hdr__sponsor-in span {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: #6b6d92;
+  }
+  .hdr__sponsor-in img { width: auto; height: 30px; }
+
+  .hdr__main-in {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-block: 0.7rem;
+    flex-wrap: wrap;
+  }
+
+  /* Logoet staar paa hvid plade: det er en JPEG-original med hvid baggrund,
+     og en plade er mere respektfuld over for maerket end en daarlig udklipning */
+  .hdr__logo {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 0.35rem 0.5rem;
+    line-height: 0;
+    flex: none;
+  }
+  .hdr__logo img { width: auto; height: 52px; }
+
+  nav { margin-left: auto; }
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.35rem;
+    flex-wrap: wrap;
+  }
+  nav a {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    padding-block: 0.3rem;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.15s;
+  }
+  nav a:hover { border-bottom-color: rgb(255 255 255 / 50%); }
+  nav a[aria-current='page'] { border-bottom-color: var(--orange); }
+
+  .hdr__cta { flex: none; }
+
+  @media (max-width: 720px) {
+    .hdr__main-in { gap: 0.8rem; }
+    .hdr__logo img { height: 42px; }
+    nav { margin-left: 0; order: 3; width: 100%; }
+    nav ul { gap: 1rem; }
+    nav a { font-size: 0.76rem; }
+    .hdr__cta { margin-left: auto; }
+  }
+</style>

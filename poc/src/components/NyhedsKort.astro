@@ -1,0 +1,68 @@
+---
+import { danishDate } from '../lib/slug';
+
+interface Props {
+  slug: string;
+  titel: string;
+  dato: Date;
+  kategori: string;
+  resume: string;
+  kilde: 'cms' | 'instagram';
+}
+const { slug, titel, dato, kategori, resume, kilde } = Astro.props;
+
+/* Farvet felt i stedet for foto: POC'en bruger ikke billeder af eleverne.
+   Vinklen varieres ud fra overskriften, saa kortene ikke ser ens ud. */
+const vinkel = 120 + ([...titel].reduce((a, c) => a + c.charCodeAt(0), 0) % 90);
+---
+
+<a class="card nk" href={`/nyheder/${slug}`}>
+  <div class="nk__img" style={`--v:${vinkel}deg`}>
+    <span class="pill">{kategori}</span>
+    {kilde === 'instagram' && <span class="nk__auto">via Instagram</span>}
+  </div>
+  <div class="nk__body">
+    <h3>{titel}</h3>
+    <time datetime={dato.toISOString()}>{danishDate(dato)}</time>
+    <p>{resume}</p>
+  </div>
+</a>
+
+<style>
+  .nk { height: 100%; }
+  .nk__img {
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(var(--v), var(--navy) 0%, var(--navy-600) 55%, var(--orange) 190%);
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    padding: 0.6rem;
+  }
+  .nk__auto {
+    position: absolute;
+    right: 0.6rem;
+    bottom: 0.6rem;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #fff;
+    background: rgb(0 0 0 / 35%);
+    padding: 0.15rem 0.45rem;
+    border-radius: 2px;
+  }
+  .nk__body {
+    padding: 0.85rem 0.95rem 1.05rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .nk__body h3 { font-size: 1.02rem; letter-spacing: 0.02em; }
+  .nk__body time {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+  }
+  .nk__body p { font-size: 0.9rem; color: var(--text-dim); }
+</style>

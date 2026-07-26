@@ -1,0 +1,161 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import NyhedsKort from '../components/NyhedsKort.astro';
+import { hold, truppen } from '../data/akademi';
+
+const nyheder = (await getCollection('nyheder'))
+  .sort((a, b) => b.data.dato.getTime() - a.data.dato.getTime());
+const seneste = nyheder.slice(0, 3);
+const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
+---
+
+<Base titel="forside">
+  <section class="hero">
+    <div class="wrap hero__in">
+      <div class="hero__text">
+        <span class="eyebrow">Nykøbing Mors</span>
+        <h1>Vi skaber<br />fremtidens stjerner</h1>
+        <p class="lead">
+          Elitehåndbold og ungdomsuddannelse samlet ét sted. Træning, skole og
+          fællesskab i Morsø Multipark — med bolig i gåafstand fra hallen.
+        </p>
+        <div class="hero__btns">
+          <a href="/bliv-elev" class="btn btn--primary">Bliv elev</a>
+          <a href="/om-akademiet" class="btn btn--onnavy">Om akademiet</a>
+        </div>
+      </div>
+
+      <dl class="hero__tal">
+        <div><dt>Spillere</dt><dd class="num">{antalSpillere}</dd></div>
+        <div><dt>Årgange</dt><dd class="num">{hold.length}</dd></div>
+        <div><dt>Uddannelser</dt><dd>STX · HHX · HF</dd></div>
+        <div><dt>Bolig</dt><dd class="num">35 værelser</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="section">
+      <div class="section__head">
+        <h2>Seneste nyt</h2>
+        <a href="/nyheder">Se alle {nyheder.length} →</a>
+      </div>
+      <div class="grid grid--3">
+        {seneste.map((n) => (
+          <NyhedsKort slug={n.id} titel={n.data.titel} dato={n.data.dato}
+                      kategori={n.data.kategori} resume={n.data.resume}
+                      kilde={n.data.kilde} />
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__head">
+        <h2>Årgange</h2>
+        <a href="/hold/u17">Se truppen →</a>
+      </div>
+      <div class="grid grid--2">
+        {hold.map((h) => (
+          <a class="card holdkort" href={`/hold/${h.id}`}>
+            <div class="holdkort__top">
+              <h3>{h.navn}</h3>
+              <span class="pill pill--orange">{h.raekke}</span>
+            </div>
+            <p class="holdkort__aar num">Årgang {h.aargang}</p>
+            <p class="holdkort__antal num">{truppen(h.id).length} spillere i truppen</p>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Bliv elev</h2></div>
+      <div class="grid grid--3">
+        <div class="card infokort">
+          <h3>Træning</h3>
+          <p>Målrettet håndboldtræning med uddannede trænere, fysioterapeuter
+             og mentaltræner tilknyttet hverdagen.</p>
+        </div>
+        <div class="card infokort">
+          <h3>Uddannelse</h3>
+          <p>Skema koordineret med Morsø Gymnasium, EUC Nordvest og HF Mors,
+             så træning og undervisning går op i en højere enhed.</p>
+        </div>
+        <div class="card infokort">
+          <h3>Bolig</h3>
+          <p>35 værelser på Traneholm i gåafstand fra hal og skole. Fælleskøkken
+             og opholdsrum på hver etage.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .hero {
+    background:
+      radial-gradient(90% 120% at 85% 0%, rgb(224 137 62 / 26%), transparent 60%),
+      linear-gradient(160deg, var(--navy) 0%, var(--navy-900) 100%);
+    color: #fff;
+    padding-block: clamp(2.6rem, 6vw, 4.6rem);
+  }
+  .hero__in {
+    display: grid;
+    gap: 2.2rem;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: end;
+  }
+  @media (min-width: 900px) {
+    .hero__in { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
+  }
+  .hero__text { display: flex; flex-direction: column; gap: 0.9rem; }
+  .hero h1 { font-size: clamp(2.3rem, 6.4vw, 4.2rem); letter-spacing: -0.005em; }
+  .hero .lead { color: #C6C7E9; }
+  .hero .eyebrow { color: var(--orange); }
+  .hero__btns { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.4rem; }
+
+  .hero__tal {
+    margin: 0;
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(2, 1fr);
+    background: rgb(255 255 255 / 18%);
+    border: 1px solid rgb(255 255 255 / 18%);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .hero__tal > div {
+    background: rgb(27 29 92 / 72%);
+    padding: 0.85rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .hero__tal dt {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.64rem;
+    font-weight: 600;
+    color: #9DA0D4;
+  }
+  .hero__tal dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+
+  .holdkort { padding: 1.15rem 1.25rem 1.3rem; gap: 0.3rem; }
+  .holdkort__top { display: flex; align-items: center; gap: 0.7rem;
+                   justify-content: space-between; }
+  .holdkort h3 { font-size: 1.2rem; }
+  .holdkort__aar { color: var(--text-dim); font-size: 0.94rem; }
+  .holdkort__antal { color: var(--text-faint); font-size: 0.86rem; }
+
+  .infokort { padding: 1.15rem 1.25rem 1.3rem; gap: 0.45rem; }
+  .infokort h3 { font-size: 1.02rem; }
+  .infokort p { font-size: 0.92rem; color: var(--text-dim); }
+</style>

@@ -1,0 +1,80 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { danishDate } from '../../lib/slug';
+import { getHold } from '../../data/akademi';
+
+export const getStaticPaths = (async () => {
+  const nyheder = await getCollection('nyheder');
+  return nyheder.map((n) => ({ params: { slug: n.id }, props: { n } }));
+}) satisfies GetStaticPaths;
+
+const { n } = Astro.props;
+const { Content } = await render(n);
+const h = n.data.holdId ? getHold(n.data.holdId) : undefined;
+---
+
+<Base titel={n.data.titel} beskrivelse={n.data.resume}>
+  <div class="wrap">
+    <nav class="krumme" aria-label="Sti">
+      <a href="/">Forside</a> <span>/</span>
+      <a href="/nyheder">Nyheder</a> <span>/</span>
+      <span>{n.data.titel}</span>
+    </nav>
+
+    <article class="artikel">
+      <header class="artikel__top">
+        <div class="artikel__meta">
+          <span class="pill">{n.data.kategori}</span>
+          <time datetime={n.data.dato.toISOString()}>{danishDate(n.data.dato)}</time>
+          {n.data.kilde === 'instagram' && <span class="via">hentet fra Instagram</span>}
+        </div>
+        <h1>{n.data.titel}</h1>
+        <p class="lead">{n.data.resume}</p>
+        {h && <a href={`/hold/${h.id}`} class="artikel__hold">{h.navn} · årgang {h.aargang}</a>}
+      </header>
+
+      <div class="artikel__krop prose">
+        <Content />
+      </div>
+    </article>
+
+    <a href="/nyheder" class="btn btn--ghost tilbage">← Alle nyheder</a>
+  </div>
+</Base>
+
+<style>
+  .krumme { display: flex; flex-wrap: wrap; gap: 0.4rem; padding-top: 1rem;
+            font-size: 0.8rem; color: var(--text-faint); }
+  .krumme a { color: var(--text-dim); text-decoration: none; }
+  .krumme a:hover { text-decoration: underline; }
+
+  .artikel { max-width: 68ch; padding-block: 1.6rem 0; }
+  .artikel__top { display: flex; flex-direction: column; gap: 0.6rem;
+                  padding-bottom: 1.2rem; border-bottom: 1px solid var(--line); }
+  .artikel__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+  .artikel__meta time { font-family: var(--font-mono); font-size: 0.76rem;
+                        color: var(--text-faint); }
+  .via {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.1em; font-size: 0.6rem; font-weight: 600;
+    color: var(--text-faint); border: 1px solid var(--line);
+    padding: 0.12rem 0.4rem; border-radius: 2px;
+  }
+  .artikel h1 { font-size: clamp(1.8rem, 4.6vw, 2.8rem); }
+  .artikel__hold {
+    align-self: flex-start; font-family: var(--font-display);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 0.76rem; font-weight: 600; text-decoration: none;
+    color: var(--navy-600); border-bottom: 2px solid var(--orange);
+  }
+  .artikel__krop { padding-block: 1.3rem; }
+  .artikel__krop :global(blockquote) {
+    margin: 0; padding: 0.4rem 0 0.4rem 1rem;
+    border-left: 3px solid var(--orange);
+    font-size: 1.08rem; color: var(--text);
+  }
+  .artikel__krop :global(em) { color: var(--text-faint); }
+  .tilbage { margin-bottom: 1rem; }
+</style>

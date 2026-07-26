@@ -1,0 +1,157 @@
+---
+import Base from '../layouts/Base.astro';
+
+/* Priserne er dem der staar paa m-tha.dk i dag. */
+const priser = [
+  { post: 'Ophold og forplejning', beloeb: 2495 },
+  { post: 'Akademi og uddannelse', beloeb: 3850 },
+];
+const total = priser.reduce((n, p) => n + p.beloeb, 0);
+
+const trin = [
+  { h: 'Send en ansøgning', p: 'Udfyld formularen herunder. Vi svarer inden for en uge.' },
+  { h: 'Kom til en snak', p: 'Vi aftaler et besøg, hvor I ser hal, bolig og uddannelsessted.' },
+  { h: 'Træn med', p: 'Du prøver en træning med den årgang, du skal gå på.' },
+  { h: 'Kontrakt og indflytning', p: 'Kontrakten underskrives, og værelset står klar til august.' },
+];
+---
+
+<Base titel="Bliv elev"
+      beskrivelse="Sådan bliver du elev på Mors-Thy Håndbold Akademi: krav, priser, uddannelse og ansøgning.">
+  <div class="wrap">
+    <header class="top">
+      <span class="eyebrow">Optagelse</span>
+      <h1>Bliv elev</h1>
+      <p class="lead">
+        Denne side findes ikke på den nuværende hjemmeside. I dag skal en
+        forælder selv samle pris, uddannelse, bolig og kontakt fra fire steder
+        på én lang side.
+      </p>
+    </header>
+
+    <section class="section">
+      <div class="section__head"><h2>Sådan foregår det</h2></div>
+      <ol class="trin">
+        {trin.map((t) => (
+          <li>
+            <div>
+              <h3>{t.h}</h3>
+              <p>{t.p}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Pris</h2></div>
+      <div class="tblwrap">
+        <table>
+          <caption>Månedlig egenbetaling. Beløb som oplyst på m-tha.dk.</caption>
+          <thead><tr><th scope="col">Post</th><th scope="col" class="n">Pr. måned</th></tr></thead>
+          <tbody>
+            {priser.map((p) => (
+              <tr><td>{p.post}</td><td class="n num">{p.beloeb.toLocaleString('da-DK')} kr.</td></tr>
+            ))}
+            <tr class="tot">
+              <td>I alt</td>
+              <td class="n num">{total.toLocaleString('da-DK')} kr.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Ansøg</h2></div>
+      <form class="ansoeg" method="post" action="#" novalidate>
+        <p class="ansoeg__note">
+          Prototype — formularen sender ikke. I den færdige løsning lander
+          ansøgningen både i indbakken på info@m-tha.dk og i CMS'et, så intet
+          forsvinder i et spamfilter.
+        </p>
+        <div class="ansoeg__rk">
+          <label>Spillerens navn<input type="text" name="navn" autocomplete="name" /></label>
+          <label>Fødselsår<input type="number" name="aar" min="2004" max="2016" /></label>
+        </div>
+        <div class="ansoeg__rk">
+          <label>Forælders e-mail<input type="email" name="email" autocomplete="email" /></label>
+          <label>Telefon<input type="tel" name="tlf" autocomplete="tel" /></label>
+        </div>
+        <div class="ansoeg__rk">
+          <label>Moderklub<input type="text" name="klub" /></label>
+          <label>Ønsket uddannelse
+            <select name="uddannelse">
+              <option>STX — Morsø Gymnasium</option>
+              <option>HHX — EUC Nordvest</option>
+              <option>HF — HF Mors</option>
+            </select>
+          </label>
+        </div>
+        <label>Fortæl kort om spilleren
+          <textarea name="besked" rows="4"></textarea>
+        </label>
+        <button type="submit" class="btn btn--primary">Send ansøgning</button>
+      </form>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .top { display: flex; flex-direction: column; gap: 0.5rem;
+         padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+
+  .trin { list-style: none; counter-reset: t; margin: 0; padding: 0;
+          display: flex; flex-direction: column; }
+  .trin li {
+    counter-increment: t;
+    display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: 1rem;
+    padding-block: 0.9rem; border-bottom: 1px dashed var(--line);
+  }
+  .trin li::before {
+    content: counter(t, decimal-leading-zero);
+    font-family: var(--font-display); font-weight: 700; font-size: 1.35rem;
+    color: var(--orange); font-variant-numeric: tabular-nums;
+  }
+  .trin h3 { font-size: 1rem; }
+  .trin p { color: var(--text-dim); font-size: 0.93rem; }
+
+  .tblwrap { overflow-x: auto; border: 1px solid var(--line-soft);
+             border-radius: var(--radius); }
+  table { border-collapse: collapse; width: 100%; min-width: 26rem; font-size: 0.94rem; }
+  caption { text-align: left; padding: 0.75rem 1rem; font-size: 0.8rem;
+            color: var(--text-faint); border-bottom: 1px solid var(--line-soft); }
+  th, td { text-align: left; padding: 0.62rem 1rem; border-bottom: 1px solid var(--line-soft); }
+  th { font-family: var(--font-display); text-transform: uppercase;
+       letter-spacing: 0.09em; font-size: 0.68rem; color: var(--text-dim);
+       background: var(--surface-2); }
+  td { color: var(--text-dim); }
+  td:first-child { color: var(--text); }
+  .n { text-align: right; white-space: nowrap; }
+  tr.tot td { background: var(--surface-2); color: var(--text); font-weight: 700; }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  .ansoeg { display: flex; flex-direction: column; gap: 0.85rem;
+            max-width: 46rem; }
+  .ansoeg__note {
+    font-size: 0.84rem; color: var(--text-faint);
+    border-left: 3px solid var(--orange); padding-left: 0.7rem;
+  }
+  .ansoeg__rk { display: grid; gap: 0.85rem;
+                grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+  .ansoeg label {
+    display: flex; flex-direction: column; gap: 0.28rem;
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.1em; font-size: 0.66rem; font-weight: 600;
+    color: var(--text-faint);
+  }
+  .ansoeg input, .ansoeg select, .ansoeg textarea {
+    font-family: var(--font-body); font-size: 0.95rem; color: var(--text);
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 0.5rem 0.6rem;
+    text-transform: none; letter-spacing: normal;
+  }
+  .ansoeg textarea { resize: vertical; }
+  .ansoeg button { align-self: flex-start; margin-top: 0.3rem; }
+</style>

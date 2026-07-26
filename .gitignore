@@ -1,0 +1,28 @@
+# Astro / Node
+node_modules/
+dist/
+.astro/
+*.tsbuildinfo
+
+# Miljø og hemmeligheder
+.env
+.env.*
+!.env.example
+
+# Log
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# OS og editor
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Arbejdsfiler fra analysen af den nuværende side
+scratch/
+*.tmp

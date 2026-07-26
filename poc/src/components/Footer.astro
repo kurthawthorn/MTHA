@@ -1,0 +1,121 @@
+---
+import { sponsorer } from '../data/akademi';
+
+const top = sponsorer.filter((s) => s.niveau === 'topsponsor');
+const oevrige = sponsorer.filter((s) => s.niveau === 'sponsor');
+---
+
+<footer class="ft">
+  <div class="wrap ft__in">
+    <div class="ft__col">
+      <img src="/brand/mtha-logo.png" alt="Mors-Thy Håndbold Akademi"
+           width="240" height="179" class="ft__logo" />
+      <p>Vi skaber fremtidens stjerner.</p>
+    </div>
+
+    <div class="ft__col">
+      <h3>Kontakt</h3>
+      <address>
+        Tranevej 4<br />7900 Nykøbing Mors<br />
+        <a href="tel:+4530624304">30 62 43 04</a><br />
+        <a href="mailto:info@m-tha.dk">info@m-tha.dk</a>
+      </address>
+    </div>
+
+    <div class="ft__col">
+      <h3>Genveje</h3>
+      <ul>
+        <li><a href="/nyheder">Nyheder</a></li>
+        <li><a href="/bliv-elev">Bliv elev</a></li>
+        <li><a href="/sponsorer">Sponsorer</a></li>
+        <li><a href="/dokumenter">Dokumenter</a></li>
+      </ul>
+    </div>
+
+    <div class="ft__col">
+      <h3>Følg akademiet</h3>
+      <ul>
+        <li><a href="https://www.facebook.com/morsthyhaandboldakademi/"
+               rel="noopener" target="_blank">Facebook</a></li>
+        <li><a href="https://www.instagram.com/mors_thy_handbold_akademi/"
+               rel="noopener" target="_blank">Instagram</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ft__sponsors">
+    <div class="wrap">
+      <p class="ft__sponsors-h">Topsponsorer</p>
+      <ul class="ft__logos">
+        {top.map((s) => <li>{s.navn}</li>)}
+      </ul>
+      <p class="ft__sponsors-h">Sponsorer</p>
+      <ul class="ft__logos ft__logos--small">
+        {oevrige.map((s) => <li>{s.navn}</li>)}
+      </ul>
+      <p class="ft__note">
+        Sponsorerne vises her fra ét register — samme sted som logoerne på
+        spillerkortene. Skifter en sponsor navn eller logo, rettes det ét sted.
+      </p>
+    </div>
+  </div>
+
+  <div class="ft__legal">
+    <div class="wrap">
+      <span>© {new Date().getFullYear()} Mors-Thy Håndbold Akademi</span>
+      <span>POC — ikke akademiets officielle hjemmeside</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ft { background: var(--navy-900); color: #D9DAF0; margin-top: 3rem; }
+  .ft__in {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+    padding-block: 2.4rem 2rem;
+  }
+  .ft__col { display: flex; flex-direction: column; gap: 0.6rem; }
+  .ft__logo {
+    width: auto; height: 74px;
+    background: #fff; border-radius: var(--radius); padding: 0.4rem 0.55rem;
+    align-self: flex-start;
+  }
+  .ft__col p { font-size: 0.92rem; color: #A6A8D2; }
+  .ft h3 {
+    font-size: 0.78rem; letter-spacing: 0.13em; color: var(--orange);
+  }
+  .ft address { font-style: normal; font-size: 0.92rem; line-height: 1.75; }
+  .ft ul { list-style: none; margin: 0; padding: 0; display: flex;
+           flex-direction: column; gap: 0.28rem; font-size: 0.92rem; }
+  .ft a { color: #D9DAF0; text-decoration: none; }
+  .ft a:hover { color: #fff; text-decoration: underline; }
+
+  .ft__sponsors { border-top: 1px solid rgb(255 255 255 / 12%); padding-block: 1.6rem; }
+  .ft__sponsors-h {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.14em; font-size: 0.66rem; font-weight: 600;
+    color: #8285BC; margin-bottom: 0.55rem;
+  }
+  .ft__logos {
+    list-style: none; margin: 0 0 1.2rem; padding: 0;
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+  }
+  /* Pladsholdere: rigtige sponsorlogoer indsaettes i etape 3 */
+  .ft__logos li {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.06em; font-size: 0.76rem; font-weight: 600;
+    color: #C7C9E8;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 2px; padding: 0.34rem 0.65rem;
+  }
+  .ft__logos--small li { font-size: 0.68rem; color: #9699CC; padding: 0.26rem 0.5rem; }
+  .ft__note { font-size: 0.8rem; color: #7B7EB4; max-width: 62ch; }
+
+  .ft__legal { border-top: 1px solid rgb(255 255 255 / 12%); padding-block: 0.9rem; }
+  .ft__legal .wrap {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem;
+    justify-content: space-between; font-size: 0.78rem; color: #7B7EB4;
+  }
+</style>

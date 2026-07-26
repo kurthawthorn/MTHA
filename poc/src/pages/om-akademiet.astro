@@ -1,0 +1,78 @@
+---
+import Base from '../layouts/Base.astro';
+
+const faciliteter = [
+  { h: 'Morsø Multipark', p: 'Akademiets base med haller, styrkerum og mødelokaler samlet ét sted.' },
+  { h: 'Sparekassen Thy Arena | Mors', p: 'Hjemmebane for kampe og en del af den daglige træning.' },
+  { h: 'Traneholm', p: '35 værelser i kollegielignende bolig i gåafstand fra hal og uddannelse.' },
+  { h: 'Skyum Idrætsefterskole', p: 'Samarbejde om faciliteter og træningsmiljø.' },
+];
+
+const uddannelser = [
+  { h: 'STX', p: 'Morsø Gymnasium' },
+  { h: 'HHX', p: 'EUC Nordvest' },
+  { h: 'HF', p: 'HF Mors' },
+];
+---
+
+<Base titel="Om akademiet"
+      beskrivelse="Mors-Thy Håndbold Akademi kombinerer elitehåndbold med ungdomsuddannelse i Nykøbing Mors.">
+  <div class="wrap">
+    <header class="top">
+      <span class="eyebrow">Træning · uddannelse · fællesskab</span>
+      <h1>Om akademiet</h1>
+      <p class="lead">
+        Mors-Thy Håndbold Akademi vil gennem træning, uddannelse og fællesskab
+        være det foretrukne valg for motiverede unge elitehåndboldspillere.
+      </p>
+    </header>
+
+    <section class="section prose">
+      <h2>Vision</h2>
+      <p>
+        Som elev på akademiet får du hjælp til at planlægge og strukturere din
+        skolegang, så den hænger sammen med elitesport. Trænerne har
+        DHF-uddannelse og mange års erfaring, og flere er selv en del af
+        Mors-Thy Håndbolds ligatrup.
+      </p>
+      <p>
+        Der er stort fokus på elevernes fysiske udvikling. Fysioterapeuter fra
+        Morsø Fysiologi står for skadesforebyggende træning, og en mentaltræner
+        er tilknyttet hverdagen.
+      </p>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Uddannelse</h2></div>
+      <div class="grid grid--3">
+        {uddannelser.map((u) => (
+          <div class="card kort">
+            <h3>{u.h}</h3>
+            <p>{u.p}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Faciliteter</h2></div>
+      <div class="grid grid--2">
+        {faciliteter.map((f) => (
+          <div class="card kort">
+            <h3>{f.h}</h3>
+            <p>{f.p}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .top { display: flex; flex-direction: column; gap: 0.5rem;
+         padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+  .kort { padding: 1.1rem 1.2rem; gap: 0.35rem; }
+  .kort h3 { font-size: 1.02rem; }
+  .kort p { font-size: 0.92rem; color: var(--text-dim); }
+</style>

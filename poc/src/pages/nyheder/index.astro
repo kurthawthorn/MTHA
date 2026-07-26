@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import NyhedsKort from '../../components/NyhedsKort.astro';
+
+const nyheder = (await getCollection('nyheder'))
+  .sort((a, b) => b.data.dato.getTime() - a.data.dato.getTime());
+const fraInstagram = nyheder.filter((n) => n.data.kilde === 'instagram').length;
+---
+
+<Base titel="Nyheder"
+      beskrivelse="Nyt fra Mors-Thy Håndbold Akademi — kampe, hverdagen på akademiet, uddannelse og sponsorer.">
+  <div class="wrap">
+    <header class="top">
+      <span class="eyebrow">Nyt fra akademiet</span>
+      <h1>Nyheder</h1>
+      <p class="lead">
+        Hver nyhed har sin egen adresse og kan deles direkte — til forældre, til
+        sponsorer eller på Facebook.
+      </p>
+      {fraInstagram > 0 && (
+        <p class="auto">
+          {fraInstagram} af {nyheder.length} nyheder er hentet automatisk fra
+          Instagram. Staben skriver ét sted.
+        </p>
+      )}
+    </header>
+
+    <section class="section">
+      <div class="grid grid--3">
+        {nyheder.map((n) => (
+          <NyhedsKort slug={n.id} titel={n.data.titel} dato={n.data.dato}
+                      kategori={n.data.kategori} resume={n.data.resume}
+                      kilde={n.data.kilde} />
+        ))}
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .top {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    padding-block: 1.8rem 1.1rem;
+    border-bottom: 2px solid var(--navy);
+  }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+  .auto {
+    font-size: 0.84rem; color: var(--text-faint);
+    border-left: 3px solid var(--orange); padding-left: 0.7rem; margin-top: 0.3rem;
+  }
+</style>

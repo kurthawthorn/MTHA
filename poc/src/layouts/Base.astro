@@ -1,0 +1,111 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  titel: string;
+  beskrivelse?: string;
+}
+
+const { titel, beskrivelse = 'Elitehåndbold og ungdomsuddannelse i Nykøbing Mors. ' +
+  'Mors-Thy Håndbold Akademi skaber rammerne for dig, der vil udvikle dit talent.' } = Astro.props;
+
+const fuldTitel = titel === 'forside'
+  ? 'Mors-Thy Håndbold Akademi'
+  : `${titel} | Mors-Thy Håndbold Akademi`;
+const kanonisk = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="da">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fuldTitel}</title>
+    <meta name="description" content={beskrivelse} />
+    <link rel="canonical" href={kanonisk} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fuldTitel} />
+    <meta property="og:description" content={beskrivelse} />
+    <meta property="og:url" content={kanonisk} />
+    <meta property="og:locale" content="da_DK" />
+    <meta name="theme-color" content="#2E308D" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- Struktureret data: fortaeller Google at der er tale om en
+         sportsorganisation med adresse. Findes ikke paa den nuvaerende side. -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SportsOrganization',
+      name: 'Mors-Thy Håndbold Akademi',
+      sport: 'Håndbold',
+      url: 'https://m-tha.dk',
+      email: 'info@m-tha.dk',
+      telephone: '+4530624304',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Tranevej 4',
+        postalCode: '7900',
+        addressLocality: 'Nykøbing Mors',
+        addressCountry: 'DK',
+      },
+      sameAs: [
+        'https://www.facebook.com/morsthyhaandboldakademi/',
+        'https://www.instagram.com/mors_thy_handbold_akademi/',
+      ],
+    })} />
+  </head>
+
+  <body>
+    <a href="#indhold" class="skip">Gå til indhold</a>
+
+    <div class="poc-banner">
+      <div class="wrap">
+        <strong>POC</strong>
+        <span>
+          Prototype til Mors-Thy Håndbold Akademi. Navne og årgange er
+          offentlige data fra m-tha.dk; øvrige spilleroplysninger er
+          eksempeldata. Ikke akademiets officielle hjemmeside.
+        </span>
+      </div>
+    </div>
+
+    <Header />
+    <main id="indhold"><slot /></main>
+    <Footer />
+
+    <style>
+      .skip {
+        position: absolute;
+        left: -9999px;
+        background: var(--orange);
+        color: #241304;
+        padding: 0.6rem 1rem;
+        font-weight: 700;
+        z-index: 10;
+      }
+      .skip:focus { left: 0.6rem; top: 0.6rem; }
+
+      .poc-banner {
+        background: repeating-linear-gradient(
+          135deg, #2E308D 0 12px, #272a7d 12px 24px);
+        color: #fff;
+        font-size: 0.78rem;
+        padding-block: 0.42rem;
+      }
+      .poc-banner .wrap { display: flex; gap: 0.6rem; align-items: baseline;
+                          flex-wrap: wrap; }
+      .poc-banner strong {
+        font-family: var(--font-display);
+        letter-spacing: 0.12em;
+        background: var(--orange);
+        color: #241304;
+        padding: 0.05rem 0.4rem;
+        border-radius: 2px;
+        flex: none;
+      }
+      .poc-banner span { color: #C9CAEA; }
+    </style>
+  </body>
+</html>

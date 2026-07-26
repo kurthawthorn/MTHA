@@ -1,0 +1,64 @@
+---
+import Base from '../layouts/Base.astro';
+
+/* Dokumenterne findes paa m-tha.dk i dag. Her ligger de i ét register med
+   kategori og dato, i stedet for som loese links spredt ud over forsiden. */
+const dokumenter = [
+  { titel: 'Velkommen til Mors-Thy Håndbold Akademi', kategori: 'Brochure', aar: 2023 },
+  { titel: 'Vi skaber fremtidens stjerner', kategori: 'Brochure', aar: 2023 },
+  { titel: 'Forældreovervejelser', kategori: 'Vejledning', aar: 2023 },
+  { titel: 'Kontrakt', kategori: 'Vejledning', aar: 2024 },
+  { titel: 'Vedtægter', kategori: 'Vedtægter', aar: 2025 },
+  { titel: 'Referat fra generalforsamling, oktober 2025', kategori: 'Referat', aar: 2025 },
+  { titel: 'Privatlivspolitik', kategori: 'Vedtægter', aar: 2024 },
+  { titel: 'Boligselskabet Nykøbing Mors — flyer', kategori: 'Bolig', aar: 2024 },
+];
+
+const kategorier = [...new Set(dokumenter.map((d) => d.kategori))];
+---
+
+<Base titel="Dokumenter"
+      beskrivelse="Brochurer, vedtægter, referater og vejledninger fra Mors-Thy Håndbold Akademi.">
+  <div class="wrap">
+    <header class="top">
+      <span class="eyebrow">Til download</span>
+      <h1>Dokumenter</h1>
+      <p class="lead">
+        Ét register med kategori og årstal, i stedet for løse links spredt ud
+        over forsiden.
+      </p>
+    </header>
+
+    {kategorier.map((k) => (
+      <section class="section">
+        <div class="section__head"><h2>{k}</h2></div>
+        <ul class="dok">
+          {dokumenter.filter((d) => d.kategori === k).map((d) => (
+            <li>
+              <a href="#">{d.titel}</a>
+              <span class="num">{d.aar} · PDF</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    <p class="note">Prototype — filerne er ikke vedhæftet i denne POC.</p>
+  </div>
+</Base>
+
+<style>
+  .top { display: flex; flex-direction: column; gap: 0.5rem;
+         padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+  .dok { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line-soft); }
+  .dok li {
+    display: flex; flex-wrap: wrap; gap: 0.3rem 1rem;
+    justify-content: space-between; align-items: baseline;
+    padding: 0.62rem 0.2rem; border-bottom: 1px solid var(--line-soft);
+  }
+  .dok a { font-weight: 600; text-decoration: none; color: var(--text); }
+  .dok a:hover { text-decoration: underline; color: var(--navy-600); }
+  .dok span { font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-faint); }
+  .note { font-size: 0.82rem; color: var(--text-faint); padding-bottom: 1rem; }
+</style>
