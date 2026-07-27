@@ -1,0 +1,439 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { spillere, holdFor, getSponsor, truppen, hold } from '../data/akademi';
+import { saeson } from '../data/saeson';
+import { billede } from '../lib/billeder';
+
+/**
+ * Demonstration af redigeringsvinduet — ikke et rigtigt CMS.
+ *
+ * Formålet er at vise HVILKE felter en spiller har, og hvilke af dem der skal
+ * vedligeholdes hvornår. Feltopdelingen herunder er den vigtigste pointe:
+ *
+ *   stamdata   udfyldes én gang, ændres aldrig
+ *   sæson      kan ændre sig fra sæson til sæson
+ *   udregnet   kan ikke redigeres — systemet finder selv frem til det
+ *
+ * Alle værdier er den rigtige Joakim Lindum fra roster.json, så det er
+ * faktiske data i den faktiske form.
+ */
+const s = spillere.find((x) => x.slug === 'joakim-lindum') ?? spillere[0]!;
+const h = holdFor(s);
+const sponsor = getSponsor(s.sponsorId);
+const foto = billede(s.fotoKey);
+
+type Slags = 'stam' | 'saeson' | 'udregnet';
+
+interface Felt {
+  navn: string;
+  vaerdi: string;
+  slags: Slags;
+  hjaelp?: string;
+  type?: 'tekst' | 'tal' | 'valg' | 'billede' | 'reference' | 'kontakt';
+}
+
+const felter: Felt[] = [
+  { navn: 'Navn', vaerdi: s.navn, slags: 'stam', type: 'tekst',
+    hjaelp: 'Udfyldes én gang' },
+  { navn: 'Webadresse', vaerdi: `/spillere/${s.slug}`, slags: 'udregnet',
+    hjaelp: 'Dannes automatisk ud fra navnet' },
+  { navn: 'Portræt', vaerdi: 'joakim-lindum.jpg', slags: 'stam', type: 'billede',
+    hjaelp: 'Træk et foto ind. Beskæring om ansigtet og komprimering sker automatisk' },
+  { navn: 'Fødselsår', vaerdi: String(s.foedselsaar), slags: 'stam', type: 'tal',
+    hjaelp: 'Det vigtigste felt — holdet udregnes herudfra. Ændres aldrig' },
+  { navn: 'Moderklub', vaerdi: s.moderklub, slags: 'stam', type: 'tekst' },
+  { navn: 'Rygnummer', vaerdi: String(s.rygnummer), slags: 'saeson', type: 'tal' },
+  { navn: 'Position', vaerdi: s.position, slags: 'saeson', type: 'valg' },
+  { navn: 'Uddannelse', vaerdi: s.uddannelse, slags: 'saeson', type: 'valg' },
+  { navn: 'Personlig sponsor', vaerdi: sponsor?.navn ?? s.sponsorNavn ?? '—',
+    slags: 'saeson', type: 'reference',
+    hjaelp: 'Peger på sponsorregistret — logo og link følger med' },
+  { navn: 'Spiller på andet hold', vaerdi: 'ikke sat', slags: 'saeson',
+    type: 'reference', hjaelp: 'Kun hvis spilleren spiller op eller ned' },
+  { navn: 'Aktiv på akademiet', vaerdi: s.aktiv ? 'Ja' : 'Nej', slags: 'saeson',
+    type: 'valg', hjaelp: 'Slå fra når spilleren stopper. Profilen består' },
+  { navn: 'Hold', vaerdi: h ? `${h.navn} · årgang ${h.aargang}` : 'ingen',
+    slags: 'udregnet',
+    hjaelp: `Fødselsår ${s.foedselsaar} findes i ${h?.navn}'s årgange [${saeson.hold.find((x) => x.id === h?.id)?.foedselsaar.join(', ')}]` },
+  { navn: 'I truppen', vaerdi: h ? `Ja — nr. ${truppen(h.id).findIndex((x) => x.slug === s.slug) + 1} af ${truppen(h.id).length}` : 'Nej',
+    slags: 'udregnet', hjaelp: 'Aktiv + har et hold i denne sæson' },
+];
+
+const SLAGS: Record<Slags, { navn: string; forklaring: string }> = {
+  stam: { navn: 'Stamdata',
+    forklaring: 'Udfyldes én gang, når spilleren oprettes. Ændres aldrig igen.' },
+  saeson: { navn: 'Sæsondata',
+    forklaring: 'Kan ændre sig i løbet af eller mellem sæsoner. Rettes efter behov.' },
+  udregnet: { navn: 'Udregnet',
+    forklaring: 'Kan ikke redigeres. Systemet finder selv frem til værdien.' },
+};
+
+const antal = (sl: Slags) => felter.filter((f) => f.slags === sl).length;
+
+/* Hvad der opdateres af sig selv, når ét felt rettes */
+const ringvirkning = [
+  { felt: 'Fødselsår', rammer: ['Holdtilknytning', 'Truppen', 'Årgangsfilter', 'Tællingen på forsiden'] },
+  { felt: 'Portræt', rammer: ['Spillerkort', 'Spillerprofil', 'Alle billedstørrelser og WebP'] },
+  { felt: 'Personlig sponsor', rammer: ['Spillerkort', 'Spillerprofil', '”Støtter N spillere” på sponsorsiden'] },
+  { felt: 'Aktiv', rammer: ['Truppen', 'Tællingen på forsiden', 'Årgangsfilter'] },
+];
+---
+
+<Base titel="Stamdata på en spiller"
+      beskrivelse="Hvilke felter en spiller har, og hvilke af dem der skal vedligeholdes hvornår.">
+  <div class="wrap">
+    <header class="top">
+      <span class="eyebrow">Demonstration · ikke et rigtigt redigeringsvindue</span>
+      <h1>Stamdata på en spiller</h1>
+      <p class="lead">
+        Her er {s.navn}s felter, som de ser ud i systemet. Værdierne er de
+        faktiske fra prototypen. Farven til venstre viser <strong>hvornår</strong>
+        feltet skal vedligeholdes — og det er hele pointen.
+      </p>
+    </header>
+
+    <section class="section">
+      <div class="noegle">
+        {(Object.keys(SLAGS) as Slags[]).map((sl) => (
+          <div class={`noegle__i noegle__i--${sl}`}>
+            <span class="noegle__navn">{SLAGS[sl].navn}<em class="num">{antal(sl)} felter</em></span>
+            <p>{SLAGS[sl].forklaring}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="editor">
+        <header class="editor__bar">
+          <span class="editor__sti">Spillere / {s.navn}</span>
+          <span class="editor__gemt">● Ændringer gemt</span>
+        </header>
+
+        <div class="editor__krop">
+          <div class="editor__foto">
+            {foto ? (
+              <Image src={foto} alt={s.navn} widths={[220, 380]} sizes="200px"
+                     quality={84} loading="lazy" />
+            ) : <span>foto</span>}
+            <p>Træk et nyt foto herind for at erstatte</p>
+          </div>
+
+          <dl class="felter">
+            {felter.map((f) => (
+              <div class={`felt felt--${f.slags}`}>
+                <dt>
+                  {f.navn}
+                  {f.slags === 'udregnet' && <span class="felt__laas" aria-label="udregnet">udregnet</span>}
+                </dt>
+                <dd>
+                  <span class={`felt__vaerdi felt__vaerdi--${f.type ?? 'tekst'}`}>
+                    {f.vaerdi}
+                  </span>
+                  {f.hjaelp && <em>{f.hjaelp}</em>}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <footer class="editor__fod">
+          <span class="editor__knap editor__knap--primaer">Udgiv</span>
+          <span class="editor__knap">Gem kladde</span>
+          <span class="editor__hist">Version 4 · rettet af Lars · se historik</span>
+        </footer>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Ringvirkning — ét felt, mange steder</h2></div>
+      <p class="lead">
+        Fordi tingene udregnes frem for at skrives ind flere gange, slår en
+        rettelse igennem overalt af sig selv.
+      </p>
+      <ul class="ring">
+        {ringvirkning.map((r) => (
+          <li>
+            <span class="ring__felt">{r.felt}</span>
+            <span class="ring__pil" aria-hidden="true">→</span>
+            <span class="ring__liste">
+              {r.rammer.map((x) => <em>{x}</em>)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>De tre ting man gør</h2></div>
+      <div class="flows">
+        <article class="flow">
+          <h3>Ny spiller</h3>
+          <ol>
+            <li>Tryk <b>Spillere → +</b></li>
+            <li>Skriv navn og <b>fødselsår</b></li>
+            <li>Træk portrættet ind fra kamerarullen</li>
+            <li>Udfyld rygnummer, position, moderklub, uddannelse, sponsor</li>
+            <li>Tryk <b>Udgiv</b></li>
+          </ol>
+          <p class="flow__ud">
+            Spilleren er straks på det rigtige hold, i truppen, i filtrene og i
+            forsidens tælling. <strong class="num">Ca. 40 sekunder.</strong>
+          </p>
+        </article>
+
+        <article class="flow">
+          <h3>Spilleren stopper</h3>
+          <ol>
+            <li>Åbn spilleren</li>
+            <li>Slå <b>Aktiv på akademiet</b> fra</li>
+            <li>Tryk <b>Udgiv</b></li>
+          </ol>
+          <p class="flow__ud">
+            Forsvinder fra truppen med det samme. Profil, foto og historik
+            består, så gamle nyheder ikke får døde links.
+            <strong>Man sletter ikke.</strong>
+          </p>
+        </article>
+
+        <article class="flow flow--fremhaev">
+          <h3>Ny sæson</h3>
+          <ol>
+            <li>Åbn <b>Hold → U17</b></li>
+            <li>Ret årgangene fra <b>{saeson.hold[0]!.foedselsaar.join(', ')}</b>
+                til det nye</li>
+            <li>Samme på <b>U19</b></li>
+          </ol>
+          <p class="flow__ud">
+            <strong>Spillerne røres ikke.</strong> De rykker selv op, fordi
+            holdet er defineret ved fødselsår — og fødselsåret er stamdata der
+            aldrig ændrer sig. Målt på prototypen:
+          </p>
+          <table class="maalt">
+            <thead><tr><th>Hold</th><th class="n">Før</th><th class="n">Efter</th></tr></thead>
+            <tbody>
+              <tr><td>U17</td><td class="n num">25</td><td class="n num">12</td></tr>
+              <tr><td>U19</td><td class="n num">29</td><td class="n num">28</td></tr>
+            </tbody>
+          </table>
+          <p class="flow__note">
+            De 13 født i 2008 rykkede selv op fra U17 til U19. De 14 født i 2006
+            faldt ud af truppen. Nul spillere redigeret.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card cta">
+        <h2>Det svære er allerede lavet</h2>
+        <p>
+          Kortlægningen fra <code>7.png</code> til {s.navn} med det rigtige
+          portræt og den rigtige personlige sponsor er lavet maskinelt ud af den
+          nuværende side — for alle 54 spillere. Den skal aldrig laves igen.
+        </p>
+        <div class="cta__btns">
+          <a href={`/spillere/${s.slug}`} class="btn btn--primary">Se profilen som besøgende</a>
+          <a href={`/hold/${h?.id ?? hold[0]!.id}`} class="btn btn--ghost">Se truppen</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .top { display: flex; flex-direction: column; gap: 0.5rem;
+         padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+
+  /* Farvenøgle: de tre slags felter */
+  .noegle { display: grid; gap: 0.9rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+  .noegle__i {
+    background: var(--surface); border: 1px solid var(--line-soft);
+    border-left: 5px solid var(--line); border-radius: var(--radius);
+    padding: 0.9rem 1.05rem;
+    display: flex; flex-direction: column; gap: 0.28rem;
+  }
+  .noegle__i--stam     { border-left-color: var(--navy); }
+  .noegle__i--saeson   { border-left-color: var(--orange); }
+  .noegle__i--udregnet { border-left-color: var(--text-faint); }
+  .noegle__navn {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.07em; font-size: 0.86rem; font-weight: 700;
+    display: flex; align-items: baseline; gap: 0.6rem; justify-content: space-between;
+  }
+  .noegle__navn em {
+    font-style: normal; font-family: var(--font-mono);
+    font-size: 0.68rem; color: var(--text-faint); letter-spacing: 0;
+  }
+  .noegle__i p { font-size: 0.88rem; color: var(--text-dim); }
+
+  /* Redigeringsvinduet */
+  .editor {
+    border: 1px solid var(--line);
+    border-radius: 6px; overflow: hidden;
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  .editor__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+    padding: 0.6rem 1rem; background: var(--surface-2);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .editor__sti { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); }
+  .editor__gemt { font-family: var(--font-mono); font-size: 0.72rem; color: var(--good); }
+
+  .editor__krop {
+    display: grid; gap: 1.4rem; padding: 1.2rem 1.3rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 800px) { .editor__krop { grid-template-columns: 12.5rem minmax(0, 1fr); } }
+
+  .editor__foto { display: flex; flex-direction: column; gap: 0.5rem; }
+  .editor__foto :global(img) {
+    width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 12%;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: linear-gradient(178deg, #fff, #EEF0F7);
+  }
+  .editor__foto > span {
+    display: grid; place-items: center; aspect-ratio: 3 / 4;
+    border: 1px dashed var(--line); border-radius: var(--radius);
+    color: var(--text-faint); font-size: 0.8rem;
+  }
+  .editor__foto p { font-size: 0.72rem; color: var(--text-faint); }
+
+  .felter { margin: 0; display: flex; flex-direction: column; }
+  .felt {
+    display: grid; gap: 0.1rem 1rem;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0.55rem 0 0.55rem 0.8rem;
+    border-left: 4px solid var(--line);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  @media (min-width: 620px) {
+    .felt { grid-template-columns: 11rem minmax(0, 1fr); align-items: baseline; }
+  }
+  .felt:last-child { border-bottom: 0; }
+  .felt--stam     { border-left-color: var(--navy); }
+  .felt--saeson   { border-left-color: var(--orange); }
+  .felt--udregnet { border-left-color: var(--text-faint); background: var(--surface-2); }
+
+  .felt dt {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.09em; font-size: 0.66rem; font-weight: 600;
+    color: var(--text-dim);
+    display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+  }
+  .felt__laas {
+    font-size: 0.56rem; letter-spacing: 0.1em;
+    background: var(--line); color: var(--text-dim);
+    padding: 0.08rem 0.3rem; border-radius: 2px;
+  }
+  .felt dd { margin: 0; display: flex; flex-direction: column; gap: 0.12rem; }
+
+  .felt__vaerdi {
+    font-size: 0.94rem; color: var(--text); font-weight: 600;
+    align-self: flex-start;
+  }
+  /* Feltets type antydes visuelt, som i et rigtigt redigeringsvindue */
+  .felt__vaerdi--tekst, .felt__vaerdi--tal {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 2px; padding: 0.2rem 0.5rem; min-width: 8rem;
+  }
+  .felt__vaerdi--tal { font-variant-numeric: tabular-nums; min-width: 5rem; }
+  .felt__vaerdi--valg {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 2px; padding: 0.2rem 1.6rem 0.2rem 0.5rem;
+    position: relative;
+  }
+  .felt__vaerdi--valg::after {
+    content: '▾'; position: absolute; right: 0.45rem; top: 0.15rem;
+    color: var(--text-faint); font-size: 0.8rem;
+  }
+  .felt__vaerdi--reference {
+    background: var(--navy-100); border: 1px solid var(--navy-300);
+    border-radius: 20px; padding: 0.16rem 0.65rem; font-size: 0.86rem;
+  }
+  .felt__vaerdi--billede {
+    font-family: var(--font-mono); font-size: 0.8rem; font-weight: 400;
+    color: var(--text-dim);
+  }
+  .felt dd em { font-style: normal; font-size: 0.74rem; color: var(--text-faint); }
+
+  .editor__fod {
+    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    padding: 0.85rem 1.3rem; border-top: 1px solid var(--line-soft);
+    background: var(--surface-2);
+  }
+  .editor__knap {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.09em; font-size: 0.7rem; font-weight: 700;
+    border: 1px solid var(--line); border-radius: 2px;
+    padding: 0.34rem 0.75rem; color: var(--text-dim);
+  }
+  .editor__knap--primaer {
+    background: var(--orange); border-color: var(--orange); color: #241304;
+  }
+  .editor__hist { margin-left: auto; font-family: var(--font-mono);
+                  font-size: 0.7rem; color: var(--text-faint); }
+
+  /* Ringvirkning */
+  .ring { list-style: none; margin: 1.2rem 0 0; padding: 0;
+          display: flex; flex-direction: column; }
+  .ring li {
+    display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap;
+    padding-block: 0.65rem; border-bottom: 1px dashed var(--line);
+  }
+  .ring li:last-child { border-bottom: 0; }
+  .ring__felt {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.07em; font-size: 0.78rem; font-weight: 700;
+    min-width: 10rem;
+  }
+  .ring__pil { color: var(--orange); }
+  .ring__liste { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .ring__liste em {
+    font-style: normal; font-size: 0.78rem; color: var(--text-dim);
+    background: var(--surface-2); border: 1px solid var(--line-soft);
+    border-radius: 20px; padding: 0.14rem 0.6rem;
+  }
+
+  /* De tre flows */
+  .flows { display: grid; gap: 1.1rem;
+           grid-template-columns: repeat(auto-fit, minmax(min(100%, 275px), 1fr)); }
+  .flow {
+    background: var(--surface); border: 1px solid var(--line-soft);
+    border-radius: var(--radius); padding: 1.15rem 1.25rem 1.3rem;
+    display: flex; flex-direction: column; gap: 0.6rem;
+  }
+  .flow--fremhaev { border-top: 3px solid var(--orange); }
+  .flow h3 { font-size: 1.05rem; }
+  .flow ol { margin: 0; padding-left: 1.2rem; display: flex;
+             flex-direction: column; gap: 0.22rem;
+             font-size: 0.9rem; color: var(--text-dim); }
+  .flow ol b { color: var(--text); }
+  .flow__ud { font-size: 0.9rem; color: var(--text-dim);
+              padding-top: 0.4rem; border-top: 1px solid var(--line-soft); }
+  .flow__note { font-size: 0.8rem; color: var(--text-faint); }
+
+  .maalt { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+  .maalt th, .maalt td { text-align: left; padding: 0.3rem 0.5rem;
+                         border-bottom: 1px solid var(--line-soft); }
+  .maalt th { font-family: var(--font-display); text-transform: uppercase;
+              letter-spacing: 0.08em; font-size: 0.62rem; color: var(--text-faint); }
+  .maalt .n { text-align: right; }
+  .maalt td:first-child { font-weight: 600; }
+
+  .cta { padding: 1.6rem 1.7rem; gap: 0.6rem; align-items: flex-start;
+         background: var(--surface-2); }
+  .cta h2 { font-size: 1.3rem; }
+  .cta p { color: var(--text-dim); max-width: 62ch; }
+  .cta code {
+    font-family: var(--font-mono); font-size: 0.88em;
+    background: var(--surface); border: 1px solid var(--line-soft);
+    padding: 0.08em 0.34em; border-radius: 2px;
+  }
+  .cta__btns { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.4rem; }
+</style>

@@ -80,6 +80,7 @@ const kanonisk = new URL(Astro.url.pathname, Astro.site);
           offentlige data fra m-tha.dk; øvrige spilleroplysninger er
           eksempeldata. Ikke akademiets officielle hjemmeside.
         </span>
+        <a href="/admin-demo">Sådan vedligeholdes indholdet →</a>
       </div>
     </div>
 
@@ -157,6 +158,18 @@ const kanonisk = new URL(Astro.url.pathname, Astro.site);
         flex: none;
       }
       .poc-banner span { color: #C9CAEA; }
+      .poc-banner a {
+        margin-left: auto;
+        font-family: var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: var(--orange);
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .poc-banner a:hover { text-decoration: underline; }
     </style>
   </body>
 </html>
