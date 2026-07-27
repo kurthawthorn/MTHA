@@ -83,27 +83,26 @@ const slugFraKey = (key: string) => key.replace(/^(spiller|person|logo)-/, '');
 
 /* ── Sponsorer ─────────────────────────────────────────────────────────── */
 
-/** Thisted Forsikring har sit eget udskilte logo — se assets/brand/. */
-const HOVEDSPONSOR: Sponsor = {
-  id: 'thisted-forsikring',
-  navn: 'Thisted Forsikring',
-  niveau: 'hovedsponsor',
-  url: 'https://www.thistedforsikring.dk/',
-  // Ligger i public/brand/, udskilt af det kombinerede logo med split_logo.py
-  logo: '/brand/thisted-forsikring.png',
-};
-
-export const sponsorer: Sponsor[] = [
-  HOVEDSPONSOR,
-  ...roster.sponsorer.map((s) => ({
-    id: slugFraKey(s.key),
-    navn: s.navn,
-    niveau: s.niveau as SponsorNiveau,
-    logoKey: s.key,
-    // Linket til sponsorens egen hjemmeside — hentet fra m-tha.dk
-    url: (s as { url?: string }).url,
-  })),
-];
+/**
+ * Sponsorerne kommer ALLE fra registret — også hovedsponsoren.
+ *
+ * Den var før hardkodet her, og det gav to fejl som først blev fanget da
+ * indholdet skulle migreres til Sanity: Thy Sport havde arvet niveauet
+ * "hovedsponsor" og blev derfor vist ingen steder, og de to spillere med
+ * Thisted Forsikring som personlig sponsor havde ingen at pege på.
+ * Derfor: ét register, ingen undtagelser.
+ */
+export const sponsorer: Sponsor[] = roster.sponsorer.map((s) => ({
+  id: slugFraKey(s.key),
+  navn: s.navn,
+  niveau: s.niveau as SponsorNiveau,
+  logoKey: s.key,
+  // Linket til sponsorens egen hjemmeside — hentet fra m-tha.dk
+  url: (s as { url?: string }).url,
+  // Hovedsponsorens logo ligger også i public/, fordi header og sidefod
+  // viser det uden Astros billedbehandling.
+  logo: s.niveau === 'hovedsponsor' ? '/brand/thisted-forsikring.png' : undefined,
+}));
 
 /* ── Hold ──────────────────────────────────────────────────────────────── */
 
@@ -200,7 +199,8 @@ export const getSponsor = (id?: string) =>
 export const truppen = (holdId: string) =>
   spillere.filter((s) => s.aktiv && holdFor(s)?.id === holdId)
           .sort((a, b) => a.rygnummer - b.rygnummer);
-export const hovedsponsor = () => HOVEDSPONSOR;
+export const hovedsponsor = () =>
+  sponsorer.find((s) => s.niveau === 'hovedsponsor')!;
 export const iSektion = (s: Person['sektion']) => personer.filter((p) => p.sektion === s);
 export const sponsorerPaaNiveau = (n: SponsorNiveau) =>
   sponsorer.filter((s) => s.niveau === n);

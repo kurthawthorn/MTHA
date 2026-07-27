@@ -26,7 +26,7 @@ export default defineConfig({
   name: 'mtha',
   title: 'Mors-Thy Håndbold Akademi',
 
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID ?? 'INDSÆT_PROJEKT_ID',
+  projectId: process.env.SANITY_STUDIO_PROJECT_ID ?? 'g4s1nwak',
   dataset: 'production',
 
   plugins: [

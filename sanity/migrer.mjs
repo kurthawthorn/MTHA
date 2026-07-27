@@ -23,24 +23,48 @@
 
 import { createClient } from '@sanity/client';
 import { readFile, access } from 'node:fs/promises';
+import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HER = dirname(fileURLToPath(import.meta.url));
 const ROD = join(HER, '..');
 
-const projectId = process.env.SANITY_STUDIO_PROJECT_ID;
+/**
+ * Læser .env hvis den findes, så tokenet kan ligge i en fil frem for i en
+ * miljøvariabel man skal sætte forfra hver gang. .env er dækket af
+ * .gitignore og bliver aldrig committet.
+ */
+for (const navn of ['.env.local', '.env']) {
+  const sti = join(HER, navn);
+  if (!existsSync(sti)) continue;
+  for (const linje of readFileSync(sti, 'utf8').split(/\r?\n/)) {
+    const m = linje.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$/);
+    if (!m) continue;
+    const vaerdi = m[2].replace(/^["']|["']$/g, '');
+    process.env[m[1]] ??= vaerdi;
+  }
+}
+
+const projectId = process.env.SANITY_STUDIO_PROJECT_ID ?? 'g4s1nwak';
 const token = process.env.SANITY_WRITE_TOKEN;
 
-if (!projectId || !token) {
+if (!token) {
   console.error(`
-Mangler opsætning.
+Mangler et skrivetoken.
 
-  SANITY_STUDIO_PROJECT_ID   projekt-id fra sanity.io/manage
-  SANITY_WRITE_TOKEN         et token med skriverettigheder
+  Hent det på https://sanity.io/manage/project/g4s1nwak/api
+  under "Tokens" — vælg rollen Editor.
 
-Tokenet må ikke committes. Sæt det i terminalen, eller brug en .env-fil
-der er dækket af .gitignore.
+Nemmest: opret filen sanity/.env med denne ene linje
+
+  SANITY_WRITE_TOKEN=sk...
+
+Eller sæt den i terminalen:
+  PowerShell:  $env:SANITY_WRITE_TOKEN = "sk..."
+  Bash:        export SANITY_WRITE_TOKEN=sk...
+
+Tokenet må IKKE committes. .env er dækket af .gitignore.
 `);
   process.exit(1);
 }

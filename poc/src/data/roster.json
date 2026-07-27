@@ -666,6 +666,13 @@
  ],
  "sponsorer": [
   {
+   "navn": "Thisted Forsikring",
+   "niveau": "hovedsponsor",
+   "key": "logo-thisted-forsikring",
+   "kilde": "Mors- thistid.jpg (udskilt med tools/split_logo.py)",
+   "url": "https://www.thistedforsikring.dk/"
+  },
+  {
    "navn": "3N Lakering",
    "niveau": "sponsor",
    "key": "logo-3n-lakering",
@@ -863,7 +870,7 @@
   },
   {
    "navn": "Thy Sport",
-   "niveau": "hovedsponsor",
+   "niveau": "sponsor",
    "key": "logo-thy-sport",
    "kilde": "Thy.JPG",
    "url": "https://thisted-bryghus.dk/thy-sport/"
