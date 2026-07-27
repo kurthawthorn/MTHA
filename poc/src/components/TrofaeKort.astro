@@ -1,0 +1,281 @@
+---
+import type { Titel } from '../data/vaerdier';
+
+interface Props {
+  titel: Titel;
+  index: number;
+}
+const { titel: t, index } = Astro.props;
+const id = `trofae-${t.aar}`;
+
+/* Felter uden indhold vises som "udfyldes af akademiet" frem for at blive
+   gættet. Det viser samtidig at feltet findes og er nemt at rette. */
+const mangler = (v: string) => v === '';
+const harKampe = Boolean(t.finale || t.semifinale);
+---
+
+<!-- Kortet er en knap, fordi det åbner noget. Ikke et link. -->
+<button type="button" class="tk" style={`--i:${index}`} aria-haspopup="dialog"
+        data-aabn={id}>
+  <span class="tk__aar num">{t.aar}</span>
+  <span class="tk__txt">
+    <strong>Danmarksmestre</strong>
+    <em>{t.raekke}</em>
+  </span>
+  <span class="tk__mere" aria-hidden="true">Se detaljer →</span>
+</button>
+
+<dialog class="dl" id={id} aria-labelledby={`${id}-h`}>
+  <article class="dl__in">
+    <header class="dl__top">
+      <div>
+        <span class="dl__aar num">{t.aar}</span>
+        <h2 id={`${id}-h`}>Danmarksmestre · {t.raekke}</h2>
+        {mangler(t.dato)
+          ? <p class="dl__mangler">Dato udfyldes af akademiet</p>
+          : <p class="dl__dato">{t.dato}</p>}
+        {!mangler(t.spillested) && <p class="dl__sted">{t.spillested}</p>}
+      </div>
+      <button type="button" class="dl__luk" data-luk aria-label="Luk">✕</button>
+    </header>
+
+    <div class="dl__krop">
+      {harKampe ? (
+        <section class="dl__blok">
+          <h3>Kampene</h3>
+          <ul class="kampe">
+            {[t.finale, t.semifinale].filter(Boolean).map((k) => (
+              <li>
+                <span class="kampe__navn">{k!.navn}</span>
+                <span class="kampe__mod">{k!.modstander}</span>
+                <span class="kampe__res num">
+                  {k!.resultat}
+                  {k!.halvleg && <em class="num">({k!.halvleg})</em>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        <section class="dl__blok">
+          <h3>Kampene</h3>
+          <p class="dl__tom">
+            Modstander og resultat findes ikke offentligt for {t.aar}.
+            Udfyldes af akademiet.
+          </p>
+        </section>
+      )}
+
+      {t.maalscorere.length > 0 ? (
+        <section class="dl__blok">
+          <h3>Målscorere i finalen</h3>
+          <ul class="scorere">
+            {t.maalscorere.map((m) => (
+              <li>
+                <span>{m.navn}</span>
+                <b class="num">{m.maal}</b>
+              </li>
+            ))}
+          </ul>
+          <p class="dl__kilde num">
+            {t.maalscorere.reduce((n, m) => n + m.maal, 0)} af målene fordelt
+          </p>
+        </section>
+      ) : (
+        <section class="dl__blok">
+          <h3>Målscorere</h3>
+          <p class="dl__tom">Udfyldes af akademiet.</p>
+        </section>
+      )}
+
+      <section class="dl__blok">
+        <h3>Truppen</h3>
+        {t.trup.length > 0 ? (
+          <ul class="trup">{t.trup.map((n) => <li>{n}</li>)}</ul>
+        ) : (
+          <p class="dl__tom">
+            Feltet er klar, men trupperne findes ikke i offentlige kilder.
+            Akademiet kan indsætte spillerne — og fra den dag hænger et
+            mesterskab sammen med de spillere der vandt det.
+          </p>
+        )}
+      </section>
+
+      <section class="dl__blok">
+        <h3>Trænerstab</h3>
+        {t.traenere.length > 0 ? (
+          <ul class="trup">{t.traenere.map((n) => <li>{n}</li>)}</ul>
+        ) : (
+          <p class="dl__tom">Udfyldes af akademiet.</p>
+        )}
+      </section>
+
+      {t.noter.length > 0 && (
+        <ul class="noter">
+          {t.noter.map((n) => <li>{n}</li>)}
+        </ul>
+      )}
+    </div>
+
+    <footer class="dl__fod">
+      <p>
+        Kampdetaljer er fra pressedækningen. Tomme felter er bevidst tomme —
+        et gæt der ser rigtigt ud er værre end et felt der mangler.
+      </p>
+      <button type="button" class="btn btn--ghost" data-luk>Luk</button>
+    </footer>
+  </article>
+</dialog>
+
+<style>
+  /* Kortet ---------------------------------------------------------------- */
+  .tk {
+    display: flex; align-items: center; gap: 1rem;
+    width: 100%; text-align: left; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--line-soft);
+    border-left: 4px solid var(--orange);
+    border-radius: var(--radius); padding: 0.95rem 1.1rem;
+    font: inherit; color: inherit;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  .tk:hover {
+    border-color: var(--navy-300); border-left-color: var(--orange);
+    transform: translateY(-2px); box-shadow: var(--shadow);
+  }
+  .tk:hover .tk__mere { color: var(--orange-600); }
+  .tk__aar {
+    font-family: var(--font-display); font-weight: 700; font-size: 2.1rem;
+    line-height: 1; color: var(--orange); flex: none;
+  }
+  .tk__txt { display: flex; flex-direction: column; gap: 0.1rem; flex: 1; }
+  .tk__txt strong {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.05em; font-size: 0.8rem;
+  }
+  .tk__txt em { font-style: normal; font-size: 0.8rem; color: var(--text-faint); }
+  .tk__mere {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.08em; font-size: 0.62rem; font-weight: 700;
+    color: var(--text-faint); flex: none; transition: color 0.15s;
+  }
+
+  /* Modalen --------------------------------------------------------------- */
+  .dl {
+    border: 0; padding: 0; max-width: min(46rem, calc(100vw - 2rem));
+    width: 100%; max-height: min(88vh, 52rem);
+    background: var(--surface); color: var(--text);
+    border-radius: 6px; box-shadow: 0 24px 70px -20px rgb(11 13 46 / 55%);
+    overflow: hidden;
+  }
+  .dl::backdrop { background: rgb(11 13 46 / 62%); backdrop-filter: blur(3px); }
+  .dl[open] { display: flex; }
+  :global(.anim) .dl[open] { animation: dlIn 0.24s cubic-bezier(0.2, 0.8, 0.3, 1); }
+  @keyframes dlIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .dl__in { display: flex; flex-direction: column; min-height: 0; width: 100%; }
+
+  .dl__top {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1.2rem 1.3rem 1rem;
+    background: var(--navy); color: #fff;
+  }
+  .dl__top > div { flex: 1; display: flex; flex-direction: column; gap: 0.15rem; }
+  .dl__aar {
+    font-family: var(--font-display); font-weight: 700; font-size: 2.4rem;
+    line-height: 1; color: var(--orange);
+  }
+  .dl__top h2 { font-size: 1.12rem; }
+  .dl__dato { font-family: var(--font-mono); font-size: 0.8rem; color: #C8C9EB; }
+  .dl__sted { font-size: 0.88rem; color: #A8ABDC; }
+  .dl__mangler {
+    font-size: 0.76rem; color: var(--orange);
+    font-family: var(--font-mono);
+  }
+  .dl__luk {
+    background: rgb(255 255 255 / 12%); border: 0; color: #fff;
+    width: 2rem; height: 2rem; border-radius: 50%; cursor: pointer;
+    font-size: 0.9rem; flex: none; line-height: 1;
+  }
+  .dl__luk:hover { background: rgb(255 255 255 / 24%); }
+
+  .dl__krop {
+    padding: 1.2rem 1.3rem 1.3rem;
+    overflow-y: auto; display: flex; flex-direction: column; gap: 1.2rem;
+  }
+  .dl__blok { display: flex; flex-direction: column; gap: 0.5rem; }
+  .dl__blok h3 {
+    font-size: 0.72rem; letter-spacing: 0.13em; color: var(--text-faint);
+  }
+  .dl__tom {
+    font-size: 0.88rem; color: var(--text-dim);
+    border-left: 3px solid var(--line); padding-left: 0.7rem;
+  }
+  .dl__kilde { font-size: 0.74rem; color: var(--text-faint); }
+
+  .kampe { list-style: none; margin: 0; padding: 0;
+           border-top: 1px solid var(--line-soft); }
+  .kampe li {
+    display: grid; gap: 0.15rem 0.9rem; align-items: baseline;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 0.55rem 0; border-bottom: 1px solid var(--line-soft);
+  }
+  .kampe__navn {
+    grid-column: 1; font-family: var(--font-display);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    font-size: 0.62rem; font-weight: 600; color: var(--text-faint);
+  }
+  .kampe__mod { grid-column: 1; font-weight: 600; font-size: 0.98rem; }
+  .kampe__res {
+    grid-column: 2; grid-row: 1 / span 2;
+    font-family: var(--font-display); font-weight: 700; font-size: 1.35rem;
+    color: var(--navy); display: flex; align-items: baseline; gap: 0.4rem;
+  }
+  .kampe__res em {
+    font-style: normal; font-family: var(--font-mono);
+    font-size: 0.7rem; color: var(--text-faint); font-weight: 400;
+  }
+  @media (prefers-color-scheme: dark) { .kampe__res { color: var(--navy-300); } }
+
+  .scorere { list-style: none; margin: 0; padding: 0;
+             display: grid; gap: 0.3rem;
+             grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
+  .scorere li {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 0.7rem; padding: 0.32rem 0.6rem;
+    background: var(--surface-2); border-radius: var(--radius);
+    font-size: 0.9rem;
+  }
+  .scorere b {
+    font-family: var(--font-display); font-size: 1.05rem; color: var(--orange-600);
+  }
+  @media (prefers-color-scheme: dark) { .scorere b { color: var(--orange); } }
+
+  .trup { list-style: none; margin: 0; padding: 0;
+          display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .trup li {
+    font-size: 0.85rem; background: var(--surface-2);
+    border: 1px solid var(--line-soft); border-radius: 20px;
+    padding: 0.16rem 0.6rem;
+  }
+
+  .noter { list-style: none; margin: 0; padding: 0;
+           display: flex; flex-direction: column; gap: 0.3rem; }
+  .noter li {
+    font-size: 0.88rem; color: var(--text-dim);
+    padding-left: 1.3rem; position: relative;
+  }
+  .noter li::before {
+    content: ''; position: absolute; left: 0; top: 0.6em;
+    width: 7px; height: 7px; border-radius: 50%; background: var(--orange);
+  }
+
+  .dl__fod {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    padding: 0.9rem 1.3rem; border-top: 1px solid var(--line-soft);
+    background: var(--surface-2);
+  }
+  .dl__fod p { flex: 1 1 18rem; font-size: 0.76rem; color: var(--text-faint); }
+</style>

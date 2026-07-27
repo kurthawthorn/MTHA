@@ -1,0 +1,101 @@
+---
+export type Slags = 'stam' | 'saeson' | 'udregnet';
+
+export interface Felt {
+  navn: string;
+  vaerdi: string;
+  slags: Slags;
+  hjaelp?: string;
+  type?: 'tekst' | 'tal' | 'valg' | 'billede' | 'reference' | 'til-fra' | 'url';
+  tom?: boolean;
+}
+
+interface Props {
+  felter: Felt[];
+}
+const { felter } = Astro.props;
+---
+
+<dl class="felter">
+  {felter.map((f) => (
+    <div class={`felt felt--${f.slags}`}>
+      <dt>
+        {f.navn}
+        {f.slags === 'udregnet' && <span class="felt__laas">udregnet</span>}
+      </dt>
+      <dd>
+        <span class:list={[
+          'felt__vaerdi', `felt__vaerdi--${f.type ?? 'tekst'}`, f.tom && 'er-tom',
+        ]}>{f.vaerdi}</span>
+        {f.hjaelp && <em>{f.hjaelp}</em>}
+      </dd>
+    </div>
+  ))}
+</dl>
+
+<style>
+  .felter { margin: 0; display: flex; flex-direction: column; }
+  .felt {
+    display: grid; gap: 0.1rem 1rem;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0.55rem 0 0.55rem 0.8rem;
+    border-left: 4px solid var(--line);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  @media (min-width: 620px) {
+    .felt { grid-template-columns: 11.5rem minmax(0, 1fr); align-items: baseline; }
+  }
+  .felt:last-child { border-bottom: 0; }
+  .felt--stam     { border-left-color: var(--navy); }
+  .felt--saeson   { border-left-color: var(--orange); }
+  .felt--udregnet { border-left-color: var(--text-faint); background: var(--surface-2); }
+
+  .felt dt {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.09em; font-size: 0.66rem; font-weight: 600;
+    color: var(--text-dim);
+    display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+  }
+  .felt__laas {
+    font-size: 0.56rem; letter-spacing: 0.1em;
+    background: var(--line); color: var(--text-dim);
+    padding: 0.08rem 0.3rem; border-radius: 2px;
+  }
+  .felt dd { margin: 0; display: flex; flex-direction: column; gap: 0.12rem; }
+
+  .felt__vaerdi {
+    font-size: 0.94rem; color: var(--text); font-weight: 600;
+    align-self: flex-start;
+  }
+  .felt__vaerdi.er-tom {
+    font-weight: 400; font-style: italic; color: var(--text-faint);
+    background: none; border-style: dashed;
+  }
+  .felt__vaerdi--tekst, .felt__vaerdi--tal, .felt__vaerdi--url {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 2px; padding: 0.2rem 0.5rem; min-width: 8rem;
+  }
+  .felt__vaerdi--tal { font-variant-numeric: tabular-nums; min-width: 5rem; }
+  .felt__vaerdi--url { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 400; }
+  .felt__vaerdi--valg {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 2px; padding: 0.2rem 1.6rem 0.2rem 0.5rem; position: relative;
+  }
+  .felt__vaerdi--valg::after {
+    content: '▾'; position: absolute; right: 0.45rem; top: 0.15rem;
+    color: var(--text-faint); font-size: 0.8rem;
+  }
+  .felt__vaerdi--til-fra {
+    background: var(--good); color: #fff; border-radius: 20px;
+    padding: 0.14rem 0.7rem; font-size: 0.82rem;
+  }
+  .felt__vaerdi--reference {
+    background: var(--navy-100); border: 1px solid var(--navy-300);
+    border-radius: 20px; padding: 0.16rem 0.65rem; font-size: 0.86rem;
+  }
+  .felt__vaerdi--billede {
+    font-family: var(--font-mono); font-size: 0.8rem; font-weight: 400;
+    color: var(--text-dim);
+  }
+  .felt dd em { font-style: normal; font-size: 0.74rem; color: var(--text-faint); }
+</style>

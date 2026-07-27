@@ -63,18 +63,39 @@ const path = Astro.url.pathname;
   </div>
 </header>
 
+<script>
+  // Kompakt tilstand efter 40 px rul. Passiv lytter, så den ikke koster
+  // noget under rulning. ~230 bytes.
+  const hdr = document.querySelector<HTMLElement>('.hdr');
+  if (hdr) {
+    const opdater = () => hdr.classList.toggle('er-rullet', scrollY > 40);
+    opdater();
+    addEventListener('scroll', opdater, { passive: true });
+  }
+</script>
+
 <style>
+  /* Sticky: headeren følger med ned. Når man har rullet lidt, trækker den
+     sig sammen — logoet bliver mindre og luften mindre — så den ikke spiser
+     plads fra indholdet. Skyggen kommer først frem når der ER noget over den. */
   .hdr {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     background: #fff;
     border-bottom: 3px solid var(--navy);
+    transition: box-shadow 0.2s ease;
   }
+  .hdr.er-rullet { box-shadow: 0 6px 22px -12px rgb(11 13 46 / 45%); }
   .hdr__in {
     display: flex;
     align-items: center;
     gap: 1rem 1.8rem;
     padding-block: 0.8rem;
     flex-wrap: wrap;
+    transition: padding-block 0.22s ease;
   }
+  .hdr.er-rullet .hdr__in { padding-block: 0.45rem; }
 
   /* Mærke-lockup: MTHA og hovedsponsoren side om side */
   .hdr__maerke {
@@ -87,7 +108,11 @@ const path = Astro.url.pathname;
   /* Logoet står frit — ingen plade, ingen ramme. Højden er sat efter at det er
      et bredt mærke (702 x 356), så 78 px højde giver ca. 154 px bredde. */
   .hdr__logo { flex: none; line-height: 0; }
-  .hdr__logo img { width: auto; height: 78px; }
+  .hdr__logo img {
+    width: auto; height: 78px;
+    transition: height 0.22s ease;
+  }
+  .hdr.er-rullet .hdr__logo img { height: 52px; }
 
   /* Den lodrette streg gør de to mærker til én enhed frem for to løse logoer */
   .hdr__sponsor {
@@ -106,7 +131,15 @@ const path = Astro.url.pathname;
     color: #7a7c9e;
   }
   .hdr__sponsor a { line-height: 0; }
-  .hdr__sponsor img { width: auto; height: 34px; }
+  .hdr__sponsor img {
+    width: auto; height: 34px;
+    transition: height 0.22s ease;
+  }
+  .hdr.er-rullet .hdr__sponsor img { height: 26px; }
+  /* Ordet "Hovedsponsor" ryger ud i kompakt tilstand — logoet taler selv */
+  .hdr.er-rullet .hdr__sponsor span {
+    font-size: 0; opacity: 0; height: 0; overflow: hidden;
+  }
 
   nav { margin-left: auto; }
 

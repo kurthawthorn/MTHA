@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import SpillerKort from '../../components/SpillerKort.astro';
+import SpillerModal from '../../components/SpillerModal.astro';
 import { hold, truppen } from '../../data/akademi';
 import { billede } from '../../lib/billeder';
 
@@ -74,6 +75,8 @@ const aargange = [...new Set(trup.map((s) => s.foedselsaar))].sort();
       </div>
       <p class="tom" data-tom hidden>Ingen spillere matcher filtrene.</p>
     </section>
+
+    <SpillerModal />
   </div>
 </Base>
 

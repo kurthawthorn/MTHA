@@ -76,23 +76,96 @@ export const ligatrupTal = { iMiljoeet: 17, iTrup: 19, saeson: '2023/24' };
 
 /* ── Trofæer ──────────────────────────────────────────────────────────── */
 
+export interface Kamp {
+  navn: string;
+  modstander: string;
+  resultat: string;
+  halvleg?: string;
+}
+
+export interface Maalscorer {
+  navn: string;
+  maal: number;
+}
+
 export interface Titel {
   aar: number;
   raekke: string;
+  /** Tom streng = oplysningen findes ikke offentligt og skal udfyldes. */
+  dato: string;
+  spillested: string;
+  finale?: Kamp;
+  semifinale?: Kamp;
+  maalscorere: Maalscorer[];
+  traenere: string[];
+  trup: string[];
+  noter: string[];
 }
 
 /**
  * U19-danmarksmesterskaber. Tre gange i fire år.
  *
- * KILDE  2025-titlen er dokumenteret på akademiets eget site med filen
- *        "Officiel vinderbillede U19 DM 2025.jpg". Årene bekræftet i pressen:
- *        2025-dækningen skriver "tredje gang i fire år", og 2023-dækningen
- *        skriver "anden år i træk" — hvilket giver 2022, 2023 og 2025.
+ * HVOR TALLENE KOMMER FRA
+ *   2025-titlen er dokumenteret paa akademiets eget site med filen
+ *   "Officiel vinderbillede U19 DM 2025.jpg". Kampdetaljerne er fra
+ *   pressedaekningen (hbold.dk, morsthy.dk, nordjyske.dk, europamester.dk).
+ *
+ * HVAD DER MANGLER — og bevidst staar tomt frem for at blive gaettet
+ *   * dato for 2025 og 2022
+ *   * alle kampdetaljer for 2022; titlen er kun bekraeftet indirekte via
+ *     "anden aar i traek" (2023) og "tredje gang i fire aar" (2025)
+ *   * fulde trupper og traenerstab for alle tre aar
+ *   Kilderne er uenige om 2023-datoen: én skriver 23. april, en anden 24.
+ *   April 23. 2023 var en soendag, hvilket passer med Final4-moenstret.
+ *
+ * Tomme felter vises som "udfyldes af akademiet" — de er der, og de er nemme
+ * at rette. Det er bedre end et gaet der ser rigtigt ud.
  */
 export const titler: Titel[] = [
-  { aar: 2025, raekke: 'U19 Drenge' },
-  { aar: 2023, raekke: 'U19 Drenge' },
-  { aar: 2022, raekke: 'U19 Drenge' },
+  {
+    aar: 2025,
+    raekke: 'U19 Drenge',
+    dato: '',
+    spillested: 'Final4 i Helsinge',
+    finale: { navn: 'Finale', modstander: 'GOG Håndbold',
+              resultat: '36–31', halvleg: '20–13' },
+    semifinale: { navn: 'Semifinale', modstander: 'Nordsjælland Håndbold',
+                  resultat: '35–30', halvleg: '20–13' },
+    maalscorere: [
+      { navn: 'Frederik Bak', maal: 10 },
+      { navn: 'Anton Houe', maal: 7 },
+      { navn: 'Gustav Sunesen', maal: 6 },
+      { navn: 'Mads Faurskov', maal: 5 },
+      { navn: 'Nikolaj Lundal Hansen', maal: 5 },
+      { navn: 'Jonas Dehn', maal: 3 },
+    ],
+    traenere: [],
+    trup: [],
+    noter: ['Tredje danmarksmesterskab i fire år'],
+  },
+  {
+    aar: 2023,
+    raekke: 'U19 Drenge',
+    dato: '23. april 2023',
+    spillested: 'Sparekassen Thy Arena | Mors — egen hjemmebane',
+    finale: { navn: 'Finale', modstander: 'GOG Håndbold', resultat: '34–33' },
+    semifinale: { navn: 'Semifinale', modstander: 'Skanderborg Håndbold',
+                  resultat: '39–29' },
+    maalscorere: [],
+    traenere: [],
+    trup: [],
+    noter: ['Andet mesterskab i træk', 'Pokalen løftet foran fyldt hjemmebane'],
+  },
+  {
+    aar: 2022,
+    raekke: 'U19 Drenge',
+    dato: '',
+    spillested: '',
+    maalscorere: [],
+    traenere: [],
+    trup: [],
+    noter: ['Akademiets første U19-danmarksmesterskab'],
+  },
 ];
 
 export const titelTekst = 'Tre danmarksmesterskaber i fire år';

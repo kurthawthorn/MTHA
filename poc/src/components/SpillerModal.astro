@@ -1,0 +1,191 @@
+---
+/**
+ * Spillerprofil som modal — uden at give slip på den rigtige adresse.
+ *
+ * HVORFOR IKKE BARE EN MODAL
+ *   At hver spiller har sin egen adresse var et af hovedargumenterne i
+ *   forslaget: det kan deles, findes i Google og linkes til fra Facebook. En
+ *   ren modal ville smide det væk.
+ *
+ * SÅDAN LØSES BEGGE TING
+ *   Kortet er stadig et almindeligt link til /spillere/navn. JavaScript
+ *   opsnapper klikket, henter siden og viser profilen i en modal — og retter
+ *   samtidig adresselinjen med History API. Derfor:
+ *     * adressen i browseren er den rigtige og kan kopieres
+ *     * tilbage-knappen lukker modalen, som man forventer
+ *     * uden JavaScript sker der en helt normal sideskift
+ *     * Google ser stadig 54 selvstændige sider
+ *
+ *   Indholdet hentes fra selve profilsiden i stedet for at blive gentaget her.
+ *   Så kan modal og side aldrig komme til at vise noget forskelligt.
+ */
+---
+
+<dialog class="sm" id="spiller-modal" aria-label="Spillerprofil">
+  <button type="button" class="sm__luk" data-luk aria-label="Luk">✕</button>
+  <div class="sm__krop" data-sm-krop>
+    <p class="sm__henter">Henter…</p>
+  </div>
+</dialog>
+
+<script>
+  const dlg = document.getElementById('spiller-modal') as HTMLDialogElement | null;
+  const krop = dlg?.querySelector<HTMLElement>('[data-sm-krop]');
+
+  if (dlg && krop) {
+    const cache = new Map<string, string>();
+
+    /** Henter profilsiden og trækker selve profilen ud af den. */
+    async function hent(url: string): Promise<string> {
+      if (cache.has(url)) return cache.get(url)!;
+      const svar = await fetch(url);
+      const doc = new DOMParser().parseFromString(await svar.text(), 'text/html');
+      const profil = doc.querySelector('.profil');
+      // Knappen "Hele truppen" hører til på siden, ikke i modalen
+      profil?.querySelector('.btn')?.remove();
+      const html = profil?.innerHTML ?? '';
+      cache.set(url, html);
+      return html;
+    }
+
+    async function aabn(url: string, skubHistorik = true) {
+      krop.innerHTML = '<p class="sm__henter">Henter…</p>';
+      if (!dlg.open) dlg.showModal();
+      if (skubHistorik) history.pushState({ spiller: url }, '', url);
+      krop.innerHTML = await hent(url);
+      krop.scrollTop = 0;
+    }
+
+    function luk(gaaTilbage = true) {
+      if (!dlg.open) return;
+      dlg.close();
+      if (gaaTilbage && history.state?.spiller) history.back();
+    }
+
+    // Opsnap klik på spillerlinks. Modifikator-klik og midterklik slipper
+    // igennem, så "åbn i ny fane" stadig virker.
+    document.addEventListener('click', (e) => {
+      const m = e as MouseEvent;
+      if (m.metaKey || m.ctrlKey || m.shiftKey || m.altKey || m.button !== 0) return;
+      const link = (m.target as HTMLElement)?.closest<HTMLAnchorElement>('a[href^="/spillere/"]');
+      if (!link) return;
+      e.preventDefault();
+      aabn(link.getAttribute('href')!);
+    });
+
+    // Forhent ved hover, så modalen føles øjeblikkelig
+    document.addEventListener('mouseover', (e) => {
+      const link = (e.target as HTMLElement)?.closest<HTMLAnchorElement>('a[href^="/spillere/"]');
+      if (link) hent(link.getAttribute('href')!).catch(() => {});
+    }, { passive: true });
+
+    dlg.querySelectorAll('[data-luk]').forEach((b) =>
+      b.addEventListener('click', () => luk()));
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) luk(); });
+    // Esc lukker af sig selv i <dialog>; sørg for at historikken følger med
+    dlg.addEventListener('cancel', (e) => { e.preventDefault(); luk(); });
+
+    // Tilbage/frem i browseren styrer modalen
+    addEventListener('popstate', () => {
+      if (location.pathname.startsWith('/spillere/')) aabn(location.pathname, false);
+      else luk(false);
+    });
+  }
+</script>
+
+<style>
+  .sm {
+    border: 0; padding: 0;
+    width: min(52rem, calc(100vw - 2rem));
+    max-height: min(90vh, 56rem);
+    background: var(--surface); color: var(--text);
+    border-radius: 6px; box-shadow: 0 24px 70px -20px rgb(11 13 46 / 55%);
+    overflow: hidden; position: relative;
+  }
+  .sm::backdrop { background: rgb(11 13 46 / 62%); backdrop-filter: blur(3px); }
+  .sm[open] { display: block; }
+  :global(.anim) .sm[open] { animation: smIn 0.22s cubic-bezier(0.2, 0.8, 0.3, 1); }
+  @keyframes smIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .sm__luk {
+    position: absolute; top: 0.7rem; right: 0.7rem; z-index: 2;
+    width: 2.1rem; height: 2.1rem; border-radius: 50%;
+    background: var(--navy); color: #fff; border: 0; cursor: pointer;
+    font-size: 0.9rem; line-height: 1;
+  }
+  .sm__luk:hover { background: var(--navy-800); }
+
+  .sm__krop { overflow-y: auto; max-height: min(90vh, 56rem); padding: 1.4rem 1.5rem; }
+
+  /* Profilen kommer fra /spillere/… og har sine egne scopede klasser, så
+     layoutet gentages her — kun det modalen har brug for. */
+  .sm__krop :global(.profil) { display: contents; }
+  .sm__krop :global(.profil__foto) {
+    float: left; width: min(15rem, 42%); margin: 0 1.4rem 0.8rem 0;
+    aspect-ratio: 3 / 4; position: relative; overflow: hidden;
+    border-radius: var(--radius); border: 1px solid var(--line-soft);
+    background: linear-gradient(178deg, #fff, #EBEDF6);
+  }
+  .sm__krop :global(.profil__foto img) {
+    width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%;
+  }
+  .sm__krop :global(.profil__nr) {
+    position: absolute; left: 0; bottom: 0;
+    font-family: var(--font-display); font-size: 1.8rem; font-weight: 700;
+    color: #fff; background: var(--navy); line-height: 1;
+    padding: 0.26rem 0.55rem 0.32rem; border-top-right-radius: 4px;
+  }
+  .sm__krop :global(.profil__info) { display: flow-root; }
+  .sm__krop :global(.profil h1) {
+    font-size: clamp(1.5rem, 4vw, 2.1rem); margin-bottom: 0.5rem;
+    padding-right: 2.5rem;
+  }
+  .sm__krop :global(.fakta) {
+    display: grid; gap: 1px; margin: 0.7rem 0 0;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 118px), 1fr));
+    background: var(--line-soft); border: 1px solid var(--line-soft);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .sm__krop :global(.fakta > div) {
+    background: var(--surface); padding: 0.6rem 0.75rem;
+    display: flex; flex-direction: column; gap: 0.08rem;
+  }
+  .sm__krop :global(.fakta dt) {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.11em; font-size: 0.58rem; font-weight: 600;
+    color: var(--text-faint);
+  }
+  .sm__krop :global(.fakta dd) { margin: 0; font-weight: 600; font-size: 0.9rem; }
+  .sm__krop :global(.sponsorboks) {
+    margin-top: 0.9rem; clear: both;
+    background: var(--orange-100); border: 1px solid var(--line-soft);
+    border-left: 3px solid var(--orange); border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    display: flex; flex-wrap: wrap; gap: 0.9rem;
+    align-items: center; justify-content: space-between;
+  }
+  .sm__krop :global(.sponsorboks__txt) {
+    display: flex; flex-direction: column; gap: 0.18rem; flex: 1 1 14rem;
+  }
+  .sm__krop :global(.sponsorboks strong) {
+    font-family: var(--font-display); font-size: 1.05rem;
+    text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .sm__krop :global(.sponsorboks p) { font-size: 0.82rem; color: var(--text-dim); }
+  .sm__krop :global(.demo) {
+    font-size: 0.78rem; color: var(--text-faint); clear: both;
+    margin-top: 0.9rem; padding-top: 0.7rem;
+    border-top: 1px solid var(--line-soft);
+  }
+  .sm__krop :global(.eyebrow) { margin-bottom: 0.2rem; }
+
+  .sm__henter { color: var(--text-faint); font-size: 0.9rem; padding: 2rem 0; }
+
+  @media (max-width: 560px) {
+    .sm__krop { padding: 1.1rem 1.1rem 1.2rem; }
+    .sm__krop :global(.profil__foto) { float: none; width: 62%; margin: 0 0 1rem; }
+  }
+</style>

@@ -41,7 +41,10 @@ const faciliteter = [
           <span class="trofae__label">Danmarksmestre U19</span>
           <ul class="trofae__aar">
             {titler.map((t, i) => (
-              <li style={`--i:${i}`}><span class="num">{t.aar}</span></li>
+              <li style={`--i:${i}`}>
+                <a href={`/vaerdier#trofaeskabet`} class="num"
+                   title={`Se detaljer om ${t.aar}`}>{t.aar}</a>
+              </li>
             ))}
           </ul>
         </div>
@@ -270,9 +273,12 @@ const faciliteter = [
     padding: 0.34rem 0.7rem 0.4rem;
     backdrop-filter: blur(3px);
   }
-  .trofae__aar li span {
+  .trofae__aar li { transition: background 0.15s, border-color 0.15s; }
+  .trofae__aar li:hover { background: rgb(255 255 255 / 20%); }
+  .trofae__aar li a {
     font-family: var(--font-display); font-weight: 700;
     font-size: 1.32rem; line-height: 1; color: var(--orange);
+    text-decoration: none;
   }
 
 

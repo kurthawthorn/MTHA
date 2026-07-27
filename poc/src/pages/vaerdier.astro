@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { MOTTO, vaerdier, historie, ligatrupTal, titler, titelTekst } from '../data/vaerdier';
+import TrofaeKort from '../components/TrofaeKort.astro';
 import { billede } from '../lib/billeder';
 import { altFor } from '../data/billeder';
 
@@ -33,13 +34,10 @@ const fælles = billede('hold-udenfor');
     <section class="section">
       <div class="section__head"><h2>Det vi bygger på</h2></div>
       <div class="vgrid">
-        {vaerdier.map((v, i) => (
+        {vaerdier.map((v) => (
           <article class="vkort">
-            <span class="vkort__nr num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <div class="vkort__txt">
-              <h3>{v.titel}</h3>
-              <p>{v.tekst}</p>
-            </div>
+            <h3>{v.titel}</h3>
+            <p>{v.tekst}</p>
           </article>
         ))}
       </div>
@@ -69,20 +67,12 @@ const fælles = billede('hold-udenfor');
 
     <section class="section">
       <div class="section__head">
-        <h2>Trofæskabet</h2>
+        <h2 id="trofaeskabet">Trofæskabet</h2>
         <span class="antal">{titelTekst}</span>
       </div>
-      <ul class="pokaler">
-        {titler.map((t, i) => (
-          <li style={`--i:${i}`}>
-            <span class="pokaler__aar num">{t.aar}</span>
-            <span class="pokaler__txt">
-              <strong>Danmarksmestre</strong>
-              <em>{t.raekke}</em>
-            </span>
-          </li>
-        ))}
-      </ul>
+      <div class="pokaler">
+        {titler.map((t, i) => <TrofaeKort titel={t} index={i} />)}
+      </div>
     </section>
 
     <section class="section">
@@ -126,6 +116,25 @@ const fælles = billede('hold-udenfor');
   </div>
 </Base>
 
+<script>
+  // Native <dialog> giver Esc, fokuslaas og baggrund gratis. ~350 bytes.
+  for (const knap of document.querySelectorAll<HTMLElement>('[data-aabn]')) {
+    knap.addEventListener('click', () => {
+      const d = document.getElementById(knap.dataset.aabn!) as HTMLDialogElement | null;
+      d?.showModal();
+    });
+  }
+  for (const d of document.querySelectorAll<HTMLDialogElement>('dialog')) {
+    // Luk-knapper
+    d.querySelectorAll('[data-luk]').forEach((b) =>
+      b.addEventListener('click', () => d.close()));
+    // Klik uden for indholdet lukker også
+    d.addEventListener('click', (e) => {
+      if (e.target === d) d.close();
+    });
+  }
+</script>
+
 <style>
   .motto {
     position: relative; overflow: hidden;
@@ -152,21 +161,22 @@ const fælles = billede('hold-udenfor');
   }
   .motto__under { color: #C8C9EB; max-width: 52ch; font-size: 1.05rem; }
 
-  .vgrid { display: grid; gap: 1.1rem;
-           grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  /* Fire vaerdier gaar op i 2x2. Bredere spalter giver en laeselig
+     linjelaengde omkring 60 tegn — i tre smalle spalter blev teksten hoej
+     og laset, og den fjerde kasse stod alene paa anden raekke.
+     Numrene er droppet: 01-04 antyder en raekkefoelge, men de fire vaerdier
+     er sideordnede. */
+  .vgrid { display: grid; gap: 1.1rem; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 760px) { .vgrid { grid-template-columns: repeat(2, 1fr); } }
+
   .vkort {
-    display: grid; grid-template-columns: 2.7rem minmax(0, 1fr); gap: 0.9rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
     background: var(--surface); border: 1px solid var(--line-soft);
-    border-radius: var(--radius); border-top: 3px solid var(--orange);
-    padding: 1.1rem 1.2rem 1.25rem;
+    border-top: 3px solid var(--orange); border-radius: var(--radius);
+    padding: 1.25rem 1.4rem 1.4rem;
   }
-  .vkort__nr {
-    font-family: var(--font-display); font-weight: 700; font-size: 1.5rem;
-    color: var(--orange); line-height: 1.05;
-  }
-  .vkort__txt { display: flex; flex-direction: column; gap: 0.35rem; }
-  .vkort h3 { font-size: 1rem; }
-  .vkort p { font-size: 0.93rem; color: var(--text-dim); }
+  .vkort h3 { font-size: 1.06rem; letter-spacing: 0.03em; }
+  .vkort p { font-size: 0.96rem; color: var(--text-dim); max-width: 58ch; }
 
   .kilde { font-size: 0.82rem; color: var(--text-faint); margin-top: 1rem; max-width: 66ch; }
 
@@ -213,25 +223,8 @@ const fælles = billede('hold-udenfor');
            letter-spacing: 0.09em; font-size: 0.76rem; font-weight: 600;
            color: var(--orange-600); }
 
-  .pokaler { list-style: none; margin: 0; padding: 0;
-             display: grid; gap: 0.7rem;
-             grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
-  .pokaler li {
-    display: flex; align-items: center; gap: 1rem;
-    background: var(--surface); border: 1px solid var(--line-soft);
-    border-left: 4px solid var(--orange);
-    border-radius: var(--radius); padding: 0.95rem 1.1rem;
-  }
-  .pokaler__aar {
-    font-family: var(--font-display); font-weight: 700; font-size: 2.1rem;
-    line-height: 1; color: var(--orange); flex: none;
-  }
-  .pokaler__txt { display: flex; flex-direction: column; gap: 0.1rem; }
-  .pokaler__txt strong {
-    font-family: var(--font-display); text-transform: uppercase;
-    letter-spacing: 0.05em; font-size: 0.8rem;
-  }
-  .pokaler__txt em { font-style: normal; font-size: 0.8rem; color: var(--text-faint); }
+  .pokaler { display: grid; gap: 0.7rem;
+             grid-template-columns: repeat(auto-fit, minmax(min(100%, 265px), 1fr)); }
 
   .bred { margin: 0; }
   .bred :global(img) {
