@@ -1,15 +1,46 @@
 ---
-import { sponsorer } from '../data/akademi';
+import SponsorLogo from './SponsorLogo.astro';
+import { sponsorerPaaNiveau, hovedsponsor } from '../data/akademi';
 
-const top = sponsorer.filter((s) => s.niveau === 'topsponsor');
-const oevrige = sponsorer.filter((s) => s.niveau === 'sponsor');
+const hoved = hovedsponsor();
+const top = sponsorerPaaNiveau('topsponsor');
+const oevrige = sponsorerPaaNiveau('sponsor');
+
+/* Sidefoden viser KUN hovedsponsor og topsponsorer.
+   Hele raekken paa 42 logoer hoerer paa /sponsorer, hvor folk er kommet for at
+   se den. Netop det at laegge hele sponsorvaeggen paa hver enkelt side er en af
+   grundene til at den nuvaerende forside fylder 687 KB. */
+const antalIAlt = 1 + top.length + oevrige.length;
 ---
 
 <footer class="ft">
+  <!-- Hovedsponsoren staar alene og oeverst -->
+  <div class="ft__hoved">
+    <div class="wrap ft__hoved-in">
+      <span class="ft__label">Hovedsponsor</span>
+      <a href={hoved.url} rel="noopener" target="_blank" class="ft__hovedlogo">
+        <img src="/brand/thisted-forsikring.png" alt={hoved.navn}
+             width="314" height="173" loading="lazy" />
+      </a>
+    </div>
+  </div>
+
+  <div class="ft__sponsorer">
+    <div class="wrap">
+      <p class="ft__label">Topsponsorer</p>
+      <div class="ft__raekke">
+        {top.map((s) => <SponsorLogo sponsor={s} hoejde={40} />)}
+      </div>
+      <p class="ft__alle">
+        <a href="/sponsorer">Se alle {antalIAlt} sponsorer →</a>
+      </p>
+    </div>
+  </div>
+
   <div class="wrap ft__in">
     <div class="ft__col">
       <img src="/brand/mtha-logo.png" alt="Mors-Thy Håndbold Akademi"
-           width="240" height="179" class="ft__logo" />
+           width="240" height="179" class="ft__logo" loading="lazy" />
       <p>Vi skaber fremtidens stjerner.</p>
     </div>
 
@@ -26,9 +57,14 @@ const oevrige = sponsorer.filter((s) => s.niveau === 'sponsor');
       <h3>Genveje</h3>
       <ul>
         <li><a href="/nyheder">Nyheder</a></li>
+        <li><a href="/hold/u17">Hold og spillere</a></li>
+        <li><a href="/staben">Staben</a></li>
         <li><a href="/bliv-elev">Bliv elev</a></li>
+        <li><a href="/bliv-elev/oekonomi">Økonomi</a></li>
+        <li><a href="/bolig">Bolig</a></li>
         <li><a href="/sponsorer">Sponsorer</a></li>
         <li><a href="/dokumenter">Dokumenter</a></li>
+        <li><a href="/privatlivspolitik">Privatlivspolitik</a></li>
       </ul>
     </div>
 
@@ -40,23 +76,13 @@ const oevrige = sponsorer.filter((s) => s.niveau === 'sponsor');
         <li><a href="https://www.instagram.com/mors_thy_handbold_akademi/"
                rel="noopener" target="_blank">Instagram</a></li>
       </ul>
-    </div>
-  </div>
-
-  <div class="ft__sponsors">
-    <div class="wrap">
-      <p class="ft__sponsors-h">Topsponsorer</p>
-      <ul class="ft__logos">
-        {top.map((s) => <li>{s.navn}</li>)}
+      <h3 class="ft__h2">Samarbejdspartnere</h3>
+      <ul>
+        <li>Morsø Kommune</li>
+        <li>Morsø Gymnasium</li>
+        <li>EUC Nordvest</li>
+        <li>HF Mors</li>
       </ul>
-      <p class="ft__sponsors-h">Sponsorer</p>
-      <ul class="ft__logos ft__logos--small">
-        {oevrige.map((s) => <li>{s.navn}</li>)}
-      </ul>
-      <p class="ft__note">
-        Sponsorerne vises her fra ét register — samme sted som logoerne på
-        spillerkortene. Skifter en sponsor navn eller logo, rettes det ét sted.
-      </p>
     </div>
   </div>
 
@@ -70,48 +96,54 @@ const oevrige = sponsorer.filter((s) => s.niveau === 'sponsor');
 
 <style>
   .ft { background: var(--navy-900); color: #D9DAF0; margin-top: 3rem; }
-  .ft__in {
-    display: grid;
-    gap: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
-    padding-block: 2.4rem 2rem;
+
+  .ft__label {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.15em; font-size: 0.64rem; font-weight: 600;
+    color: #8285BC; margin-bottom: 0.6rem; display: block;
   }
-  .ft__col { display: flex; flex-direction: column; gap: 0.6rem; }
+
+  .ft__hoved { background: #fff; }
+  .ft__hoved-in {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1.2rem; padding-block: 1rem; flex-wrap: wrap;
+  }
+  .ft__hoved .ft__label { color: #6b6d92; margin: 0; }
+  .ft__hovedlogo { line-height: 0; }
+  .ft__hovedlogo img { width: auto; height: 52px; }
+
+  .ft__sponsorer { padding-block: 1.6rem; border-bottom: 1px solid rgb(255 255 255 / 12%); }
+  .ft__raekke {
+    display: grid; gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
+    margin-bottom: 1.4rem;
+  }
+  .ft__alle { font-size: 0.86rem; }
+  .ft__alle a {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.09em; font-size: 0.76rem; font-weight: 600;
+    color: var(--orange);
+  }
+
+  .ft__in {
+    display: grid; gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 185px), 1fr));
+    padding-block: 2.2rem 1.8rem;
+  }
+  .ft__col { display: flex; flex-direction: column; gap: 0.55rem; }
   .ft__logo {
-    width: auto; height: 74px;
+    width: auto; height: 72px;
     background: #fff; border-radius: var(--radius); padding: 0.4rem 0.55rem;
     align-self: flex-start;
   }
   .ft__col p { font-size: 0.92rem; color: #A6A8D2; }
-  .ft h3 {
-    font-size: 0.78rem; letter-spacing: 0.13em; color: var(--orange);
-  }
+  .ft h3 { font-size: 0.78rem; letter-spacing: 0.13em; color: var(--orange); }
+  .ft__h2 { margin-top: 0.8rem; }
   .ft address { font-style: normal; font-size: 0.92rem; line-height: 1.75; }
   .ft ul { list-style: none; margin: 0; padding: 0; display: flex;
-           flex-direction: column; gap: 0.28rem; font-size: 0.92rem; }
+           flex-direction: column; gap: 0.26rem; font-size: 0.92rem; }
   .ft a { color: #D9DAF0; text-decoration: none; }
   .ft a:hover { color: #fff; text-decoration: underline; }
-
-  .ft__sponsors { border-top: 1px solid rgb(255 255 255 / 12%); padding-block: 1.6rem; }
-  .ft__sponsors-h {
-    font-family: var(--font-display); text-transform: uppercase;
-    letter-spacing: 0.14em; font-size: 0.66rem; font-weight: 600;
-    color: #8285BC; margin-bottom: 0.55rem;
-  }
-  .ft__logos {
-    list-style: none; margin: 0 0 1.2rem; padding: 0;
-    display: flex; flex-wrap: wrap; gap: 0.4rem;
-  }
-  /* Pladsholdere: rigtige sponsorlogoer indsaettes i etape 3 */
-  .ft__logos li {
-    font-family: var(--font-display); text-transform: uppercase;
-    letter-spacing: 0.06em; font-size: 0.76rem; font-weight: 600;
-    color: #C7C9E8;
-    border: 1px solid rgb(255 255 255 / 16%);
-    border-radius: 2px; padding: 0.34rem 0.65rem;
-  }
-  .ft__logos--small li { font-size: 0.68rem; color: #9699CC; padding: 0.26rem 0.5rem; }
-  .ft__note { font-size: 0.8rem; color: #7B7EB4; max-width: 62ch; }
 
   .ft__legal { border-top: 1px solid rgb(255 255 255 / 12%); padding-block: 0.9rem; }
   .ft__legal .wrap {

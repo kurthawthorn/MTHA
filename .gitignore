@@ -26,3 +26,14 @@ desktop.ini
 # Arbejdsfiler fra analysen af den nuværende side
 scratch/
 *.tmp
+
+# Akademiets egne billeder og dokumenter — hentes med tools/fetch_assets.py.
+# De ligger IKKE i git: de tilhoerer akademiet, sponsorerne og fotograferne,
+# portraetterne viser mindreaarige, og binaere filer bliver i historikken for evigt.
+poc/src/assets/fotos/
+poc/src/assets/portraetter/
+poc/src/assets/logoer/
+poc/public/dokumenter/*.pdf
+
+# Logoerne BLIVER i git: de er små, og uden dem kan designet ikke
+# rendere. Det er en anden sag end 142 fotos af mindreårige.

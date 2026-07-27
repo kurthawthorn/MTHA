@@ -2,6 +2,7 @@
 titel: Thisted Forsikring forlænger som hovedsponsor
 dato: 2026-06-28
 kategori: Sponsor
+fotoKey: hold-samlet
 kilde: cms
 resume: >-
   Akademiets hovedsponsor gennem flere år fortsætter samarbejdet og sikrer

@@ -1,20 +1,38 @@
 ---
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NyhedsKort from '../components/NyhedsKort.astro';
-import { hold, truppen } from '../data/akademi';
+import { hold, truppen, personer } from '../data/akademi';
+import { billede } from '../lib/billeder';
 
 const nyheder = (await getCollection('nyheder'))
   .sort((a, b) => b.data.dato.getTime() - a.data.dato.getTime());
 const seneste = nyheder.slice(0, 3);
 const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
+
+/* Hero tåler hård komprimering (quality 58): der ligger et kraftigt navy-slør
+   over fotoet, så artefakter er usynlige. Det halverer forsidens vægt. */
+const heroFoto = billede('dm-2025-vinder');
+const traening = ['traening-hal', 'traening-styrke', 'socialt-4'];
+const faciliteter = [
+  { key: 'traneholm-indgang', h: 'Traneholm', p: '35 værelser i gåafstand fra hal og skole' },
+  { key: 'traneholm-koekken', h: 'Fælleskøkken', p: 'Fælles køkken og opholdsrum på hver etage' },
+  { key: 'drone-2', h: 'Morsø Multipark', p: 'Haller, styrkerum og mødelokaler samlet' },
+];
 ---
 
 <Base titel="forside">
+  <!-- Forsidens tese: det mest karakteristiske akademiet har — DM-guldet -->
   <section class="hero">
+    {heroFoto && (
+      <Image src={heroFoto} alt="" class="hero__bg"
+             widths={[760, 1200, 1700]} sizes="100vw" quality={58} loading="eager" />
+    )}
+    <div class="hero__slor"></div>
     <div class="wrap hero__in">
       <div class="hero__text">
-        <span class="eyebrow">Nykøbing Mors</span>
+        <span class="eyebrow">Nykøbing Mors · Danmarksmestre U19</span>
         <h1>Vi skaber<br />fremtidens stjerner</h1>
         <p class="lead">
           Elitehåndbold og ungdomsuddannelse samlet ét sted. Træning, skole og
@@ -22,13 +40,13 @@ const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
         </p>
         <div class="hero__btns">
           <a href="/bliv-elev" class="btn btn--primary">Bliv elev</a>
-          <a href="/om-akademiet" class="btn btn--onnavy">Om akademiet</a>
+          <a href="/nyheder" class="btn btn--onnavy">Se nyheder</a>
         </div>
       </div>
 
       <dl class="hero__tal">
         <div><dt>Spillere</dt><dd class="num">{antalSpillere}</dd></div>
-        <div><dt>Årgange</dt><dd class="num">{hold.length}</dd></div>
+        <div><dt>Professionelle</dt><dd class="num">{personer.length}</dd></div>
         <div><dt>Uddannelser</dt><dd>STX · HHX · HF</dd></div>
         <div><dt>Bolig</dt><dd class="num">35 værelser</dd></div>
       </dl>
@@ -45,7 +63,7 @@ const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
         {seneste.map((n) => (
           <NyhedsKort slug={n.id} titel={n.data.titel} dato={n.data.dato}
                       kategori={n.data.kategori} resume={n.data.resume}
-                      kilde={n.data.kilde} />
+                      kilde={n.data.kilde} fotoKey={n.data.fotoKey} />
         ))}
       </div>
     </section>
@@ -56,37 +74,67 @@ const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
         <a href="/hold/u17">Se truppen →</a>
       </div>
       <div class="grid grid--2">
-        {hold.map((h) => (
-          <a class="card holdkort" href={`/hold/${h.id}`}>
-            <div class="holdkort__top">
-              <h3>{h.navn}</h3>
-              <span class="pill pill--orange">{h.raekke}</span>
-            </div>
-            <p class="holdkort__aar num">Årgang {h.aargang}</p>
-            <p class="holdkort__antal num">{truppen(h.id).length} spillere i truppen</p>
-          </a>
-        ))}
+        {hold.map((h) => {
+          const foto = billede(h.fotoKey);
+          return (
+            <a class="card holdkort" href={`/hold/${h.id}`}>
+              <div class="holdkort__foto">
+                {foto && (
+                  <Image src={foto} alt="" widths={[420, 700, 1000]}
+                         sizes="(max-width: 700px) 92vw, 520px" quality={78} loading="lazy" />
+                )}
+              </div>
+              <div class="holdkort__txt">
+                <div class="holdkort__top">
+                  <h3>{h.navn} · Årgang {h.aargang}</h3>
+                  <span class="pill pill--orange">{h.raekke}</span>
+                </div>
+                <p class="num">{truppen(h.id).length} spillere{h.traener && ` · træner ${h.traener}`}</p>
+              </div>
+            </a>
+          );
+        })}
       </div>
     </section>
 
     <section class="section">
-      <div class="section__head"><h2>Bliv elev</h2></div>
+      <div class="section__head"><h2>Træning og hverdag</h2></div>
+      <div class="stribe">
+        {traening.map((k) => {
+          const foto = billede(k);
+          return foto ? (
+            <div class="stribe__i">
+              <Image src={foto} alt="" widths={[400, 700]}
+                     sizes="(max-width: 700px) 92vw, 360px" quality={78} loading="lazy" />
+            </div>
+          ) : null;
+        })}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__head">
+        <h2>Faciliteter</h2>
+        <a href="/om-akademiet">Om akademiet →</a>
+      </div>
       <div class="grid grid--3">
-        <div class="card infokort">
-          <h3>Træning</h3>
-          <p>Målrettet håndboldtræning med uddannede trænere, fysioterapeuter
-             og mentaltræner tilknyttet hverdagen.</p>
-        </div>
-        <div class="card infokort">
-          <h3>Uddannelse</h3>
-          <p>Skema koordineret med Morsø Gymnasium, EUC Nordvest og HF Mors,
-             så træning og undervisning går op i en højere enhed.</p>
-        </div>
-        <div class="card infokort">
-          <h3>Bolig</h3>
-          <p>35 værelser på Traneholm i gåafstand fra hal og skole. Fælleskøkken
-             og opholdsrum på hver etage.</p>
-        </div>
+        {faciliteter.map((f) => {
+          const foto = billede(f.key);
+          return (
+            <div class="card fk">
+              <div class="fk__foto">
+                {foto && (
+                  <Image src={foto} alt="" widths={[380, 640]}
+                         sizes="(max-width: 700px) 92vw, 340px" quality={78} loading="lazy" />
+                )}
+              </div>
+              <div class="fk__txt">
+                <h3>{f.h}</h3>
+                <p>{f.p}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   </div>
@@ -94,68 +142,102 @@ const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
 
 <style>
   .hero {
-    background:
-      radial-gradient(90% 120% at 85% 0%, rgb(224 137 62 / 26%), transparent 60%),
-      linear-gradient(160deg, var(--navy) 0%, var(--navy-900) 100%);
+    position: relative;
     color: #fff;
-    padding-block: clamp(2.6rem, 6vw, 4.6rem);
+    padding-block: clamp(3.4rem, 9vw, 7rem) clamp(2rem, 5vw, 3.4rem);
+    overflow: hidden;
+    background: var(--navy-900);
+  }
+  .hero :global(.hero__bg) {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 32%;
+  }
+  /* Slør: fotoet er lyst og fyldt med detaljer, saa teksten skal have baggrund */
+  .hero__slor {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(100deg, rgb(20 22 78 / 92%) 0%, rgb(24 26 84 / 74%) 44%,
+                              rgb(24 26 84 / 22%) 78%),
+      linear-gradient(0deg, rgb(11 13 46 / 72%) 0%, transparent 55%);
   }
   .hero__in {
-    display: grid;
-    gap: 2.2rem;
+    position: relative;
+    display: grid; gap: 2.2rem;
     grid-template-columns: minmax(0, 1fr);
     align-items: end;
   }
   @media (min-width: 900px) {
-    .hero__in { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
+    .hero__in { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
   }
   .hero__text { display: flex; flex-direction: column; gap: 0.9rem; }
-  .hero h1 { font-size: clamp(2.3rem, 6.4vw, 4.2rem); letter-spacing: -0.005em; }
-  .hero .lead { color: #C6C7E9; }
+  .hero h1 {
+    font-size: clamp(2.3rem, 6.6vw, 4.4rem);
+    letter-spacing: -0.005em;
+    text-shadow: 0 2px 24px rgb(11 13 46 / 55%);
+  }
+  .hero .lead { color: #D6D7F0; }
   .hero .eyebrow { color: var(--orange); }
   .hero__btns { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.4rem; }
 
   .hero__tal {
     margin: 0;
-    display: grid;
-    gap: 1px;
+    display: grid; gap: 1px;
     grid-template-columns: repeat(2, 1fr);
-    background: rgb(255 255 255 / 18%);
-    border: 1px solid rgb(255 255 255 / 18%);
+    background: rgb(255 255 255 / 22%);
+    border: 1px solid rgb(255 255 255 / 22%);
     border-radius: var(--radius);
     overflow: hidden;
+    backdrop-filter: blur(3px);
   }
   .hero__tal > div {
-    background: rgb(27 29 92 / 72%);
+    background: rgb(23 25 80 / 78%);
     padding: 0.85rem 0.9rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
+    display: flex; flex-direction: column; gap: 0.1rem;
   }
   .hero__tal dt {
-    font-family: var(--font-display);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.64rem;
-    font-weight: 600;
-    color: #9DA0D4;
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 0.63rem; font-weight: 600; color: #A8ABDC;
   }
   .hero__tal dd {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.5rem;
-    line-height: 1.1;
+    margin: 0; font-family: var(--font-display); font-weight: 700;
+    font-size: 1.45rem; line-height: 1.1;
   }
 
-  .holdkort { padding: 1.15rem 1.25rem 1.3rem; gap: 0.3rem; }
+  .holdkort { padding: 0; }
+  .holdkort__foto {
+    aspect-ratio: 16 / 7; overflow: hidden; background: var(--navy-800);
+  }
+  .holdkort__foto :global(img) {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  a.card:hover .holdkort__foto :global(img) { transform: scale(1.03); }
+  .holdkort__txt {
+    padding: 0.9rem 1.1rem 1.05rem;
+    display: flex; flex-direction: column; gap: 0.28rem;
+    border-top: 2px solid var(--orange);
+  }
   .holdkort__top { display: flex; align-items: center; gap: 0.7rem;
-                   justify-content: space-between; }
-  .holdkort h3 { font-size: 1.2rem; }
-  .holdkort__aar { color: var(--text-dim); font-size: 0.94rem; }
-  .holdkort__antal { color: var(--text-faint); font-size: 0.86rem; }
+                   justify-content: space-between; flex-wrap: wrap; }
+  .holdkort h3 { font-size: 1.05rem; }
+  .holdkort__txt p { color: var(--text-dim); font-size: 0.88rem; }
 
-  .infokort { padding: 1.15rem 1.25rem 1.3rem; gap: 0.45rem; }
-  .infokort h3 { font-size: 1.02rem; }
-  .infokort p { font-size: 0.92rem; color: var(--text-dim); }
+  .stribe {
+    display: grid; gap: 0.7rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  }
+  .stribe__i {
+    aspect-ratio: 4 / 3; overflow: hidden;
+    border-radius: var(--radius); border: 1px solid var(--line-soft);
+    background: var(--surface-2);
+  }
+  .stribe__i :global(img) { width: 100%; height: 100%; object-fit: cover; }
+
+  .fk { padding: 0; }
+  .fk__foto { aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface-2); }
+  .fk__foto :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .fk__txt { padding: 0.85rem 1rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+  .fk h3 { font-size: 1rem; }
+  .fk p { font-size: 0.9rem; color: var(--text-dim); }
 </style>

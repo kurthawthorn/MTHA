@@ -1,49 +1,95 @@
 ---
 import Base from '../layouts/Base.astro';
 
-/* Dokumenterne findes paa m-tha.dk i dag. Her ligger de i ét register med
-   kategori og dato, i stedet for som loese links spredt ud over forsiden. */
-const dokumenter = [
-  { titel: 'Velkommen til Mors-Thy Håndbold Akademi', kategori: 'Brochure', aar: 2023 },
-  { titel: 'Vi skaber fremtidens stjerner', kategori: 'Brochure', aar: 2023 },
-  { titel: 'Forældreovervejelser', kategori: 'Vejledning', aar: 2023 },
-  { titel: 'Kontrakt', kategori: 'Vejledning', aar: 2024 },
-  { titel: 'Vedtægter', kategori: 'Vedtægter', aar: 2025 },
-  { titel: 'Referat fra generalforsamling, oktober 2025', kategori: 'Referat', aar: 2025 },
-  { titel: 'Privatlivspolitik', kategori: 'Vedtægter', aar: 2024 },
-  { titel: 'Boligselskabet Nykøbing Mors — flyer', kategori: 'Bolig', aar: 2024 },
+/**
+ * De 8 PDF'er fra m-tha.dk delt i to.
+ *
+ * Indholdet i brochurerne er trukket ud paa rigtige sider: en PDF kan Google
+ * naesten ikke laese, den er ubrugelig paa en telefon, og man kan ikke linke
+ * til et afsnit i den. Tilbage staar de dokumenter der ER filer: underskrevne
+ * papirer og formelle referater.
+ */
+const flyttet = [
+  { titel: 'Vision og dagligdagen på akademiet', kilde: 'MTH_Vi skaber fremtidens stjerner (PDF, 2 sider)',
+    href: '/om-akademiet' },
+  { titel: 'Økonomi — hvad koster det', kilde: 'Forældreovervejelser (PDF, 6 sider)',
+    href: '/bliv-elev/oekonomi' },
+  { titel: 'Bolig, priser og indskud', kilde: 'Domea-flyer (PDF, 2 sider)',
+    href: '/bolig' },
+  { titel: 'Praktisk om hverdagen', kilde: 'MTH_Velkommen (PDF, 2 sider)',
+    href: '/om-akademiet' },
+  { titel: 'Privatlivspolitik', kilde: 'Privatlivspolitik (PDF, 5 sider)',
+    href: '/privatlivspolitik' },
 ];
 
-const kategorier = [...new Set(dokumenter.map((d) => d.kategori))];
+const filer = [
+  { titel: 'Vedtægter', fil: 'vedtaegter.pdf', sider: 5, aar: 2025,
+    hvorfor: 'Underskrevet dokument' },
+  { titel: 'Referat fra generalforsamling, oktober 2025',
+    fil: 'referat-generalforsamling-2025.pdf', sider: 6, aar: 2025,
+    hvorfor: 'Underskrevet referat' },
+  { titel: 'Elevkontrakt', fil: 'kontrakt.pdf', sider: 5, aar: 2024,
+    hvorfor: 'Skal printes og underskrives' },
+];
 ---
 
 <Base titel="Dokumenter"
-      beskrivelse="Brochurer, vedtægter, referater og vejledninger fra Mors-Thy Håndbold Akademi.">
+      beskrivelse="Vedtægter, referater og elevkontrakt fra Mors-Thy Håndbold Akademi. Brochurernes indhold findes som almindelige sider.">
   <div class="wrap">
     <header class="top">
-      <span class="eyebrow">Til download</span>
+      <span class="eyebrow">Dokumenter og formelle papirer</span>
       <h1>Dokumenter</h1>
       <p class="lead">
-        Ét register med kategori og årstal, i stedet for løse links spredt ud
-        over forsiden.
+        Indholdet fra brochurerne er flyttet ud på almindelige sider, hvor det
+        kan læses på en telefon, findes i Google og linkes til. Tilbage står de
+        papirer, der faktisk skal være filer.
       </p>
     </header>
 
-    {kategorier.map((k) => (
-      <section class="section">
-        <div class="section__head"><h2>{k}</h2></div>
-        <ul class="dok">
-          {dokumenter.filter((d) => d.kategori === k).map((d) => (
-            <li>
-              <a href="#">{d.titel}</a>
-              <span class="num">{d.aar} · PDF</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ))}
+    <section class="section">
+      <div class="section__head">
+        <h2>Flyttet ud på siden</h2>
+        <span class="antal num">{flyttet.length} brochurer</span>
+      </div>
+      <ul class="flyt">
+        {flyttet.map((f) => (
+          <li>
+            <a href={f.href}>
+              <span class="flyt__t">{f.titel}</span>
+              <span class="flyt__fra">tidligere: {f.kilde}</span>
+            </a>
+            <span class="flyt__pil" aria-hidden="true">→</span>
+          </li>
+        ))}
+      </ul>
+      <p class="note">
+        Godt 4 MB PDF er blevet til sider der åbner med det samme. Teksten er
+        akademiets egen — den er bare taget ud af filerne.
+      </p>
+    </section>
 
-    <p class="note">Prototype — filerne er ikke vedhæftet i denne POC.</p>
+    <section class="section">
+      <div class="section__head">
+        <h2>Dokumenter til download</h2>
+        <span class="antal num">{filer.length} filer</span>
+      </div>
+      <ul class="dok">
+        {filer.map((d) => (
+          <li>
+            <a href={`/dokumenter/${d.fil}`} download>
+              <span class="dok__t">{d.titel}</span>
+              <span class="dok__hv">{d.hvorfor}</span>
+            </a>
+            <span class="dok__meta num">{d.aar} · {d.sider} sider · PDF</span>
+          </li>
+        ))}
+      </ul>
+      <p class="note">
+        Disse tre er scannede, underskrevne papirer — der er ingen tekst i dem
+        at trække ud, og de skal blive filer. De hentes fra m-tha.dk med
+        <code>python tools/fetch_assets.py</code>, så de ligger ikke i git.
+      </p>
+    </section>
   </div>
 </Base>
 
@@ -51,14 +97,33 @@ const kategorier = [...new Set(dokumenter.map((d) => d.kategori))];
   .top { display: flex; flex-direction: column; gap: 0.5rem;
          padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
   .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
-  .dok { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line-soft); }
-  .dok li {
-    display: flex; flex-wrap: wrap; gap: 0.3rem 1rem;
-    justify-content: space-between; align-items: baseline;
-    padding: 0.62rem 0.2rem; border-bottom: 1px solid var(--line-soft);
+  .antal { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-faint); }
+
+  .flyt, .dok { list-style: none; margin: 0; padding: 0;
+                border-top: 1px solid var(--line-soft); }
+  .flyt li, .dok li {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line-soft);
   }
-  .dok a { font-weight: 600; text-decoration: none; color: var(--text); }
-  .dok a:hover { text-decoration: underline; color: var(--navy-600); }
-  .dok span { font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-faint); }
-  .note { font-size: 0.82rem; color: var(--text-faint); padding-bottom: 1rem; }
+  .flyt a, .dok a {
+    display: flex; flex-direction: column; gap: 0.15rem;
+    padding: 0.7rem 0.2rem; text-decoration: none; flex: 1;
+  }
+  .flyt a:hover .flyt__t, .dok a:hover .dok__t {
+    color: var(--navy-600); text-decoration: underline;
+  }
+  .flyt__t, .dok__t { font-weight: 650; color: var(--text); }
+  .flyt__fra, .dok__hv { font-size: 0.78rem; color: var(--text-faint); }
+  .flyt__pil { color: var(--orange); font-size: 1.1rem; padding-right: 0.2rem; }
+  .dok__meta { font-family: var(--font-mono); font-size: 0.74rem;
+               color: var(--text-faint); padding-right: 0.2rem; }
+
+  .note { font-size: 0.82rem; color: var(--text-faint); margin-top: 0.9rem;
+          max-width: 70ch; }
+  .note code {
+    font-family: var(--font-mono); font-size: 0.88em;
+    background: var(--surface-2); border: 1px solid var(--line-soft);
+    padding: 0.08em 0.34em; border-radius: 2px; color: var(--text-dim);
+  }
 </style>

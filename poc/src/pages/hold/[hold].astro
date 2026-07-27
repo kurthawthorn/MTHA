@@ -1,14 +1,17 @@
 ---
 import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import SpillerKort from '../../components/SpillerKort.astro';
 import { hold, truppen } from '../../data/akademi';
+import { billede } from '../../lib/billeder';
 
 export const getStaticPaths = (() =>
   hold.map((h) => ({ params: { hold: h.id }, props: { h } }))) satisfies GetStaticPaths;
 
 const { h } = Astro.props;
 const trup = truppen(h.id);
+const holdFoto = billede(h.fotoKey);
 
 // Filtrene bygges ud fra de positioner der faktisk findes i truppen.
 // Det er hele pointen med at have data i felter frem for i billedfiler.
@@ -23,11 +26,18 @@ const aargange = [...new Set(trup.map((s) => s.foedselsaar))].sort();
       <a href="/">Forside</a> <span>/</span> <span>Hold</span>
     </nav>
 
+    {holdFoto && (
+      <div class="holdfoto">
+        <Image src={holdFoto} alt="" widths={[900, 1400, 2200]}
+               sizes="100vw" quality={80} loading="eager" />
+      </div>
+    )}
+
     <header class="holdtop">
       <div>
         <span class="eyebrow">Årgang {h.aargang} · {h.raekke}</span>
         <h1>{h.navn}</h1>
-        <p class="lead num">{trup.length} spillere i truppen</p>
+        <p class="lead num">{trup.length} spillere i truppen{h.traener ? ` · træner ${h.traener}` : ''}</p>
       </div>
       <div class="holdtop__skift">
         {hold.map((a) => (
@@ -110,6 +120,14 @@ const aargange = [...new Set(trup.map((s) => s.foedselsaar))].sort();
   }
   .krumme a { color: var(--text-dim); text-decoration: none; }
   .krumme a:hover { text-decoration: underline; }
+
+  .holdfoto {
+    margin-top: 0.8rem;
+    aspect-ratio: 21 / 8; overflow: hidden;
+    border-radius: var(--radius); border: 1px solid var(--line-soft);
+    background: var(--navy-800);
+  }
+  .holdfoto :global(img) { width: 100%; height: 100%; object-fit: cover; }
 
   .holdtop {
     display: flex; flex-wrap: wrap; gap: 1rem;

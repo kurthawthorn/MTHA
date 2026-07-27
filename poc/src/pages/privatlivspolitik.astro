@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+
+/**
+ * Indhold fra Privatlivspolitik.pdf (5 sider, dateret 25.2.2022).
+ *
+ * ⚠︎ To ting bør akademiet se på — begge fundet i PDF'en:
+ *   1. Dataansvarlig staar som "Sports College Mors" (akademiets tidligere navn)
+ *   2. Adressen er H.C. Ørstedsvej 2, mens sitet i oevrigt oplyser Tranevej 4
+ * Det er praecis den type ting der bliver staaende naar tekst ligger laast i en
+ * PDF: ingen laegger maerke til den, og ingen retter den.
+ */
+const rettigheder = [
+  'Retten til at blive oplyst om behandlingen af data',
+  'Retten til indsigt i egne personoplysninger',
+  'Retten til berigtigelse',
+  'Retten til sletning',
+  'Retten til begrænsning af behandling',
+  'Retten til dataportabilitet',
+  'Retten til indsigelse',
+];
+
+const formaal = [
+  'Håndtering af elevernes optagelse og ophold på akademiet',
+  'Opkrævning og betaling af kontingent',
+  'Udfærdigelse af holdkort, holdopstillinger og interne resultatlister',
+  'Håndtering af trænernes og ledernes hverv og pligter',
+  'Opfyldelse af lovkrav',
+];
+---
+
+<Base titel="Privatlivspolitik"
+      beskrivelse="Sådan behandler Mors-Thy Håndbold Akademi personoplysninger om elever, trænere og ledere.">
+  <div class="wrap">
+    <header class="top">
+      <span class="eyebrow">Senest opdateret 25. februar 2022</span>
+      <h1>Privatlivspolitik</h1>
+      <p class="lead">
+        Vi behandler personoplysninger og har derfor vedtaget denne politik, der
+        kort fortæller hvordan vi behandler dine oplysninger til sikring af en
+        fair og gennemsigtig behandling.
+      </p>
+    </header>
+
+    <div class="prose section">
+      <p>
+        Gennemgående for vores databehandling er, at vi kun behandler
+        personoplysninger til bestemte formål og ud fra berettigede, legitime
+        interesser. Vi behandler kun oplysninger, der er relevante og nødvendige
+        til opfyldelse af de angivne formål, og vi sletter dine oplysninger, når
+        de ikke længere er nødvendige.
+      </p>
+
+      <h2>Dataansvarlig</h2>
+      <p>
+        Kontaktperson: Lars Svane Nielsen, daglig leder<br />
+        Telefon: <a href="tel:+4530624304">30 62 43 04</a><br />
+        E-mail: <a href="mailto:info@m-tha.dk">info@m-tha.dk</a><br />
+        CVR: 35692207
+      </p>
+
+      <div class="flag">
+        <strong>Til akademiets opmærksomhed</strong>
+        <p>
+          I PDF-udgaven står den dataansvarlige som “Sports College Mors” med
+          adressen H.C. Ørstedsvej 2, mens resten af sitet oplyser Tranevej 4.
+          Navnet og adressen bør opdateres. Det er netop den slags, der bliver
+          stående når teksten ligger låst i en fil — ingen får øje på den.
+        </p>
+      </div>
+
+      <h2>Formål med behandlingen</h2>
+      <ul>{formaal.map((f) => <li>{f}</li>)}</ul>
+
+      <h2>Børn og unge</h2>
+      <p>
+        Når vi indhenter personoplysninger om børn og unge, vurderer vi om
+        barnet selv er i stand til at afgive oplysningerne. Hvis ikke, indhenter
+        vi samtykke fra en forælder. Vores udgangspunkt er 15 år. Indsamler vi
+        oplysninger via informationstjenester som apps og sociale medier, kan
+        børn selv afgive samtykke fra de er fyldt 13 år.
+      </p>
+
+      <h2>Videregivelse</h2>
+      <p>
+        I forbindelse med idrætsaktivitet videregives oplysninger om deltagelse
+        og resultater til relevante idrætsorganisationer. Vi videregiver ikke
+        personoplysninger til firmaer til markedsføring uden dit samtykke.
+      </p>
+
+      <h2>Dine rettigheder</h2>
+      <ul>{rettigheder.map((r) => <li>{r}</li>)}</ul>
+      <p>
+        Du kan gøre brug af dine rettigheder ved at henvende dig til os. Du kan
+        altid indgive en klage til Datatilsynet.
+      </p>
+
+      <p class="note">
+        Teksten er akademiets egen, hentet ud af Privatlivspolitik.pdf og
+        forkortet til det væsentlige. I den færdige løsning bør den fulde tekst
+        stå her som redigerbart indhold — en privatlivspolitik skal være let at
+        finde og læse, og det er en PDF ikke.
+      </p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .top { display: flex; flex-direction: column; gap: 0.5rem;
+         padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+
+  .prose h2 { font-size: 1.18rem; margin-top: 1.4rem; }
+  .prose ul { display: flex; flex-direction: column; gap: 0.28rem; }
+
+  .flag {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--orange);
+    background: var(--orange-100);
+    border-radius: var(--radius);
+    padding: 0.95rem 1.1rem;
+    display: flex; flex-direction: column; gap: 0.35rem;
+    margin-block: 0.5rem;
+  }
+  .flag strong {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.08em; font-size: 0.8rem;
+  }
+  .flag p { font-size: 0.92rem; }
+
+  .note { font-size: 0.84rem; color: var(--text-faint); margin-top: 1.4rem;
+          padding-top: 1rem; border-top: 1px solid var(--line-soft); }
+</style>

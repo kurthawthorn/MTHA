@@ -1,72 +1,82 @@
 ---
+import { Image } from 'astro:assets';
 import type { Spiller } from '../data/akademi';
-import { getSponsor, spillerSlug } from '../data/akademi';
+import { getSponsor } from '../data/akademi';
+import { billede } from '../lib/billeder';
 import { initials } from '../lib/slug';
 
 interface Props { spiller: Spiller }
 const { spiller } = Astro.props;
 const sponsor = getSponsor(spiller.sponsorId);
+const foto = billede(spiller.fotoKey);
 ---
 
 <a class="card sk"
-   href={`/spillere/${spillerSlug(spiller)}`}
+   href={`/spillere/${spiller.slug}`}
    data-position={spiller.position}
    data-aar={spiller.foedselsaar}>
-  <div class="sk__foto">
-    <!-- Pladsholder: POC'en bruger bevidst ikke fotos af eleverne.
-         Feltet er der, og et rigtigt foto beskaeres automatisk om ansigtet. -->
-    <span class="sk__initialer" aria-hidden="true">{initials(spiller.navn)}</span>
+  <div class:list={['sk__foto', !foto && 'sk__foto--tom']}>
+    {foto ? (
+      <Image src={foto} alt={`${spiller.navn}, ${spiller.position}`}
+             widths={[180, 300, 420]} sizes="(max-width: 640px) 45vw, 200px"
+             quality={82} loading="lazy" />
+    ) : (
+      <span class="sk__initialer" aria-hidden="true">{initials(spiller.navn)}</span>
+    )}
     <span class="sk__nr num" aria-hidden="true">{spiller.rygnummer}</span>
   </div>
   <div class="sk__body">
     <h3>{spiller.navn}</h3>
     <p class="sk__pos">{spiller.position}</p>
-    <p class="sk__aar num">Årgang {spiller.foedselsaar}</p>
-    {sponsor && <p class="sk__sponsor">Sponsor: <span>{sponsor.navn}</span></p>}
+    {sponsor && <p class="sk__sponsor">{sponsor.navn}</p>}
   </div>
 </a>
 
 <style>
   .sk { height: 100%; }
+
+  /* Portraetterne er studiefotos paa hvid bund. Derfor er billedfeltet lyst —
+     ikke navy med et hvidt billede midt i. Navy ligger i teksten nedenunder. */
   .sk__foto {
     aspect-ratio: 3 / 4;
-    background: linear-gradient(168deg, var(--navy-600), var(--navy-800));
-    display: grid;
-    place-items: center;
+    background: linear-gradient(178deg, #FFFFFF 0%, #EEF0F7 100%);
     position: relative;
+    overflow: hidden;
+  }
+  .sk__foto :global(img) {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 12%;
+    transition: transform 0.35s ease;
+  }
+  a.card:hover .sk__foto :global(img) { transform: scale(1.035); }
+
+  .sk__foto--tom {
+    background: linear-gradient(168deg, var(--navy-600), var(--navy-800));
+    display: grid; place-items: center;
   }
   .sk__initialer {
-    font-family: var(--font-display);
-    font-size: 2.6rem;
-    font-weight: 700;
-    color: rgb(255 255 255 / 24%);
-    letter-spacing: 0.04em;
+    font-family: var(--font-display); font-size: 2.6rem; font-weight: 700;
+    color: rgb(255 255 255 / 24%); letter-spacing: 0.04em;
   }
+
   .sk__nr {
-    position: absolute;
-    left: 0.4rem;
-    bottom: 0.3rem;
-    font-family: var(--font-display);
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--orange);
-    line-height: 1;
+    position: absolute; left: 0; bottom: 0;
+    font-family: var(--font-display); font-size: 1.05rem; font-weight: 700;
+    color: #fff; background: var(--navy); line-height: 1;
+    padding: 0.22rem 0.42rem 0.26rem;
+    border-top-right-radius: 3px;
   }
+
   .sk__body {
-    padding: 0.6rem 0.7rem 0.8rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.12rem;
+    padding: 0.55rem 0.7rem 0.75rem;
+    display: flex; flex-direction: column; gap: 0.1rem;
+    border-top: 2px solid var(--orange);
   }
-  .sk__body h3 { font-size: 0.86rem; letter-spacing: 0.01em; }
-  .sk__pos { font-size: 0.78rem; color: var(--text-dim); }
-  .sk__aar { font-size: 0.72rem; color: var(--text-faint); }
+  .sk__body h3 { font-size: 0.84rem; letter-spacing: 0.01em; }
+  .sk__pos { font-size: 0.76rem; color: var(--text-dim); }
   .sk__sponsor {
-    margin-top: 0.3rem;
-    padding-top: 0.3rem;
+    margin-top: 0.28rem; padding-top: 0.28rem;
     border-top: 1px solid var(--line-soft);
-    font-size: 0.68rem;
-    color: var(--text-faint);
+    font-size: 0.66rem; color: var(--text-faint);
   }
-  .sk__sponsor span { color: var(--text-dim); font-weight: 600; }
 </style>

@@ -19,6 +19,8 @@ const nyheder = defineCollection({
     holdId: z.string().optional(),
     kilde: z.enum(['cms', 'instagram']).default('cms'),
     fremhaevet: z.boolean().default(false),
+    /** Nøgle til et af akademiets egne fotos i src/assets/fotos/ */
+    fotoKey: z.string().optional(),
   }),
 });
 

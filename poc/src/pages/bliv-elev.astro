@@ -1,12 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
+import { saeson, kr, foraeldreNettoBoende, foraeldreNettoHjemme } from '../data/saeson';
 
-/* Priserne er dem der staar paa m-tha.dk i dag. */
-const priser = [
-  { post: 'Ophold og forplejning', beloeb: 2495 },
-  { post: 'Akademi og uddannelse', beloeb: 3850 },
-];
-const total = priser.reduce((n, p) => n + p.beloeb, 0);
+/* Ingen beløb skrevet ind her — alt kommer fra saeson.ts */
+const p = saeson.priser;
 
 const trin = [
   { h: 'Send en ansøgning', p: 'Udfyld formularen herunder. Vi svarer inden for en uge.' },
@@ -14,18 +11,23 @@ const trin = [
   { h: 'Træn med', p: 'Du prøver en træning med den årgang, du skal gå på.' },
   { h: 'Kontrakt og indflytning', p: 'Kontrakten underskrives, og værelset står klar til august.' },
 ];
+
+const uddannelser = [
+  { navn: 'STX', sted: 'Morsø Gymnasium' },
+  { navn: 'HHX / EUX Business', sted: 'EUC Nordvest' },
+  { navn: 'HF', sted: 'HF Mors' },
+];
 ---
 
 <Base titel="Bliv elev"
-      beskrivelse="Sådan bliver du elev på Mors-Thy Håndbold Akademi: krav, priser, uddannelse og ansøgning.">
+      beskrivelse={`Sådan bliver du elev på Mors-Thy Håndbold Akademi: optagelse, uddannelse, bolig og priser for sæson ${saeson.navn}.`}>
   <div class="wrap">
     <header class="top">
-      <span class="eyebrow">Optagelse</span>
+      <span class="eyebrow">Optagelse · sæson {saeson.navn}</span>
       <h1>Bliv elev</h1>
       <p class="lead">
-        Denne side findes ikke på den nuværende hjemmeside. I dag skal en
-        forælder selv samle pris, uddannelse, bolig og kontakt fra fire steder
-        på én lang side.
+        Elitehåndbold og en ungdomsuddannelse, der hænger sammen. Her er hvad
+        det kræver, hvad det koster, og hvordan du søger.
       </p>
     </header>
 
@@ -44,22 +46,62 @@ const trin = [
     </section>
 
     <section class="section">
-      <div class="section__head"><h2>Pris</h2></div>
-      <div class="tblwrap">
-        <table>
-          <caption>Månedlig egenbetaling. Beløb som oplyst på m-tha.dk.</caption>
-          <thead><tr><th scope="col">Post</th><th scope="col" class="n">Pr. måned</th></tr></thead>
-          <tbody>
-            {priser.map((p) => (
-              <tr><td>{p.post}</td><td class="n num">{p.beloeb.toLocaleString('da-DK')} kr.</td></tr>
-            ))}
-            <tr class="tot">
-              <td>I alt</td>
-              <td class="n num">{total.toLocaleString('da-DK')} kr.</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="section__head"><h2>Uddannelse</h2></div>
+      <div class="grid grid--3">
+        {uddannelser.map((u) => (
+          <div class="card kort">
+            <h3>{u.navn}</h3>
+            <p>{u.sted}</p>
+          </div>
+        ))}
       </div>
+      <p class="note">
+        Skemaet koordineres med uddannelsesstedet, så træning og undervisning
+        går op i en højere enhed. Hvert sted har sin egen koordinator —
+        <a href="/staben">se staben</a>.
+      </p>
+    </section>
+
+    <section class="section">
+      <div class="section__head">
+        <h2>Pris</h2>
+        <a href="/bliv-elev/oekonomi">Hele regnestykket →</a>
+      </div>
+
+      <div class="valg">
+        <article class="card valg__i">
+          <h3>Bor på akademiet</h3>
+          <dl>
+            <div><dt>{p.opholdBoende.navn}</dt><dd class="num">{kr(p.opholdBoende.beloeb)}</dd></div>
+            <div><dt>{p.husleje.navn}</dt><dd class="num">{kr(p.husleje.beloeb)}</dd></div>
+            <div><dt>{p.forbrug.navn}</dt><dd class="num">{kr(p.forbrug.beloeb)}</dd></div>
+          </dl>
+          <footer>
+            <span>Forældrenes nettoudgift efter SU</span>
+            <strong class="num">{kr(foraeldreNettoBoende())}/md</strong>
+          </footer>
+        </article>
+
+        <article class="card valg__i">
+          <h3>Bor hjemme</h3>
+          <dl>
+            <div><dt>{p.hjemmeboende.navn}</dt><dd class="num">{kr(p.hjemmeboende.beloeb)}</dd></div>
+            <div><dt>Mad, vand og varme</dt><dd class="num">{kr(saeson.hjemmeEstimat.mad)}</dd></div>
+            <div><dt>Transport</dt><dd class="num">{kr(saeson.hjemmeEstimat.transport)}</dd></div>
+          </dl>
+          <footer>
+            <span>Forældrenes nettoudgift efter SU</span>
+            <strong class="num">{kr(foraeldreNettoHjemme())}/md</strong>
+          </footer>
+        </article>
+      </div>
+
+      <p class="note">
+        Beløbene er akademiets egne for sæson {saeson.navn} og står ét sted i
+        systemet — derfor er de ens her, på <a href="/bliv-elev/oekonomi">økonomisiden</a>
+        og på <a href="/bolig">boligsiden</a>. Se også de fire boligtyper med
+        reduceret indskud.
+      </p>
     </section>
 
     <section class="section">
@@ -82,9 +124,16 @@ const trin = [
           <label>Moderklub<input type="text" name="klub" /></label>
           <label>Ønsket uddannelse
             <select name="uddannelse">
-              <option>STX — Morsø Gymnasium</option>
-              <option>HHX — EUC Nordvest</option>
-              <option>HF — HF Mors</option>
+              {uddannelser.map((u) => <option>{u.navn} — {u.sted}</option>)}
+            </select>
+          </label>
+        </div>
+        <div class="ansoeg__rk">
+          <label>Bolig
+            <select name="bolig">
+              <option>Bor på akademiet</option>
+              <option>Bor hjemme</option>
+              <option>Ved ikke endnu</option>
             </select>
           </label>
         </div>
@@ -117,23 +166,42 @@ const trin = [
   .trin h3 { font-size: 1rem; }
   .trin p { color: var(--text-dim); font-size: 0.93rem; }
 
-  .tblwrap { overflow-x: auto; border: 1px solid var(--line-soft);
-             border-radius: var(--radius); }
-  table { border-collapse: collapse; width: 100%; min-width: 26rem; font-size: 0.94rem; }
-  caption { text-align: left; padding: 0.75rem 1rem; font-size: 0.8rem;
-            color: var(--text-faint); border-bottom: 1px solid var(--line-soft); }
-  th, td { text-align: left; padding: 0.62rem 1rem; border-bottom: 1px solid var(--line-soft); }
-  th { font-family: var(--font-display); text-transform: uppercase;
-       letter-spacing: 0.09em; font-size: 0.68rem; color: var(--text-dim);
-       background: var(--surface-2); }
-  td { color: var(--text-dim); }
-  td:first-child { color: var(--text); }
-  .n { text-align: right; white-space: nowrap; }
-  tr.tot td { background: var(--surface-2); color: var(--text); font-weight: 700; }
-  tbody tr:last-child td { border-bottom: 0; }
+  .kort { padding: 1.1rem 1.2rem; gap: 0.3rem; }
+  .kort h3 { font-size: 1rem; }
+  .kort p { font-size: 0.9rem; color: var(--text-dim); }
 
-  .ansoeg { display: flex; flex-direction: column; gap: 0.85rem;
-            max-width: 46rem; }
+  .valg { display: grid; gap: 1.1rem;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); }
+  .valg__i { padding: 0; }
+  .valg__i h3 {
+    font-size: 1.1rem; padding: 1rem 1.2rem 0.8rem;
+    background: var(--surface-2); border-bottom: 1px solid var(--line-soft);
+  }
+  .valg__i dl { margin: 0; padding: 0.4rem 1.2rem 0.8rem; flex: 1; }
+  .valg__i dl > div {
+    display: flex; justify-content: space-between; gap: 1rem;
+    padding: 0.42rem 0; border-bottom: 1px solid var(--line-soft);
+  }
+  .valg__i dt { font-size: 0.92rem; color: var(--text-dim); }
+  .valg__i dd { margin: 0; font-weight: 650; white-space: nowrap; }
+  .valg__i footer {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 0.8rem;
+    padding: 0.85rem 1.2rem 1rem;
+    border-top: 2px solid var(--orange); background: var(--orange-100);
+  }
+  .valg__i footer span {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.09em; font-size: 0.66rem; font-weight: 600;
+  }
+  .valg__i footer strong {
+    font-family: var(--font-display); font-size: 1.5rem; font-weight: 700;
+    line-height: 1; margin-left: auto;
+  }
+
+  .note { font-size: 0.85rem; color: var(--text-faint); margin-top: 1rem;
+          max-width: 70ch; }
+
+  .ansoeg { display: flex; flex-direction: column; gap: 0.85rem; max-width: 46rem; }
   .ansoeg__note {
     font-size: 0.84rem; color: var(--text-faint);
     border-left: 3px solid var(--orange); padding-left: 0.7rem;
@@ -143,8 +211,7 @@ const trin = [
   .ansoeg label {
     display: flex; flex-direction: column; gap: 0.28rem;
     font-family: var(--font-display); text-transform: uppercase;
-    letter-spacing: 0.1em; font-size: 0.66rem; font-weight: 600;
-    color: var(--text-faint);
+    letter-spacing: 0.1em; font-size: 0.66rem; font-weight: 600; color: var(--text-faint);
   }
   .ansoeg input, .ansoeg select, .ansoeg textarea {
     font-family: var(--font-body); font-size: 0.95rem; color: var(--text);

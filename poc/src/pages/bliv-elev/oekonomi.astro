@@ -1,0 +1,211 @@
+---
+import Base from '../../layouts/Base.astro';
+import {
+  SÆSON, scenarier, nettoFor, konklusion, fordele, suBetingelser,
+} from '../../data/oekonomi';
+
+const kr = (n: number) => `${n.toLocaleString('da-DK')} kr.`;
+---
+
+<Base titel="Økonomi — hvad koster det"
+      beskrivelse="Hvad koster det at gå på Mors-Thy Håndbold Akademi? Priser, SU-satser og to regneeksempler: bor hjemme eller bor på akademiet.">
+  <div class="wrap">
+    <nav class="krumme" aria-label="Sti">
+      <a href="/">Forside</a> <span>/</span>
+      <a href="/bliv-elev">Bliv elev</a> <span>/</span> <span>Økonomi</span>
+    </nav>
+
+    <header class="top">
+      <span class="eyebrow">Sæson {SÆSON}</span>
+      <h1>Hvad koster det?</h1>
+      <p class="lead">
+        Det spørgsmål stiller alle forældre først. Her er de to regnestykker
+        stillet op ved siden af hinanden — med SU og indirekte udgifter regnet
+        med, så tallene kan sammenlignes.
+      </p>
+    </header>
+
+    <section class="section">
+      <div class="scenarier">
+        {scenarier.map((s) => {
+          const netto = nettoFor(s);
+          const udgift = s.udgifter.reduce((n, p) => n + p.beloeb, 0);
+          const indt = s.indtaegter.reduce((n, p) => n + p.beloeb, 0);
+          return (
+            <article class="card sc">
+              <header class="sc__top">
+                <h2>{s.navn}</h2>
+                <p>{s.beskrivelse}</p>
+              </header>
+
+              <dl class="sc__poster">
+                <dt class="sc__gruppe">Udgifter</dt>
+                {s.udgifter.map((p) => (
+                  <div class="sc__linje">
+                    <dd class="sc__navn">{p.navn}{p.note && <em>{p.note}</em>}</dd>
+                    <dd class="sc__tal num">−{kr(p.beloeb)}</dd>
+                  </div>
+                ))}
+
+                <dt class="sc__gruppe">Indtægter</dt>
+                {s.indtaegter.map((p) => (
+                  <div class="sc__linje">
+                    <dd class="sc__navn">{p.navn}{p.note && <em>{p.note}</em>}</dd>
+                    <dd class="sc__tal sc__tal--plus num">+{kr(p.beloeb)}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <footer class="sc__netto">
+                <span>Nettoudgift pr. måned</span>
+                <strong class="num">{kr(netto)}</strong>
+                <small class="num">{kr(udgift)} ud · {kr(indt)} ind</small>
+              </footer>
+            </article>
+          );
+        })}
+      </div>
+
+      <p class="afvigelse">
+        <strong>Bemærk:</strong> forsiden på m-tha.dk oplyser 2.495 kr./md for
+        ophold, mens brochuren skriver 2.395 kr./md for samme post. Vi bruger
+        brochurens tal her. Netop den slags dobbelte vedligehold er grunden til
+        at priser bør stå ét sted — så kan de kun være rigtige.
+      </p>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Konklusionen fra brochuren</h2></div>
+      <div class="prose">
+        {konklusion.map((k) => <p>{k}</p>)}
+      </div>
+      <ul class="fordele">
+        {fordele.map((f) => <li>{f}</li>)}
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Udeboende SU — betingelser</h2></div>
+      <p class="lead">
+        For at blive godkendt til udeboende-satsen som 18- eller 19-årig skal du
+        være udeboende og opfylde mindst én af disse betingelser:
+      </p>
+      <ul class="betingelser">
+        {suBetingelser.map((b) => <li>{b}</li>)}
+      </ul>
+      <p class="note">
+        Satser og regler fastsættes af Uddannelses- og Forskningsministeriet og
+        ændres årligt. Tallene her er sæson {SÆSON} som oplyst i akademiets
+        brochure — tjek altid de aktuelle satser på su.dk.
+      </p>
+    </section>
+
+    <section class="section">
+      <div class="card cta">
+        <h2>Spørgsmål til økonomien?</h2>
+        <p>
+          Ring til daglig leder Lars Svane Nielsen, eller send en ansøgning og
+          få en snak om hvad der passer i jeres situation.
+        </p>
+        <div class="cta__btns">
+          <a href="tel:+4530624304" class="btn btn--primary">30 62 43 04</a>
+          <a href="/bliv-elev" class="btn btn--ghost">Til ansøgning</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .krumme { display: flex; flex-wrap: wrap; gap: 0.4rem; padding-top: 1rem;
+            font-size: 0.8rem; color: var(--text-faint); }
+  .krumme a { color: var(--text-dim); text-decoration: none; }
+  .krumme a:hover { text-decoration: underline; }
+
+  .top { display: flex; flex-direction: column; gap: 0.5rem;
+         padding-block: 1.4rem 1.1rem; border-bottom: 2px solid var(--navy); }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+
+  /* To regnestykker side om side — det er en sammenligning, ikke en liste */
+  .scenarier {
+    display: grid; gap: 1.1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  }
+  .sc { padding: 0; }
+  .sc__top {
+    padding: 1.1rem 1.2rem 0.9rem;
+    border-bottom: 1px solid var(--line-soft);
+    background: var(--surface-2);
+  }
+  .sc__top h2 { font-size: 1.15rem; }
+  .sc__top p { font-size: 0.88rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+  .sc__poster { margin: 0; padding: 0.6rem 1.2rem 0.9rem; flex: 1; }
+  .sc__gruppe {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 0.62rem; font-weight: 600;
+    color: var(--text-faint);
+    margin-top: 0.7rem; padding-bottom: 0.25rem;
+  }
+  .sc__linje {
+    display: flex; align-items: baseline; gap: 0.9rem;
+    justify-content: space-between;
+    padding: 0.42rem 0; border-bottom: 1px solid var(--line-soft);
+  }
+  .sc__navn { margin: 0; font-size: 0.92rem; display: flex; flex-direction: column; }
+  .sc__navn em {
+    font-style: normal; font-size: 0.74rem; color: var(--text-faint);
+    margin-top: 0.12rem;
+  }
+  .sc__tal {
+    margin: 0; font-weight: 650; white-space: nowrap;
+    font-size: 0.94rem; color: var(--text);
+  }
+  .sc__tal--plus { color: var(--good); }
+
+  .sc__netto {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 0.8rem;
+    padding: 0.9rem 1.2rem 1.05rem;
+    border-top: 2px solid var(--orange);
+    background: var(--orange-100);
+  }
+  .sc__netto span {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.1em; font-size: 0.68rem; font-weight: 600;
+  }
+  .sc__netto strong {
+    font-family: var(--font-display); font-size: 1.75rem; font-weight: 700;
+    line-height: 1; margin-left: auto;
+  }
+  .sc__netto small { width: 100%; font-size: 0.74rem; color: var(--text-faint); }
+
+  .afvigelse {
+    margin-top: 1.2rem; font-size: 0.88rem; color: var(--text-dim);
+    border-left: 3px solid var(--orange); padding: 0.3rem 0 0.3rem 0.8rem;
+    max-width: 72ch;
+  }
+  .afvigelse strong { color: var(--text); }
+
+  .fordele, .betingelser {
+    margin: 1rem 0 0; padding: 0; list-style: none;
+    display: flex; flex-direction: column; gap: 0.4rem;
+    max-width: 70ch;
+  }
+  .fordele li, .betingelser li {
+    padding-left: 1.4rem; position: relative; color: var(--text-dim);
+    font-size: 0.94rem;
+  }
+  .fordele li::before, .betingelser li::before {
+    content: ''; position: absolute; left: 0; top: 0.6em;
+    width: 7px; height: 7px; border-radius: 50%; background: var(--orange);
+  }
+
+  .note { font-size: 0.82rem; color: var(--text-faint); margin-top: 1rem;
+          max-width: 68ch; }
+
+  .cta { padding: 1.6rem 1.7rem; gap: 0.6rem; align-items: flex-start;
+         background: var(--surface-2); }
+  .cta h2 { font-size: 1.3rem; }
+  .cta p { color: var(--text-dim); max-width: 56ch; }
+  .cta__btns { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.4rem; }
+</style>

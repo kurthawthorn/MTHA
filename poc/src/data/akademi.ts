@@ -1,18 +1,22 @@
 /**
  * POC-datalag.
  *
- * Formen her er identisk med Sanity-skemaet i forslaget, saa etape 2 er et
- * skift af datakilde og ikke en omskrivning: `getSpillere()` gaar fra at laese
- * denne fil til at kalde Sanity. Siderne aendres ikke.
+ * Formen er identisk med Sanity-skemaet i forslaget, saa etape 2 er et skift
+ * af datakilde og ikke en omskrivning: `truppen()` gaar fra at laese denne fil
+ * til at kalde Sanity, og siderne aendres ikke.
  *
  * DATAKILDE
- *   Navne og aargange er offentlige oplysninger fra m-tha.dk.
- *   Position, rygnummer, moderklub, uddannelse og personlig sponsor er
- *   EKSEMPELDATA, indsat for at vise felterne. De erstattes af akademiets
- *   egne oplysninger.
+ *   roster.json er udtrukket maskinelt fra m-tha.dk og indeholder de
+ *   OFFENTLIGE oplysninger: navn, aargang, stabens roller, sponsornavne — samt
+ *   noeglen til det tilhoerende billede.
+ *
+ *   Position, rygnummer, foedselsaar, moderklub, uddannelse og personlig
+ *   sponsor er EKSEMPELDATA, indsat for at vise felterne. De skal erstattes af
+ *   akademiets egne oplysninger.
  */
 
-import { slugify } from '../lib/slug';
+import roster from './roster.json';
+import { saeson } from './saeson';
 
 export type Position =
   | 'Målvogter' | 'Venstre fløj' | 'Venstre back'
@@ -24,9 +28,9 @@ export interface Sponsor {
   id: string;
   navn: string;
   niveau: SponsorNiveau;
+  /** Nøgle til logofilen i src/assets/logoer/ */
+  logoKey?: string;
   url?: string;
-  /** Logo i /public/brand — kun hovedsponsoren har en rigtig fil i POC'en. */
-  logo?: string;
 }
 
 export interface Hold {
@@ -34,12 +38,17 @@ export interface Hold {
   navn: string;
   aargang: string;
   raekke: string;
-  traener: string;
+  traener?: string;
+  /** Nøgle til holdfoto */
+  fotoKey: string;
 }
 
 export interface Spiller {
   navn: string;
+  slug: string;
   holdId: string;
+  /** Nøgle til portrættet i src/assets/portraetter/ */
+  fotoKey: string;
   rygnummer: number;
   position: Position;
   foedselsaar: number;
@@ -49,34 +58,50 @@ export interface Spiller {
   aktiv: boolean;
 }
 
+export interface Person {
+  navn: string;
+  slug: string;
+  rolle: string;
+  fotoKey: string;
+  gruppe: 'ledelse' | 'traener' | 'sundhed' | 'uddannelse' | 'bestyrelse';
+}
+
+const slugFraKey = (key: string) => key.replace(/^(spiller|person|logo)-/, '');
+
 /* ── Sponsorer ─────────────────────────────────────────────────────────── */
 
+/** Thisted Forsikring har sit eget udskilte logo — se assets/brand/. */
+const HOVEDSPONSOR: Sponsor = {
+  id: 'thisted-forsikring',
+  navn: 'Thisted Forsikring',
+  niveau: 'hovedsponsor',
+  url: 'https://thistedforsikring.dk',
+};
+
 export const sponsorer: Sponsor[] = [
-  { id: 'thisted-forsikring', navn: 'Thisted Forsikring', niveau: 'hovedsponsor',
-    url: 'https://thistedforsikring.dk', logo: '/brand/thisted-forsikring.png' },
-  { id: 'jyske-bank',    navn: 'Jyske Bank',         niveau: 'topsponsor' },
-  { id: 'jysk-elteknik', navn: 'Jysk Elteknik',      niveau: 'topsponsor' },
-  { id: 'mth-biler',     navn: 'MTH Biler — Toyota', niveau: 'topsponsor' },
-  { id: 'beierholm',     navn: 'Beierholm',          niveau: 'sponsor' },
-  { id: 'davidsen',      navn: 'Davidsen',           niveau: 'sponsor' },
-  { id: 'dencker',       navn: 'Dencker',            niveau: 'sponsor' },
-  { id: 'ejner-hessel',  navn: 'Ejner Hessel',       niveau: 'sponsor' },
-  { id: 'jesperhus',     navn: 'Jesperhus',          niveau: 'sponsor' },
-  { id: 'arena-mors',    navn: 'Arena Mors Fitness', niveau: 'sponsor' },
-  { id: 'thy-mors',      navn: 'Thy-Mors Energi',    niveau: 'sponsor' },
-  { id: 'br-energy',     navn: 'BR Energy',          niveau: 'sponsor' },
-  { id: 'redoffice',     navn: 'RedOffice',          niveau: 'sponsor' },
-  { id: 'altibox',       navn: 'Altibox',            niveau: 'sponsor' },
+  HOVEDSPONSOR,
+  ...roster.sponsorer.map((s) => ({
+    id: slugFraKey(s.key),
+    navn: s.navn,
+    niveau: s.niveau as SponsorNiveau,
+    logoKey: s.key,
+  })),
 ];
 
 /* ── Hold ──────────────────────────────────────────────────────────────── */
 
-export const hold: Hold[] = [
-  { id: 'u17', navn: 'U17 Drenge', aargang: '2008–2009',
-    raekke: 'U17 Liga', traener: 'Udfyldes af akademiet' },
-  { id: 'u19', navn: 'U19 Drenge', aargang: '2006–2007',
-    raekke: 'U19 Liga', traener: 'Udfyldes af akademiet' },
-];
+/** Holdene kommer fra sæsonen — ingen årstal skrevet ind her. */
+const TRAENER: Record<string, string> = { u17: 'Rune Lanng', u19: 'Henrik Tilsted' };
+const HOLDFOTO: Record<string, string> = { u17: 'hold-samlet', u19: 'hold-udenfor' };
+
+export const hold: Hold[] = saeson.hold.map((h) => ({
+  id: h.id,
+  navn: h.navn,
+  aargang: h.aargang,
+  raekke: h.raekke,
+  traener: TRAENER[h.id],
+  fotoKey: HOLDFOTO[h.id] ?? 'hold-samlet',
+}));
 
 /* ── Spillere ──────────────────────────────────────────────────────────── */
 
@@ -87,50 +112,66 @@ const POS: Position[] = [
 const KLUBBER = ['Thisted IK', 'Mors-Thy Håndbold', 'Skive fH', 'Nykøbing Mors IF',
                  'Hurup IF', 'Sydthy HK', 'Struer HK'];
 const UDD = ['STX', 'HHX', 'HF'] as const;
+const AARGANG: Record<string, number[]> = Object.fromEntries(
+  saeson.hold.map((h) => [h.id, h.foedselsaar]),
+);
 
-/** Navne hentet fra m-tha.dk. Oevrige felter er eksempeldata. */
-const NAVNE_U17 = [
-  'Gustav Tandrup', 'Joakim Lindum', 'Jonas Thomsen', 'Ludvig Bruun Sørensen',
-  'Marcus Bundgaard', 'Lucas Kjær Krintel', 'Jonathan Rokkjær',
-  'Rasmus Lang Havemann', 'Gustav Bro Petersen', 'Jeppe Knudsen',
-  'Hjalte Trangbæk Jørgensen', 'Anton Lund Gregersen', 'Anton Sunesen',
-  'Alexander Hamper', 'Christian Lyng Andersen', 'Oliver Mors',
-];
-const NAVNE_U19 = [
-  'Christian Guldhammer Højbak', 'Anders Hove', 'Christoffer Cichosz',
-  'Jesper Corneliussen', 'Mathias Bak', 'Emil Overgaard', 'Noah Riis',
-  'Silas Bjerre', 'Villads Kirk', 'Magnus Dahl', 'Sander Holm',
-  'Frederik Bach', 'Oscar Lindholm', 'Thor Mikkelsen',
-];
+const personligeSponsorer = roster.sponsorer
+  .filter((s) => s.niveau === 'sponsor')
+  .map((s) => slugFraKey(s.key));
 
-function build(navne: string[], holdId: string, aar: number[]): Spiller[] {
-  return navne.map((navn, i) => ({
-    navn,
-    holdId,
-    rygnummer: i + 1,
-    position: POS[i % POS.length],
-    foedselsaar: aar[i % aar.length],
-    moderklub: KLUBBER[i % KLUBBER.length],
-    uddannelse: UDD[i % UDD.length],
-    // Hver 3. spiller har en personlig sponsor — som i dag paa m-tha.dk
-    sponsorId: i % 3 === 0 ? sponsorer[(i % 10) + 4]?.id : undefined,
-    aktiv: true,
-  }));
+export const spillere: Spiller[] = roster.spillere.map((s, i) => ({
+  navn: s.navn,
+  slug: slugFraKey(s.key),
+  holdId: s.hold,
+  fotoKey: s.key,
+  // ── herfra: eksempeldata ──
+  rygnummer: (i % 30) + 1,
+  position: POS[i % POS.length]!,
+  foedselsaar: AARGANG[s.hold]![i % 2]!,
+  moderklub: KLUBBER[i % KLUBBER.length]!,
+  uddannelse: UDD[i % UDD.length]!,
+  // Hver 3. spiller har en personlig sponsor — som i dag på m-tha.dk
+  sponsorId: i % 3 === 0 ? personligeSponsorer[i % personligeSponsorer.length] : undefined,
+  aktiv: true,
+}));
+
+/* ── Professionelle og bestyrelse ──────────────────────────────────────── */
+
+function gruppeFor(rolle: string): Person['gruppe'] {
+  const r = rolle.toLowerCase();
+  if (r.includes('daglig leder')) return 'ledelse';
+  if (r.includes('træner') || r.includes('træningsansvarlig')) return 'traener';
+  if (r.includes('fysio') || r.includes('diætist') || r.includes('mental')) return 'sundhed';
+  if (r.includes('koordinator')) return 'uddannelse';
+  return 'bestyrelse';
 }
 
-export const spillere: Spiller[] = [
-  ...build(NAVNE_U17, 'u17', [2008, 2009]),
-  ...build(NAVNE_U19, 'u19', [2006, 2007]),
-];
+export const personer: Person[] = roster.stab.map((p) => ({
+  navn: p.navn,
+  slug: slugFraKey(p.key),
+  rolle: p.rolle,
+  fotoKey: p.key,
+  gruppe: gruppeFor(p.rolle),
+}));
+
+export const GRUPPE_NAVNE: Record<Person['gruppe'], string> = {
+  ledelse: 'Daglig ledelse',
+  traener: 'Trænerteam',
+  sundhed: 'Sundhed og fysik',
+  uddannelse: 'Uddannelseskoordinatorer',
+  bestyrelse: 'Bestyrelse og øvrige',
+};
 
 /* ── Opslag ────────────────────────────────────────────────────────────── */
 
-export const spillerSlug = (s: Spiller) => slugify(s.navn);
 export const getHold = (id: string) => hold.find((h) => h.id === id);
 export const getSponsor = (id?: string) =>
   id ? sponsorer.find((s) => s.id === id) : undefined;
 export const truppen = (holdId: string) =>
   spillere.filter((s) => s.holdId === holdId && s.aktiv)
           .sort((a, b) => a.rygnummer - b.rygnummer);
-export const hovedsponsor = () =>
-  sponsorer.find((s) => s.niveau === 'hovedsponsor')!;
+export const hovedsponsor = () => HOVEDSPONSOR;
+export const iGruppe = (g: Person['gruppe']) => personer.filter((p) => p.gruppe === g);
+export const sponsorerPaaNiveau = (n: SponsorNiveau) =>
+  sponsorer.filter((s) => s.niveau === n);

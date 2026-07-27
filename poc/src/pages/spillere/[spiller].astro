@@ -1,16 +1,20 @@
 ---
 import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
-import { spillere, getHold, getSponsor, spillerSlug } from '../../data/akademi';
+import SponsorLogo from '../../components/SponsorLogo.astro';
+import { spillere, getHold, getSponsor } from '../../data/akademi';
+import { billede } from '../../lib/billeder';
 import { initials } from '../../lib/slug';
 
 export const getStaticPaths = (() =>
-  spillere.map((s) => ({ params: { spiller: spillerSlug(s) }, props: { s } }))
+  spillere.map((s) => ({ params: { spiller: s.slug }, props: { s } }))
 ) satisfies GetStaticPaths;
 
 const { s } = Astro.props;
 const h = getHold(s.holdId);
 const sponsor = getSponsor(s.sponsorId);
+const foto = billede(s.fotoKey);
 ---
 
 <Base titel={s.navn}
@@ -18,13 +22,18 @@ const sponsor = getSponsor(s.sponsorId);
   <div class="wrap">
     <nav class="krumme" aria-label="Sti">
       <a href="/">Forside</a> <span>/</span>
-      <a href={`/hold/${s.holdId}`}>{h?.navn}</a> <span>/</span>
+      <a href={`/hold/${s.holdId}`}>{h?.navn} {h?.aargang}</a> <span>/</span>
       <span>{s.navn}</span>
     </nav>
 
     <article class="profil">
-      <div class="profil__foto">
-        <span class="profil__init" aria-hidden="true">{initials(s.navn)}</span>
+      <div class:list={['profil__foto', !foto && 'profil__foto--tom']}>
+        {foto ? (
+          <Image src={foto} alt={s.navn} widths={[320, 520, 600]}
+                 sizes="(max-width: 760px) 70vw, 300px" quality={86} loading="eager" />
+        ) : (
+          <span class="profil__init" aria-hidden="true">{initials(s.navn)}</span>
+        )}
         <span class="profil__nr num" aria-hidden="true">{s.rygnummer}</span>
       </div>
 
@@ -42,19 +51,23 @@ const sponsor = getSponsor(s.sponsorId);
 
         {sponsor && (
           <aside class="sponsorboks">
-            <span class="eyebrow">Personlig sponsor</span>
-            <strong>{sponsor.navn}</strong>
-            <p>
-              Sponsoren er en henvisning til sponsorregistret. Skifter de navn
-              eller logo, opdateres det ét sted og slår igennem på alle de
-              spillere de støtter — og i sidefoden.
-            </p>
+            <div class="sponsorboks__txt">
+              <span class="eyebrow">Personlig sponsor</span>
+              <strong>{sponsor.navn}</strong>
+              <p>
+                Logoet hentes fra sponsorregistret. Skifter sponsoren navn eller
+                logo, opdateres det ét sted og slår igennem på alle de spillere
+                de støtter — og i sidefoden.
+              </p>
+            </div>
+            <SponsorLogo sponsor={sponsor} hoejde={46} />
           </aside>
         )}
 
         <p class="demo">
-          Position, rygnummer, moderklub, uddannelse og sponsor er eksempeldata
-          i denne prototype. Navn og årgang er offentlige oplysninger fra m-tha.dk.
+          Navn, årgang og portræt er hentet fra m-tha.dk. Position, rygnummer,
+          moderklub, uddannelse og personlig sponsor er eksempeldata i denne
+          prototype.
         </p>
 
         <a href={`/hold/${s.holdId}`} class="btn btn--ghost">← Hele truppen</a>
@@ -73,23 +86,32 @@ const sponsor = getSponsor(s.sponsorId);
     display: grid; gap: 1.8rem; padding-block: 1.6rem 1rem;
     grid-template-columns: minmax(0, 1fr);
   }
-  @media (min-width: 760px) { .profil { grid-template-columns: 17rem minmax(0, 1fr); } }
+  @media (min-width: 760px) { .profil { grid-template-columns: 19rem minmax(0, 1fr); } }
 
   .profil__foto {
-    aspect-ratio: 3 / 4;
-    background: linear-gradient(168deg, var(--navy-600), var(--navy-900));
+    aspect-ratio: 3 / 4; position: relative; overflow: hidden;
     border-radius: var(--radius);
-    display: grid; place-items: center; position: relative;
-    max-width: 17rem;
+    border: 1px solid var(--line-soft);
+    background: linear-gradient(178deg, #FFFFFF 0%, #EBEDF6 100%);
+    max-width: 19rem;
+  }
+  .profil__foto :global(img) {
+    width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%;
+  }
+  .profil__foto--tom {
+    display: grid; place-items: center;
+    background: linear-gradient(168deg, var(--navy-600), var(--navy-900));
   }
   .profil__init {
     font-family: var(--font-display); font-size: 5rem; font-weight: 700;
     color: rgb(255 255 255 / 22%); letter-spacing: 0.04em;
   }
   .profil__nr {
-    position: absolute; left: 0.8rem; bottom: 0.5rem;
-    font-family: var(--font-display); font-size: 3rem; font-weight: 700;
-    color: var(--orange); line-height: 1;
+    position: absolute; left: 0; bottom: 0;
+    font-family: var(--font-display); font-size: 2.1rem; font-weight: 700;
+    color: #fff; background: var(--navy); line-height: 1;
+    padding: 0.3rem 0.6rem 0.36rem;
+    border-top-right-radius: 4px;
   }
 
   .profil__info { display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-start; }
@@ -107,8 +129,7 @@ const sponsor = getSponsor(s.sponsorId);
                  display: flex; flex-direction: column; gap: 0.1rem; }
   .fakta dt {
     font-family: var(--font-display); text-transform: uppercase;
-    letter-spacing: 0.12em; font-size: 0.62rem; font-weight: 600;
-    color: var(--text-faint);
+    letter-spacing: 0.12em; font-size: 0.62rem; font-weight: 600; color: var(--text-faint);
   }
   .fakta dd { margin: 0; font-weight: 600; font-size: 0.95rem; }
 
@@ -118,12 +139,15 @@ const sponsor = getSponsor(s.sponsorId);
     border: 1px solid var(--line-soft);
     border-left: 3px solid var(--orange);
     border-radius: var(--radius);
-    padding: 0.85rem 1rem;
-    display: flex; flex-direction: column; gap: 0.25rem;
+    padding: 0.9rem 1rem;
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    align-items: center; justify-content: space-between;
   }
+  .sponsorboks__txt { display: flex; flex-direction: column; gap: 0.22rem;
+                      flex: 1 1 15rem; }
   .sponsorboks strong { font-family: var(--font-display); font-size: 1.15rem;
                         text-transform: uppercase; letter-spacing: 0.02em; }
   .sponsorboks p { font-size: 0.85rem; color: var(--text-dim); }
 
-  .demo { font-size: 0.8rem; color: var(--text-faint); max-width: 60ch; }
+  .demo { font-size: 0.8rem; color: var(--text-faint); max-width: 62ch; }
 </style>

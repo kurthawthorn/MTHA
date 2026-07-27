@@ -1,52 +1,58 @@
 ---
 import Base from '../layouts/Base.astro';
-import { sponsorer, spillere, getSponsor } from '../data/akademi';
+import SponsorLogo from '../components/SponsorLogo.astro';
+import { sponsorerPaaNiveau, hovedsponsor, spillere, getSponsor } from '../data/akademi';
 
-const hoved = sponsorer.filter((s) => s.niveau === 'hovedsponsor');
-const top = sponsorer.filter((s) => s.niveau === 'topsponsor');
-const oevrige = sponsorer.filter((s) => s.niveau === 'sponsor');
+const hoved = hovedsponsor();
+const top = sponsorerPaaNiveau('topsponsor');
+const oevrige = sponsorerPaaNiveau('sponsor');
 
-// Antal spillere pr. personlig sponsor — udregnet, ikke vedligeholdt i haanden
+// Optalt automatisk ud fra spillerprofilerne — ikke vedligeholdt i hånden
 const personlige = new Map<string, number>();
 for (const s of spillere) {
   if (s.sponsorId) personlige.set(s.sponsorId, (personlige.get(s.sponsorId) ?? 0) + 1);
 }
+const medPersonlige = [...personlige.entries()]
+  .map(([id, antal]) => ({ sponsor: getSponsor(id)!, antal }))
+  .filter((x) => x.sponsor)
+  .sort((a, b) => b.antal - a.antal);
 ---
 
 <Base titel="Sponsorer"
-      beskrivelse="Mors-Thy Håndbold Akademi støttes af Thisted Forsikring og over 50 lokale virksomheder.">
+      beskrivelse="Mors-Thy Håndbold Akademi støttes af Thisted Forsikring og over 40 lokale virksomheder.">
   <div class="wrap">
     <header class="top">
       <span class="eyebrow">Uden dem, intet akademi</span>
       <h1>Sponsorer</h1>
       <p class="lead">
-        Alle sponsorer ligger i ét register. Et logo uploades én gang og vises
-        automatisk her, i sidefoden og på de spillerkort, sponsoren støtter.
+        Alle {top.length + oevrige.length + 1} sponsorer ligger i ét register.
+        Et logo uploades én gang og vises automatisk her, i sidefoden og på de
+        spillerkort sponsoren støtter.
       </p>
     </header>
 
     <section class="section">
       <div class="section__head"><h2>Hovedsponsor</h2></div>
-      {hoved.map((s) => (
-        <a class="card hoved" href={s.url} rel="noopener" target="_blank">
-          <img src={s.logo} alt={s.navn} width="314" height="173" />
-          <div>
-            <h3>{s.navn}</h3>
-            <p>Hovedsponsor for Mors-Thy Håndbold Akademi.</p>
-          </div>
-        </a>
-      ))}
+      <a class="card hoved" href={hoved.url} rel="noopener" target="_blank">
+        <img src="/brand/thisted-forsikring.png" alt={hoved.navn}
+             width="314" height="173" />
+        <div>
+          <h3>{hoved.navn}</h3>
+          <p>
+            Hovedsponsor for Mors-Thy Håndbold Akademi. Logoet er skilt ud fra
+            akademiets eget mærke, så de to kan bruges hver for sig.
+          </p>
+        </div>
+      </a>
     </section>
 
     <section class="section">
-      <div class="section__head"><h2>Topsponsorer</h2></div>
-      <div class="grid grid--3">
-        {top.map((s) => (
-          <div class="card niveau">
-            <h3>{s.navn}</h3>
-            <span class="pill pill--orange">Topsponsor</span>
-          </div>
-        ))}
+      <div class="section__head">
+        <h2>Topsponsorer</h2>
+        <span class="antal num">{top.length}</span>
+      </div>
+      <div class="logogrid logogrid--stor">
+        {top.map((s) => <SponsorLogo sponsor={s} hoejde={60} />)}
       </div>
     </section>
 
@@ -55,22 +61,33 @@ for (const s of spillere) {
         <h2>Sponsorer</h2>
         <span class="antal num">{oevrige.length} virksomheder</span>
       </div>
-      <ul class="liste">
-        {oevrige.map((s) => {
-          const antal = personlige.get(s.id);
-          return (
-            <li>
-              <span>{s.navn}</span>
-              {antal && <em class="num">personlig sponsor for {antal} spillere</em>}
-            </li>
-          );
-        })}
-      </ul>
+      <div class="logogrid">
+        {oevrige.map((s) => <SponsorLogo sponsor={s} hoejde={46} />)}
+      </div>
       <p class="note">
-        Tallene til højre er talt op automatisk ud fra spillernes profiler —
-        de skal ikke vedligeholdes i hånden.
+        Logoerne er akademiets egne filer fra m-tha.dk. De kommer i vidt
+        forskellige formater — nogle med transparent baggrund, nogle på hvid —
+        så de står alle på en plade med samme højde, for at rækken bliver rolig.
       </p>
     </section>
+
+    {medPersonlige.length > 0 && (
+      <section class="section">
+        <div class="section__head"><h2>Personlige spillersponsorer</h2></div>
+        <ul class="liste">
+          {medPersonlige.map(({ sponsor, antal }) => (
+            <li>
+              <span>{sponsor.navn}</span>
+              <em class="num">støtter {antal} {antal === 1 ? 'spiller' : 'spillere'}</em>
+            </li>
+          ))}
+        </ul>
+        <p class="note">
+          Tallene er talt op automatisk ud fra spillernes profiler. Fordelingen
+          her er eksempeldata — de rigtige sammenhænge indtaster akademiet selv.
+        </p>
+      </section>
+    )}
 
     <section class="section">
       <div class="card cta">
@@ -89,20 +106,24 @@ for (const s of spillere) {
   .top { display: flex; flex-direction: column; gap: 0.5rem;
          padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
   .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+  .antal { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-faint); }
 
   .hoved {
     flex-direction: row; align-items: center; gap: 1.4rem;
-    padding: 1.3rem 1.5rem; flex-wrap: wrap;
+    padding: 1.3rem 1.5rem; flex-wrap: wrap; text-decoration: none; color: inherit;
   }
-  .hoved img { width: auto; height: 74px; background: #fff;
+  .hoved img { width: auto; height: 76px; background: #fff;
                border-radius: var(--radius); padding: 0.3rem 0.5rem; }
-  .hoved h3 { font-size: 1.25rem; }
-  .hoved p { color: var(--text-dim); font-size: 0.92rem; }
+  .hoved h3 { font-size: 1.3rem; }
+  .hoved p { color: var(--text-dim); font-size: 0.92rem; max-width: 46ch; }
 
-  .niveau { padding: 1.1rem 1.2rem; gap: 0.5rem; align-items: flex-start; }
-  .niveau h3 { font-size: 1.05rem; }
-
-  .antal { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-faint); }
+  .logogrid {
+    display: grid; gap: 0.6rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 132px), 1fr));
+  }
+  .logogrid--stor {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr));
+  }
 
   .liste { list-style: none; margin: 0; padding: 0;
            border-top: 1px solid var(--line-soft); }
@@ -113,7 +134,9 @@ for (const s of spillere) {
   }
   .liste span { font-weight: 600; }
   .liste em { font-style: normal; font-size: 0.8rem; color: var(--text-faint); }
-  .note { font-size: 0.82rem; color: var(--text-faint); margin-top: 0.8rem; }
+
+  .note { font-size: 0.82rem; color: var(--text-faint); margin-top: 0.9rem;
+          max-width: 66ch; }
 
   .cta { padding: 1.6rem 1.7rem; gap: 0.6rem; align-items: flex-start;
          background: var(--surface-2); }

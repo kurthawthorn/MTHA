@@ -2,6 +2,7 @@
 titel: 35 nye værelser klar på Traneholm
 dato: 2026-07-19
 kategori: Akademiet
+fotoKey: traneholm-indgang
 kilde: cms
 resume: >-
   Den nye kollegielignende bolig på Traneholm står klar til sæsonstart med plads

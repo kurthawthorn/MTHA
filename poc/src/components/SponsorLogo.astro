@@ -1,0 +1,62 @@
+---
+import { Image } from 'astro:assets';
+import type { Sponsor } from '../data/akademi';
+import { billede } from '../lib/billeder';
+
+interface Props {
+  sponsor: Sponsor;
+  hoejde?: number;
+}
+const { sponsor, hoejde = 44 } = Astro.props;
+const logo = billede(sponsor.logoKey);
+const Tag = sponsor.url ? 'a' : 'div';
+---
+
+<Tag class="logo"
+     href={sponsor.url}
+     rel={sponsor.url ? 'noopener' : undefined}
+     target={sponsor.url ? '_blank' : undefined}
+     style={`--h:${hoejde}px`}
+     title={sponsor.navn}>
+  {logo ? (
+    <Image src={logo} alt={sponsor.navn} widths={[160, 320]}
+           sizes={`${hoejde * 4}px`} quality={88} loading="lazy" />
+  ) : (
+    <span class="logo__tekst">{sponsor.navn}</span>
+  )}
+</Tag>
+
+<style>
+  /* Logoerne kommer i vidt forskellige formater og baggrunde — nogle med
+     transparens, nogle med hvid bund. Derfor staar de alle paa en hvid plade
+     med samme hoejde, saa raekken bliver rolig. */
+  .logo {
+    display: grid;
+    place-items: center;
+    background: #fff;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.7rem;
+    height: calc(var(--h) + 1.4rem);
+    text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  a.logo:hover { border-color: var(--navy-300); transform: translateY(-2px); }
+
+  .logo :global(img) {
+    max-height: var(--h);
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+
+  .logo__tekst {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #44476b;
+    text-align: center;
+  }
+</style>

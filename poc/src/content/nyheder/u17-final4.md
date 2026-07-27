@@ -3,6 +3,7 @@ titel: U17 sikrer sig plads i Final4
 dato: 2026-07-24
 kategori: Kamp
 holdId: u17
+fotoKey: dm-2025-vinder
 kilde: cms
 fremhaevet: true
 resume: >-

@@ -1,0 +1,101 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { personer, iGruppe, GRUPPE_NAVNE } from '../data/akademi';
+import { billede } from '../lib/billeder';
+import { initials } from '../lib/slug';
+
+const grupper = (Object.keys(GRUPPE_NAVNE) as (keyof typeof GRUPPE_NAVNE)[])
+  .map((g) => ({ id: g, navn: GRUPPE_NAVNE[g], folk: iGruppe(g) }))
+  .filter((g) => g.folk.length > 0);
+---
+
+<Base titel="Staben"
+      beskrivelse="Trænere, fysioterapeuter, uddannelseskoordinatorer og bestyrelse omkring Mors-Thy Håndbold Akademi.">
+  <div class="wrap">
+    <header class="top">
+      <span class="eyebrow">{personer.length} professionelle omkring akademiet</span>
+      <h1>Staben</h1>
+      <p class="lead">
+        Trænere med DHF-uddannelse, fysioterapeuter fra Morsø Fysiologi,
+        uddannelseskoordinatorer på hvert af de tre uddannelsessteder — og en
+        bestyrelse bag det hele.
+      </p>
+    </header>
+
+    {grupper.map((g) => (
+      <section class="section">
+        <div class="section__head">
+          <h2>{g.navn}</h2>
+          <span class="antal num">{g.folk.length}</span>
+        </div>
+        <div class="grid personer">
+          {g.folk.map((p) => {
+            const foto = billede(p.fotoKey);
+            return (
+              <article class="card pk">
+                <div class:list={['pk__foto', !foto && 'pk__foto--tom']}>
+                  {foto ? (
+                    <Image src={foto} alt={p.navn} widths={[180, 300]}
+                           sizes="180px" quality={82} loading="lazy" />
+                  ) : (
+                    <span aria-hidden="true">{initials(p.navn)}</span>
+                  )}
+                </div>
+                <div class="pk__txt">
+                  <h3>{p.navn}</h3>
+                  {p.rolle
+                    ? <p class="pk__rolle">{p.rolle}</p>
+                    : <p class="pk__mangler">Rolle udfyldes af akademiet</p>}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+
+    <p class="note">
+      Navne, roller og portrætter er hentet fra m-tha.dk. De fem personer uden
+      rolle står også uden titel på den nuværende side — feltet er klar, så
+      akademiet selv kan udfylde det.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .top { display: flex; flex-direction: column; gap: 0.5rem;
+         padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+  .antal { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-faint); }
+
+  .personer { grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 1fr));
+              gap: 0.85rem; }
+  .pk { padding: 0; }
+  .pk__foto {
+    aspect-ratio: 3 / 4; overflow: hidden;
+    background: linear-gradient(178deg, #FFFFFF 0%, #EEF0F7 100%);
+  }
+  .pk__foto :global(img) {
+    width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%;
+  }
+  .pk__foto--tom {
+    display: grid; place-items: center;
+    background: linear-gradient(168deg, var(--navy-600), var(--navy-800));
+  }
+  .pk__foto--tom span {
+    font-family: var(--font-display); font-size: 1.9rem; font-weight: 700;
+    color: rgb(255 255 255 / 26%);
+  }
+  .pk__txt {
+    padding: 0.55rem 0.7rem 0.72rem;
+    border-top: 2px solid var(--orange);
+    display: flex; flex-direction: column; gap: 0.1rem;
+  }
+  .pk h3 { font-size: 0.82rem; letter-spacing: 0.01em; }
+  .pk__rolle { font-size: 0.74rem; color: var(--text-dim); }
+  .pk__mangler { font-size: 0.72rem; color: var(--text-faint); font-style: italic; }
+
+  .note { font-size: 0.84rem; color: var(--text-faint); max-width: 64ch;
+          padding-bottom: 1rem; }
+</style>

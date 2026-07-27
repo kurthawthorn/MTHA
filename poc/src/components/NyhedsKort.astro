@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import { billede } from '../lib/billeder';
 import { danishDate } from '../lib/slug';
 
 interface Props {
@@ -8,16 +10,22 @@ interface Props {
   kategori: string;
   resume: string;
   kilde: 'cms' | 'instagram';
+  fotoKey?: string;
 }
-const { slug, titel, dato, kategori, resume, kilde } = Astro.props;
+const { slug, titel, dato, kategori, resume, kilde, fotoKey } = Astro.props;
+const foto = billede(fotoKey);
 
-/* Farvet felt i stedet for foto: POC'en bruger ikke billeder af eleverne.
-   Vinklen varieres ud fra overskriften, saa kortene ikke ser ens ud. */
+/* Pladsholder-vinkel varieres ud fra overskriften, saa kortene ikke ser ens ud
+   naar billederne ikke er hentet. */
 const vinkel = 120 + ([...titel].reduce((a, c) => a + c.charCodeAt(0), 0) % 90);
 ---
 
 <a class="card nk" href={`/nyheder/${slug}`}>
-  <div class="nk__img" style={`--v:${vinkel}deg`}>
+  <div class:list={['nk__img', !foto && 'nk__img--tom']} style={`--v:${vinkel}deg`}>
+    {foto && (
+      <Image src={foto} alt="" widths={[320, 520, 760]}
+             sizes="(max-width: 700px) 92vw, 340px" quality={80} loading="lazy" />
+    )}
     <span class="pill">{kategori}</span>
     {kilde === 'instagram' && <span class="nk__auto">via Instagram</span>}
   </div>
@@ -32,37 +40,38 @@ const vinkel = 120 + ([...titel].reduce((a, c) => a + c.charCodeAt(0), 0) % 90);
   .nk { height: 100%; }
   .nk__img {
     aspect-ratio: 16 / 9;
-    background: linear-gradient(var(--v), var(--navy) 0%, var(--navy-600) 55%, var(--orange) 190%);
     position: relative;
-    display: flex;
-    align-items: flex-start;
+    display: flex; align-items: flex-start;
     padding: 0.6rem;
+    overflow: hidden;
+    background: var(--navy-800);
   }
+  .nk__img :global(img) {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  a.card:hover .nk__img :global(img) { transform: scale(1.04); }
+
+  .nk__img--tom {
+    background: linear-gradient(var(--v), var(--navy) 0%, var(--navy-600) 55%, var(--orange) 190%);
+  }
+
+  .nk__img .pill { position: relative; z-index: 1; }
   .nk__auto {
-    position: absolute;
-    right: 0.6rem;
-    bottom: 0.6rem;
-    font-family: var(--font-display);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.6rem;
-    font-weight: 600;
-    color: #fff;
-    background: rgb(0 0 0 / 35%);
-    padding: 0.15rem 0.45rem;
-    border-radius: 2px;
+    position: absolute; right: 0.6rem; bottom: 0.6rem; z-index: 1;
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.1em; font-size: 0.6rem; font-weight: 600;
+    color: #fff; background: rgb(0 0 0 / 48%);
+    padding: 0.15rem 0.45rem; border-radius: 2px;
   }
+
   .nk__body {
     padding: 0.85rem 0.95rem 1.05rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+    display: flex; flex-direction: column; gap: 0.35rem;
   }
   .nk__body h3 { font-size: 1.02rem; letter-spacing: 0.02em; }
-  .nk__body time {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--text-faint);
-  }
+  .nk__body time { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-faint); }
   .nk__body p { font-size: 0.9rem; color: var(--text-dim); }
 </style>
