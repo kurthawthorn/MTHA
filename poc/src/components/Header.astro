@@ -27,12 +27,18 @@ const path = Astro.url.pathname;
 */}
 <header class="hdr">
   <div class="wrap hdr__in">
-    <a href="/" class="hdr__logo" aria-label="Mors-Thy Håndbold Akademi — forside">
-      <img src="/brand/mtha-logo-officiel.png" alt="Mors-Thy Håndbold Akademi"
-           width="702" height="356" />
-    </a>
+    {/*
+      Lockup: akademiets mærke og hovedsponsoren står sammen, adskilt af en
+      lodret streg. Det er sådan et hovedsponsorat ser ud — en partner ved
+      siden af mærket, ikke en logo stoppet ind i menuens hjørne. Samtidig
+      falder headeren ned i én række, og tomrummet i midten forsvinder.
+    */}
+    <div class="hdr__maerke">
+      <a href="/" class="hdr__logo" aria-label="Mors-Thy Håndbold Akademi — forside">
+        <img src="/brand/mtha-logo-officiel.png" alt="Mors-Thy Håndbold Akademi"
+             width="702" height="356" />
+      </a>
 
-    <div class="hdr__hoejre">
       <p class="hdr__sponsor">
         <span>Hovedsponsor</span>
         <a href={sponsor.url} rel="noopener" target="_blank">
@@ -40,21 +46,20 @@ const path = Astro.url.pathname;
                width="314" height="173" />
         </a>
       </p>
-
-      <div class="hdr__bund">
-        <nav aria-label="Hovedmenu">
-          <ul>
-            {nav.map((i) => (
-              <li>
-                <a href={i.href}
-                   aria-current={path.startsWith(i.href) ? 'page' : undefined}>{i.label}</a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <a href="/bliv-elev" class="btn btn--primary hdr__cta">Bliv elev</a>
-      </div>
     </div>
+
+    <nav aria-label="Hovedmenu">
+      <ul>
+        {nav.map((i) => (
+          <li>
+            <a href={i.href}
+               aria-current={path.startsWith(i.href) ? 'page' : undefined}>{i.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <a href="/bliv-elev" class="btn btn--primary hdr__cta">Bliv elev</a>
   </div>
 </header>
 
@@ -66,9 +71,17 @@ const path = Astro.url.pathname;
   .hdr__in {
     display: flex;
     align-items: center;
-    gap: 1.6rem 2rem;
-    padding-block: 0.85rem 0.7rem;
+    gap: 1rem 1.8rem;
+    padding-block: 0.8rem;
     flex-wrap: wrap;
+  }
+
+  /* Mærke-lockup: MTHA og hovedsponsoren side om side */
+  .hdr__maerke {
+    display: flex;
+    align-items: center;
+    gap: 1.15rem;
+    flex: none;
   }
 
   /* Logoet står frit — ingen plade, ingen ramme. Højden er sat efter at det er
@@ -76,38 +89,26 @@ const path = Astro.url.pathname;
   .hdr__logo { flex: none; line-height: 0; }
   .hdr__logo img { width: auto; height: 78px; }
 
-  .hdr__hoejre {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.5rem;
-  }
-
+  /* Den lodrette streg gør de to mærker til én enhed frem for to løse logoer */
   .hdr__sponsor {
     display: flex;
-    align-items: center;
-    gap: 0.6rem;
+    flex-direction: column;
+    gap: 0.22rem;
+    padding-left: 1.15rem;
+    border-left: 1px solid var(--line);
   }
   .hdr__sponsor span {
     font-family: var(--font-display);
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 600;
     color: #7a7c9e;
   }
   .hdr__sponsor a { line-height: 0; }
-  .hdr__sponsor img { width: auto; height: 30px; }
+  .hdr__sponsor img { width: auto; height: 34px; }
 
-  .hdr__bund {
-    display: flex;
-    align-items: center;
-    gap: 1.4rem;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
+  nav { margin-left: auto; }
 
   nav ul {
     list-style: none;
@@ -146,16 +147,22 @@ const path = Astro.url.pathname;
     .hdr__sponsor span { color: #6b6d92; }
   }
 
-  @media (max-width: 900px) {
-    .hdr__in { gap: 0.8rem 1rem; }
-    .hdr__logo img { height: 62px; }
-    .hdr__hoejre { align-items: stretch; }
-    .hdr__bund { justify-content: space-between; width: 100%; }
+  /* Under 1040 px er der ikke plads til lockup og menu på samme linje.
+     Menuen falder ned under, men mærket bliver ét. */
+  @media (max-width: 1040px) {
+    .hdr__in { gap: 0.7rem 1rem; }
+    .hdr__logo img { height: 64px; }
+    .hdr__sponsor img { height: 30px; }
+    nav { margin-left: 0; order: 3; flex: 1; }
     nav ul { gap: 1rem; }
     nav a { font-size: 0.78rem; }
+    .hdr__cta { margin-left: auto; }
   }
   @media (max-width: 560px) {
-    .hdr__logo img { height: 54px; }
-    .hdr__sponsor { justify-content: flex-end; }
+    .hdr__logo img { height: 52px; }
+    .hdr__maerke { gap: 0.8rem; }
+    .hdr__sponsor { padding-left: 0.8rem; }
+    .hdr__sponsor img { height: 26px; }
+    .hdr__sponsor span { font-size: 0.52rem; }
   }
 </style>
