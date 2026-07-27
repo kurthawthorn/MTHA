@@ -1,14 +1,12 @@
 ---
 import { Image } from 'astro:assets';
-import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NyhedsKort from '../components/NyhedsKort.astro';
 import { hold, truppen, personer } from '../data/akademi';
 import { billede } from '../lib/billeder';
+import { nyheder } from '../data/nyheder';
 import { MOTTO, ligatrupTal, vaerdier, titler, titelTekst } from '../data/vaerdier';
 
-const nyheder = (await getCollection('nyheder'))
-  .sort((a, b) => b.data.dato.getTime() - a.data.dato.getTime());
 const seneste = nyheder.slice(0, 3);
 const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
 
@@ -75,9 +73,9 @@ const faciliteter = [
       </div>
       <div class="grid grid--3">
         {seneste.map((n) => (
-          <NyhedsKort slug={n.id} titel={n.data.titel} dato={n.data.dato}
-                      kategori={n.data.kategori} resume={n.data.resume}
-                      kilde={n.data.kilde} fotoKey={n.data.fotoKey} />
+          <NyhedsKort slug={n.slug} titel={n.titel} dato={n.dato}
+                      kategori={n.kategori} resume={n.resume} kilde={n.kilde}
+                      fotoKey={n.fotoKey} fotoUrl={n.fotoUrl} />
         ))}
       </div>
     </section>

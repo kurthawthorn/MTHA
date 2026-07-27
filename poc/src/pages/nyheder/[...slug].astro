@@ -1,53 +1,60 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import { getCollection, render } from 'astro:content';
-import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import RigTekst from '../../components/RigTekst.astro';
+import { nyheder } from '../../data/nyheder';
 import { billede } from '../../lib/billeder';
-import { altFor } from '../../data/billeder';
+import { billedUrl, billedSrcset } from '../../lib/sanity';
 import { danishDate } from '../../lib/slug';
 import { getHold } from '../../data/akademi';
+import { Image } from 'astro:assets';
 
-export const getStaticPaths = (async () => {
-  const nyheder = await getCollection('nyheder');
-  return nyheder.map((n) => ({ params: { slug: n.id }, props: { n } }));
-}) satisfies GetStaticPaths;
+export const getStaticPaths = (() =>
+  nyheder.map((n) => ({ params: { slug: n.slug }, props: { n } }))
+) satisfies GetStaticPaths;
 
 const { n } = Astro.props;
-const { Content } = await render(n);
-const h = n.data.holdId ? getHold(n.data.holdId) : undefined;
-const foto = billede(n.data.fotoKey);
+const h = n.holdId ? getHold(n.holdId) : undefined;
+const fraSanity = n.fotoUrl;
+const lokal = fraSanity ? undefined : billede(n.fotoKey);
 ---
 
-<Base titel={n.data.titel} beskrivelse={n.data.resume}>
+<Base titel={n.titel} beskrivelse={n.resume}>
   <div class="wrap">
     <nav class="krumme" aria-label="Sti">
       <a href="/">Forside</a> <span>/</span>
       <a href="/nyheder">Nyheder</a> <span>/</span>
-      <span>{n.data.titel}</span>
+      <span>{n.titel}</span>
     </nav>
 
     <article class="artikel">
       <header class="artikel__top">
         <div class="artikel__meta">
-          <span class="pill">{n.data.kategori}</span>
-          <time datetime={n.data.dato.toISOString()}>{danishDate(n.data.dato)}</time>
-          {n.data.kilde === 'instagram' && <span class="via">hentet fra Instagram</span>}
+          <span class="pill">{n.kategori}</span>
+          <time datetime={n.dato.toISOString()}>{danishDate(n.dato)}</time>
+          {n.kilde === 'instagram' && <span class="via">hentet fra Instagram</span>}
         </div>
-        <h1>{n.data.titel}</h1>
-        <p class="lead">{n.data.resume}</p>
+        <h1>{n.titel}</h1>
+        <p class="lead">{n.resume}</p>
         {h && <a href={`/hold/${h.id}`} class="artikel__hold">{h.navn} · årgang {h.aargang}</a>}
       </header>
 
-      {foto && (
+      {(fraSanity || lokal) && (
         <figure class="artikel__foto">
-          <Image src={foto} alt={altFor(n.data.fotoKey ?? '')} widths={[700, 1100, 1600]}
-                 sizes="(max-width: 800px) 94vw, 700px" quality={82} loading="eager" />
+          {fraSanity ? (
+            <img src={billedUrl(fraSanity, { b: 1100, kvalitet: 82 })}
+                 srcset={billedSrcset(fraSanity, [700, 1100, 1600], undefined, 82)}
+                 sizes="(max-width: 800px) 94vw, 700px"
+                 alt={n.titel} loading="eager" decoding="async" />
+          ) : (
+            <Image src={lokal!} alt={n.titel} widths={[700, 1100, 1600]}
+                   sizes="(max-width: 800px) 94vw, 700px" quality={82} loading="eager" />
+          )}
         </figure>
       )}
 
-      <div class="artikel__krop prose">
-        <Content />
+      <div class="artikel__krop">
+        <RigTekst blokke={n.indhold} />
       </div>
     </article>
 
@@ -85,13 +92,9 @@ const foto = billede(n.data.fotoKey);
     border-radius: var(--radius); overflow: hidden;
     border: 1px solid var(--line-soft); background: var(--surface-2);
   }
-  .artikel__foto :global(img) { width: 100%; height: auto; display: block; }
-  .artikel__krop { padding-block: 1.3rem; }
-  .artikel__krop :global(blockquote) {
-    margin: 0; padding: 0.4rem 0 0.4rem 1rem;
-    border-left: 3px solid var(--orange);
-    font-size: 1.08rem; color: var(--text);
+  .artikel__foto :global(img), .artikel__foto img {
+    width: 100%; height: auto; display: block;
   }
-  .artikel__krop :global(em) { color: var(--text-faint); }
+  .artikel__krop { padding-block: 1.3rem; }
   .tilbage { margin-bottom: 1rem; }
 </style>

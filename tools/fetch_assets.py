@@ -232,7 +232,17 @@ def skriv_data(alle: list[Billede]) -> None:
 
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
+
+    # Portraetter og logoer ligger nu i Sanity og hentes derfra af sitet.
+    # Under en bygning er kun `fotos` stadig noedvendige, saa CI kan bede om
+    # netop dem: `python tools/fetch_assets.py fotos`
+    # Det skaerer 129 unoedvendige kald til m-tha.dk vaek pr. bygning.
+    oenskede = set(sys.argv[1:]) or None
+
     alle = FOTOS + indlæs_manifest()
+    if oenskede:
+        alle = [b for b in alle if b.gruppe in oenskede]
+        print("Kun grupperne: " + ", ".join(sorted(oenskede)) + "\n")
 
     grupper: dict[str, list[Billede]] = {}
     for b in alle:
@@ -268,9 +278,18 @@ def main() -> None:
     print(f"\n  i alt        {len(alle) - len(fejl):3d}/{len(alle):3d} hentet   {total:5.1f} MB")
     print(f"  gemt i {DEST.relative_to(ROOT)} (ikke i git)")
 
-    hent_pdfs()
+    if not oenskede or "dokumenter" in oenskede:
+        hent_pdfs()
 
-    skriv_data([b for b in alle if not any(b.key in f for f in fejl)])
+    # billeder.ts indeholder alt-teksterne for ALLE grupper og ligger i git.
+    # Et delvist hent maa derfor ikke overskrive den — ellers ville
+    # `python tools/fetch_assets.py fotos` slette alt-teksterne for
+    # portraetter og logoer, og forskellen ville foerst vise sig som
+    # manglende alt-tekster i produktion.
+    if oenskede:
+        print("\n(billeder.ts uroert — delvist hent)")
+    else:
+        skriv_data([b for b in alle if not any(b.key in f for f in fejl)])
 
     if fejl:
         print(f"\n{len(fejl)} fejl:")

@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { billede } from '../lib/billeder';
+import { billedUrl, billedSrcset } from '../lib/sanity';
 import { danishDate } from '../lib/slug';
 
 interface Props {
@@ -11,9 +12,12 @@ interface Props {
   resume: string;
   kilde: 'cms' | 'instagram';
   fotoKey?: string;
+  fotoUrl?: string;
 }
-const { slug, titel, dato, kategori, resume, kilde, fotoKey } = Astro.props;
-const foto = billede(fotoKey);
+const { slug, titel, dato, kategori, resume, kilde, fotoKey, fotoUrl } = Astro.props;
+/* Sanitys CDN foerst, den lokale fil som reserve */
+const fraSanity = fotoUrl;
+const foto = fraSanity ? undefined : billede(fotoKey);
 
 /* Pladsholder-vinkel varieres ud fra overskriften, saa kortene ikke ser ens ud
    naar billederne ikke er hentet. */
@@ -21,11 +25,17 @@ const vinkel = 120 + ([...titel].reduce((a, c) => a + c.charCodeAt(0), 0) % 90);
 ---
 
 <a class="card nk" href={`/nyheder/${slug}`}>
-  <div class:list={['nk__img', !foto && 'nk__img--tom']} style={`--v:${vinkel}deg`}>
-    {foto && (
+  <div class:list={['nk__img', !foto && !fraSanity && 'nk__img--tom']}
+       style={`--v:${vinkel}deg`}>
+    {fraSanity ? (
+      <img src={billedUrl(fraSanity, { b: 520, h: 293, kvalitet: 80 })}
+           srcset={billedSrcset(fraSanity, [320, 520, 760], 9 / 16, 80)}
+           sizes="(max-width: 700px) 92vw, 340px"
+           alt="" loading="lazy" decoding="async" />
+    ) : foto ? (
       <Image src={foto} alt="" widths={[320, 520, 760]}
              sizes="(max-width: 700px) 92vw, 340px" quality={80} loading="lazy" />
-    )}
+    ) : null}
     <span class="pill">{kategori}</span>
     {kilde === 'instagram' && <span class="nk__auto">via Instagram</span>}
   </div>
@@ -46,13 +56,15 @@ const vinkel = 120 + ([...titel].reduce((a, c) => a + c.charCodeAt(0), 0) % 90);
     overflow: hidden;
     background: var(--navy-800);
   }
-  .nk__img :global(img) {
+  .nk__img :global(img), .nk__img img {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
   }
-  a.card:hover .nk__img :global(img) { transform: scale(1.04); }
+  a.card:hover .nk__img :global(img), a.card:hover .nk__img img {
+    transform: scale(1.04);
+  }
 
   .nk__img--tom {
     background: linear-gradient(var(--v), var(--navy) 0%, var(--navy-600) 55%, var(--orange) 190%);
