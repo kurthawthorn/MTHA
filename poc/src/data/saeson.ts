@@ -1,3 +1,5 @@
+import { hentEllerFallback } from '../lib/sanity';
+
 /**
  * ÉN SÆSON — ét sted.
  *
@@ -26,6 +28,10 @@
  * ledelsen selv kan gøre det — uden at røre kode og uden at kunne glemme et
  * sted. Det er hele forskellen på at rette ét felt og at lede efter tallet
  * på syv sider.
+ *
+ * HENTES FRA SANITY
+ *   Priserne ligger i sæson-dokumentet i studioet. Beløbene herunder er kun
+ *   reserve, hvis Sanity ikke svarer under en bygning.
  *
  * KILDE  Tallene er akademiets egne, fra "Forældreovervejelser" og
  *        Domea-flyeren.
@@ -74,9 +80,13 @@ export interface Saeson {
 
   /** Estimerede indirekte udgifter ved at bo hjemme. */
   hjemmeEstimat: { mad: number; transport: number };
+
+  /** Antal vaerelser paa Traneholm. Stod foer hardkodet i hero'en. */
+  vaerelser: number;
 }
 
-export const saeson: Saeson = {
+/** Reservedata, hvis Sanity ikke svarer. Beloeb som i broсhuren 2024-2025. */
+const RESERVE: Saeson = {
   navn: '2024–2025',
   fra: 2024,
   til: 2025,
@@ -105,6 +115,76 @@ export const saeson: Saeson = {
   su: { hjemmeboende: 1060, udeboende: 4375, aar: 2024 },
 
   hjemmeEstimat: { mad: 2500, transport: 600 },
+
+  vaerelser: 35,
+};
+
+/* ── Hent fra Sanity ──────────────────────────────────────────────────── */
+
+const Q = `*[_type == "saeson"][0]{
+  navn, fra, til, bekraeftet, vaerelser,
+  opholdBoende, husleje, forbrug, boligstoette, hjemmeboende, traenerHfMors,
+  suHjemmeboende, suUdeboende, suAar, estimatMad, estimatTransport,
+  "hold": *[_type == "hold"] | order(raekkefoelge asc) {
+    "id": _id, navn, foedselsaar, raekke
+  }
+}`;
+
+type SanitySaeson = {
+  navn?: string; fra?: number; til?: number; bekraeftet?: boolean;
+  vaerelser?: number;
+  opholdBoende?: number; husleje?: number; forbrug?: number;
+  boligstoette?: number; hjemmeboende?: number; traenerHfMors?: number;
+  suHjemmeboende?: number; suUdeboende?: number; suAar?: number;
+  estimatMad?: number; estimatTransport?: number;
+  hold?: { id: string; navn: string; foedselsaar?: number[]; raekke?: string }[];
+};
+
+const sv = (await hentEllerFallback<SanitySaeson>('saeson', Q, {})).data;
+
+/** Beholder reservens tekst og note, men tager beloebet fra Sanity. */
+const takst = (r: Takst, beloeb?: number): Takst =>
+  beloeb == null ? r : { ...r, beloeb };
+
+const aargangTekst = (aar: number[] = []) =>
+  aar.length ? [...aar].sort().join('–') : '';
+
+export const saeson: Saeson = {
+  navn: sv.navn ?? RESERVE.navn,
+  fra: sv.fra ?? RESERVE.fra,
+  til: sv.til ?? RESERVE.til,
+  bekraeftet: sv.bekraeftet ?? RESERVE.bekraeftet,
+  vaerelser: sv.vaerelser ?? RESERVE.vaerelser,
+
+  hold: sv.hold?.length
+    ? sv.hold.map((h) => ({
+        id: h.id.replace(/^hold-/, ''),
+        navn: h.navn,
+        aargang: aargangTekst(h.foedselsaar),
+        raekke: h.raekke ?? '',
+        foedselsaar: h.foedselsaar ?? [],
+      }))
+    : RESERVE.hold,
+
+  priser: {
+    opholdBoende: takst(RESERVE.priser.opholdBoende, sv.opholdBoende),
+    husleje: takst(RESERVE.priser.husleje, sv.husleje),
+    forbrug: takst(RESERVE.priser.forbrug, sv.forbrug),
+    boligstoette: takst(RESERVE.priser.boligstoette, sv.boligstoette),
+    hjemmeboende: takst(RESERVE.priser.hjemmeboende, sv.hjemmeboende),
+    traenerHfMors: takst(RESERVE.priser.traenerHfMors, sv.traenerHfMors),
+  },
+
+  su: {
+    hjemmeboende: sv.suHjemmeboende ?? RESERVE.su.hjemmeboende,
+    udeboende: sv.suUdeboende ?? RESERVE.su.udeboende,
+    aar: sv.suAar ?? RESERVE.su.aar,
+  },
+
+  hjemmeEstimat: {
+    mad: sv.estimatMad ?? RESERVE.hjemmeEstimat.mad,
+    transport: sv.estimatTransport ?? RESERVE.hjemmeEstimat.transport,
+  },
 };
 
 /* ── Udregninger — ingen side regner selv ─────────────────────────────── */

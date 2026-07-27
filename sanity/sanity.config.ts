@@ -132,10 +132,31 @@ export default defineConfig({
 
             S.divider(),
 
-            // Ét dokument — vises direkte frem for som en liste med én post
+            S.listItem()
+              .title('Værdier')
+              .child(S.documentTypeList('vaerdi').title('De fire værdier')
+                .defaultOrdering([{ field: 'raekkefoelge', direction: 'asc' }])),
+
+            S.listItem()
+              .title('Uddannelsesveje')
+              .child(S.documentTypeList('uddannelse').title('Uddannelsesveje')
+                .defaultOrdering([{ field: 'raekkefoelge', direction: 'asc' }])),
+
+            S.listItem()
+              .title('Trofæskabet')
+              .child(S.documentTypeList('titel').title('Mesterskaber')
+                .defaultOrdering([{ field: 'aar', direction: 'desc' }])),
+
+            S.divider(),
+
+            // De to enkeltdokumenter vises direkte frem for som lister
             S.listItem()
               .title('Sæson, priser og satser')
               .child(S.document().schemaType('saeson').documentId('saeson')),
+
+            S.listItem()
+              .title('Indstillinger')
+              .child(S.document().schemaType('indstillinger').documentId('indstillinger')),
           ]),
     }),
     // Til at prøve forespørgsler af. Kan fjernes inden overdragelse.
@@ -147,6 +168,6 @@ export default defineConfig({
   document: {
     // Sæsonen må ikke kunne oprettes to gange
     newDocumentOptions: (prev) =>
-      prev.filter((t) => t.templateId !== 'saeson'),
+      prev.filter((t) => !['saeson', 'indstillinger'].includes(t.templateId)),
   },
 });

@@ -14,9 +14,22 @@ export const sanity = createClient({
   projectId: 'g4s1nwak',
   dataset: 'production',
   apiVersion: '2024-01-01',
-  // CDN'en er hurtigere og billigere. Ved udgivelse rammer webhooken en ny
-  // bygning, så indholdet er friskt selv med caching.
-  useCdn: true,
+  /*
+   * IKKE CDN'en. Det er vigtigt, og det kostede en times fejlfinding.
+   *
+   * Webhooken fyrer i samme sekund en redaktør trykker Udgiv, og bygningen
+   * starter få sekunder efter. Sanitys CDN kan på det tidspunkt stadig levere
+   * den forrige version — uregelmæssigt, afhængigt af hvilken edge man rammer.
+   *
+   * Resultatet ville være: Lars trykker Udgiv, bygningen kører og melder
+   * succes, og siden viser det gamle. Næste natlige bygning ville rette det,
+   * så fejlen ville se tilfældig ud. Målt: Sanity svarede 35, bygningen skrev
+   * 44.
+   *
+   * Vi bygger en håndfuld gange om dagen. CDN'ens fordel — fart og pris ved
+   * mange kald — er derfor uden betydning her, mens korrekthed er alt.
+   */
+  useCdn: false,
 });
 
 /**

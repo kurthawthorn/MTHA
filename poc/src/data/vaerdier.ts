@@ -1,174 +1,180 @@
 /**
- * Akademiets værdier, historie og uddannelsessamarbejde.
+ * Værdier, uddannelser, trofæer, motto og nøgletal — nu fra Sanity.
  *
- * Alt herunder er akademiets EGEN tekst, trukket ud af
- * "MTH_Vi skaber fremtidens stjerner_A4_2023.pdf" og "MTH_Velkommen_A4_Aug23.pdf".
- * I dag ligger det låst i to PDF-brochurer, hvor Google ikke kan læse det, og
- * hvor ingen finder det på en telefon.
+ * Filen indeholdt før selve indholdet, skrevet ud fra akademiets brochurer.
+ * Det betød at en værdi ikke kunne omformuleres, en koordinator ikke skiftes
+ * og et nyt mesterskab ikke tilføjes uden en udvikler. Netop det indhold
+ * bliver oftest skrevet om.
+ *
+ * Nu står her kun forespørgsler og reservedata. Kan Sanity ikke nås, bruges
+ * reserven, og bygningen fortsætter — se `lib/sanity.ts`.
+ *
+ * TRÆNINGSSKEMA OG ELITETILBUD
+ *   De to lister nederst er stadig i kode. De ændrer sig sjældent, og de er
+ *   opremsninger frem for redaktionelt indhold. Flyt dem i studioet hvis
+ *   træningstiderne begynder at skifte.
  */
 
-/** Mottoet står på forsiden af visionsbrochuren. */
-export const MOTTO = 'Sammen er vi stærkere';
-export const SLOGAN = 'Vi skaber fremtidens stjerner';
+import { hentEllerFallback } from '../lib/sanity';
+
+/* ── Motto og nøgletal ────────────────────────────────────────────────── */
+
+interface Indstillinger {
+  motto: string;
+  slogan: string;
+  ligatrupIMiljoeet: number;
+  ligatrupIAlt: number;
+  ligatrupSaeson: string;
+  milepaele: { aar: number; tekst: string; tal?: string }[];
+}
+
+const Q_INDSTILLINGER = `*[_type == "indstillinger"][0]{
+  motto, slogan, ligatrupIMiljoeet, ligatrupIAlt, ligatrupSaeson,
+  "milepaele": milepaele[]{ aar, tekst, tal }
+}`;
+
+const R_INDSTILLINGER: Indstillinger = {
+  motto: 'Sammen er vi stærkere',
+  slogan: 'Vi skaber fremtidens stjerner',
+  ligatrupIMiljoeet: 17, ligatrupIAlt: 19, ligatrupSaeson: '2023/24',
+  milepaele: [
+    { aar: 2012, tekst: 'Sports College Mors starter', tal: '4 elever' },
+    { aar: 2022, tekst: 'Håndbold Akademi Mors bliver til Mors-Thy Håndbold Akademi' },
+    { aar: 2023, tekst: 'Akademiet er vokset', tal: '38 elever' },
+  ],
+};
+
+const ind = (await hentEllerFallback('indstillinger', Q_INDSTILLINGER, R_INDSTILLINGER)).data;
+
+export const MOTTO = ind.motto ?? R_INDSTILLINGER.motto;
+export const SLOGAN = ind.slogan ?? R_INDSTILLINGER.slogan;
+
+/** Akademiets stærkeste tal. Stod nederst på side 1 i en PDF. */
+export const ligatrupTal = {
+  iMiljoeet: ind.ligatrupIMiljoeet ?? 17,
+  iTrup: ind.ligatrupIAlt ?? 19,
+  saeson: ind.ligatrupSaeson ?? '2023/24',
+};
+
+export interface Milepael { aar: number; tekst: string; tal?: string }
+
+/** ”Nyt navn, samme dna.” */
+export const historie: Milepael[] = (ind.milepaele ?? R_INDSTILLINGER.milepaele)
+  .slice()
+  .sort((a, b) => a.aar - b.aar);
+
+/* ── Værdier ──────────────────────────────────────────────────────────── */
 
 export interface Vaerdi {
   titel: string;
   tekst: string;
+  paaForsiden: boolean;
 }
 
-/** Fire bærende værdier, formuleret ud af akademiets egen brochuretekst. */
-export const vaerdier: Vaerdi[] = [
-  {
-    titel: 'Dannelse og udvikling går hånd i hånd',
-    tekst:
-      'Vi arbejder med unge, der både sigter mod den sportslige top og ' +
-      'prioriterer uddannelse. Ved at balancere de to elementer udvikler vi ' +
-      'dygtigere eliteudøvere — og samtidig ansvarlige, robuste og ' +
-      'læringsparate unge, der har lyst og mod til at bidrage til ' +
-      'fællesskabet. Egenskaber, som er nyttige både på og udenfor banen.',
-  },
-  {
-    titel: 'Nærhed og tætte relationer',
-    tekst:
-      'Det skal være sjovt og hyggeligt at være en del af akademiet. Vi ' +
-      'prioriterer nærhed, interesse og tætte relationer eleverne imellem. ' +
-      'Som elev forpligter du dig på at være en del af — og tage ansvar for — ' +
-      'at det sociale liv fungerer.',
-  },
-  {
-    titel: 'Et socialt sikkerhedsnet',
-    tekst:
-      'Akademiet har en fuldtidsansat daglig leder, som ud over driften også ' +
-      'sikrer et socialt sikkerhedsnet og står til rådighed for hjælp og ' +
-      'sparring for den enkelte elev. Nettet består af et tæt samarbejde ' +
-      'mellem familien, ungdomsuddannelsen, klubben og akademiet.',
-  },
-  {
-    titel: 'Høj faglig ekspertise',
-    tekst:
-      'Vi arbejder hele tiden på at stille de bedst mulige kompetencer til ' +
-      'rådighed: tæt samarbejde med den sportslige ledelse i Mors-Thy ' +
-      'Håndbold, aftale med mentalcoach, fysioterapi og skadesforebyggelse — ' +
-      'og et træningsforløb, vi planlægger sammen med dig.',
-  },
+const Q_VAERDIER = `*[_type == "vaerdi"] | order(raekkefoelge asc) {
+  titel, tekst, paaForsiden
+}`;
+
+const R_VAERDIER: Vaerdi[] = [
+  { titel: 'Dannelse og udvikling går hånd i hånd', paaForsiden: true,
+    tekst: 'Vi arbejder med unge, der både sigter mod den sportslige top og '
+      + 'prioriterer uddannelse.' },
+  { titel: 'Nærhed og tætte relationer', paaForsiden: true,
+    tekst: 'Det skal være sjovt og hyggeligt at være en del af akademiet.' },
+  { titel: 'Et socialt sikkerhedsnet', paaForsiden: false,
+    tekst: 'Akademiet har en fuldtidsansat daglig leder, som også sikrer et '
+      + 'socialt sikkerhedsnet.' },
+  { titel: 'Høj faglig ekspertise', paaForsiden: false,
+    tekst: 'Vi stiller de bedst mulige kompetencer til rådighed.' },
 ];
 
-/* ── Historie ─────────────────────────────────────────────────────────── */
+export const vaerdier: Vaerdi[] =
+  (await hentEllerFallback('vaerdier', Q_VAERDIER, R_VAERDIER)).data
+    .map((v) => ({ ...v, paaForsiden: v.paaForsiden ?? false }));
 
-export interface Milepael {
-  aar: number;
-  tekst: string;
-  tal?: string;
-}
-
-/** "Nyt navn, samme dna." */
-export const historie: Milepael[] = [
-  { aar: 2012, tekst: 'Sports College Mors starter', tal: '4 elever' },
-  { aar: 2022, tekst: 'Håndbold Akademi Mors bliver til Mors-Thy Håndbold Akademi' },
-  { aar: 2023, tekst: 'Akademiet er vokset', tal: '38 elever' },
-];
-
-/**
- * Akademiets stærkeste tal, fra visionsbrochuren:
- * 17 af 19 spillere i ligatruppen 2023/24 er eller har været i talentmiljøet.
- */
-export const ligatrupTal = { iMiljoeet: 17, iTrup: 19, saeson: '2023/24' };
+/** Forsiden viser kun de fremhævede. Falder tilbage på de to første. */
+export const forsideVaerdier = () => {
+  const valgt = vaerdier.filter((v) => v.paaForsiden);
+  return valgt.length ? valgt : vaerdier.slice(0, 2);
+};
 
 /* ── Trofæer ──────────────────────────────────────────────────────────── */
 
-export interface Kamp {
-  navn: string;
-  modstander: string;
-  resultat: string;
-  halvleg?: string;
-}
-
-export interface Maalscorer {
-  navn: string;
-  maal: number;
-}
+export interface Maalscorer { navn: string; maal: number }
 
 export interface Titel {
   aar: number;
   raekke: string;
-  /** Tom streng = oplysningen findes ikke offentligt og skal udfyldes. */
+  /** Tom streng = oplysningen findes ikke og skal udfyldes. */
   dato: string;
   spillested: string;
-  finale?: Kamp;
-  semifinale?: Kamp;
+  finale?: { navn: string; modstander: string; resultat: string; halvleg?: string };
+  semifinale?: { navn: string; modstander: string; resultat: string };
   maalscorere: Maalscorer[];
   traenere: string[];
   trup: string[];
   noter: string[];
 }
 
-/**
- * U19-danmarksmesterskaber. Tre gange i fire år.
- *
- * HVOR TALLENE KOMMER FRA
- *   2025-titlen er dokumenteret paa akademiets eget site med filen
- *   "Officiel vinderbillede U19 DM 2025.jpg". Kampdetaljerne er fra
- *   pressedaekningen (hbold.dk, morsthy.dk, nordjyske.dk, europamester.dk).
- *
- * HVAD DER MANGLER — og bevidst staar tomt frem for at blive gaettet
- *   * dato for 2025 og 2022
- *   * alle kampdetaljer for 2022; titlen er kun bekraeftet indirekte via
- *     "anden aar i traek" (2023) og "tredje gang i fire aar" (2025)
- *   * fulde trupper og traenerstab for alle tre aar
- *   Kilderne er uenige om 2023-datoen: én skriver 23. april, en anden 24.
- *   April 23. 2023 var en soendag, hvilket passer med Final4-moenstret.
- *
- * Tomme felter vises som "udfyldes af akademiet" — de er der, og de er nemme
- * at rette. Det er bedre end et gaet der ser rigtigt ud.
- */
-export const titler: Titel[] = [
-  {
-    aar: 2025,
-    raekke: 'U19 Drenge',
-    dato: '',
-    spillested: 'Final4 i Helsinge',
-    finale: { navn: 'Finale', modstander: 'GOG Håndbold',
-              resultat: '36–31', halvleg: '20–13' },
-    semifinale: { navn: 'Semifinale', modstander: 'Nordsjælland Håndbold',
-                  resultat: '35–30', halvleg: '20–13' },
-    maalscorere: [
-      { navn: 'Frederik Bak', maal: 10 },
-      { navn: 'Anton Houe', maal: 7 },
-      { navn: 'Gustav Sunesen', maal: 6 },
-      { navn: 'Mads Faurskov', maal: 5 },
-      { navn: 'Nikolaj Lundal Hansen', maal: 5 },
-      { navn: 'Jonas Dehn', maal: 3 },
-    ],
-    traenere: [],
-    trup: [],
-    noter: ['Tredje danmarksmesterskab i fire år'],
-  },
-  {
-    aar: 2023,
-    raekke: 'U19 Drenge',
-    dato: '23. april 2023',
-    spillested: 'Sparekassen Thy Arena | Mors — egen hjemmebane',
-    finale: { navn: 'Finale', modstander: 'GOG Håndbold', resultat: '34–33' },
-    semifinale: { navn: 'Semifinale', modstander: 'Skanderborg Håndbold',
-                  resultat: '39–29' },
-    maalscorere: [],
-    traenere: [],
-    trup: [],
-    noter: ['Andet mesterskab i træk', 'Pokalen løftet foran fyldt hjemmebane'],
-  },
-  {
-    aar: 2022,
-    raekke: 'U19 Drenge',
-    dato: '',
-    spillested: '',
-    maalscorere: [],
-    traenere: [],
-    trup: [],
-    noter: ['Akademiets første U19-danmarksmesterskab'],
-  },
+const Q_TITLER = `*[_type == "titel"] | order(aar desc) {
+  aar, raekke, dato, spillested,
+  finaleModstander, finaleResultat, finaleHalvleg,
+  semiModstander, semiResultat,
+  "maalscorere": maalscorere[]{ navn, maal },
+  trup, traenere, noter
+}`;
+
+type SanityTitel = {
+  aar: number; raekke?: string; dato?: string; spillested?: string;
+  finaleModstander?: string; finaleResultat?: string; finaleHalvleg?: string;
+  semiModstander?: string; semiResultat?: string;
+  maalscorere?: Maalscorer[]; trup?: string[]; traenere?: string[]; noter?: string[];
+};
+
+const R_TITLER: SanityTitel[] = [
+  { aar: 2025, raekke: 'U19 Drenge', spillested: 'Final4 i Helsinge',
+    finaleModstander: 'GOG Håndbold', finaleResultat: '36–31' },
+  { aar: 2023, raekke: 'U19 Drenge', dato: '23. april 2023',
+    finaleModstander: 'GOG Håndbold', finaleResultat: '34–33' },
+  { aar: 2022, raekke: 'U19 Drenge' },
 ];
 
-export const titelTekst = 'Tre danmarksmesterskaber i fire år';
+export const titler: Titel[] =
+  (await hentEllerFallback('titler', Q_TITLER, R_TITLER)).data.map((t) => ({
+    aar: t.aar,
+    raekke: t.raekke ?? 'U19 Drenge',
+    dato: t.dato ?? '',
+    spillested: t.spillested ?? '',
+    finale: t.finaleModstander
+      ? { navn: 'Finale', modstander: t.finaleModstander,
+          resultat: t.finaleResultat ?? '', halvleg: t.finaleHalvleg }
+      : undefined,
+    semifinale: t.semiModstander
+      ? { navn: 'Semifinale', modstander: t.semiModstander,
+          resultat: t.semiResultat ?? '' }
+      : undefined,
+    maalscorere: t.maalscorere ?? [],
+    traenere: t.traenere ?? [],
+    trup: t.trup ?? [],
+    noter: t.noter ?? [],
+  }));
+
+/**
+ * Fx "Tre danmarksmesterskaber i fire år" — udregnet, ikke skrevet.
+ * Tilføjer akademiet 2027 i studioet, retter sætningen sig selv.
+ */
+export const titelTekst = (() => {
+  const ord = ['ingen', 'ét', 'to', 'tre', 'fire', 'fem', 'seks', 'syv', 'otte',
+               'ni', 'ti'];
+  const n = titler.length;
+  if (!n) return '';
+  if (n === 1) return 'Ét danmarksmesterskab';
+  const aar = titler.map((t) => t.aar);
+  const spand = Math.max(...aar) - Math.min(...aar) + 1;
+  const antal = ord[n] ?? String(n);
+  const iAar = ord[spand] ?? String(spand);
+  return `${antal[0]!.toUpperCase()}${antal.slice(1)} danmarksmesterskaber i ${iAar} år`;
+})();
 
 /* ── Uddannelser ──────────────────────────────────────────────────────── */
 
@@ -181,49 +187,42 @@ export interface Uddannelse {
   koordinator?: { navn: string; telefon: string; email: string };
 }
 
-export const uddannelser: Uddannelse[] = [
-  {
-    kort: 'STX',
-    navn: 'Almen gymnasial uddannelse',
-    sted: 'Morsø Gymnasium',
-    url: 'https://morsoegym.dk/',
-    beskrivelse:
-      'Det almene gymnasium ligger lige ved siden af akademiet. Alle linjer ' +
-      'kan vælges, og skemaet koordineres med træningen.',
-    koordinator: { navn: 'Jesper Kjær Nannerup', telefon: '20 88 90 48',
-                   email: 'jk@morsoe-gym.dk' },
-  },
-  {
-    kort: 'HHX · EUD · EUX Business',
-    navn: 'Merkantil ungdomsuddannelse',
-    sted: 'Morsø Handelsgymnasium — EUC Nordvest',
-    url: 'https://eucnordvest.dk/gymnasier/morso-handelsgymnasium-hhx/',
-    beskrivelse:
-      'Handelsgymnasiet ligger nabo til akademiet. Alle linjer på EUD og ' +
-      'EUX Business kan vælges.',
-    koordinator: { navn: 'Elsebeth Overgaard', telefon: '30 10 65 96',
-                   email: 'eo@eucnordvest.dk' },
-  },
-  {
-    kort: 'HF',
-    navn: 'Højere forberedelseseksamen',
-    sted: 'HF Mors',
-    url: 'https://hfmors.dk/',
-    beskrivelse:
-      'HF Mors er en del af samarbejdet omkring akademiet. Akademiets ' +
-      'mentaltræner er samtidig daglig leder på HF Mors.',
-  },
-  {
-    kort: 'EUD',
-    navn: 'Erhvervsuddannelse med læreplads',
-    sted: 'Lokale virksomheder',
-    url: 'https://eucnordvest.dk/',
-    beskrivelse:
-      'Er du mere interesseret i en erhvervsfaglig uddannelse, hjælper vi ' +
-      'med en løsning, der passer dig — herunder en læreplads hos en lokal ' +
-      'virksomhed.',
-  },
+const Q_UDDANNELSER = `*[_type == "uddannelse"] | order(raekkefoelge asc) {
+  kort, navn, sted, url, beskrivelse,
+  koordinatorNavn, koordinatorTelefon, koordinatorEmail
+}`;
+
+type SanityUddannelse = {
+  kort: string; navn: string; sted: string; url?: string; beskrivelse?: string;
+  koordinatorNavn?: string; koordinatorTelefon?: string; koordinatorEmail?: string;
+};
+
+const R_UDDANNELSER: SanityUddannelse[] = [
+  { kort: 'STX', navn: 'Almen gymnasial uddannelse', sted: 'Morsø Gymnasium',
+    url: 'https://morsoegym.dk/' },
+  { kort: 'HHX · EUD · EUX Business', navn: 'Merkantil ungdomsuddannelse',
+    sted: 'EUC Nordvest', url: 'https://eucnordvest.dk/' },
+  { kort: 'HF', navn: 'Højere forberedelseseksamen', sted: 'HF Mors',
+    url: 'https://hfmors.dk/' },
+  { kort: 'EUD', navn: 'Erhvervsuddannelse med læreplads',
+    sted: 'Lokale virksomheder', url: 'https://eucnordvest.dk/' },
 ];
+
+export const uddannelser: Uddannelse[] =
+  (await hentEllerFallback('uddannelser', Q_UDDANNELSER, R_UDDANNELSER)).data
+    .map((u) => ({
+      kort: u.kort,
+      navn: u.navn,
+      sted: u.sted,
+      url: u.url ?? '',
+      beskrivelse: u.beskrivelse ?? '',
+      koordinator: u.koordinatorNavn
+        ? { navn: u.koordinatorNavn, telefon: u.koordinatorTelefon ?? '',
+            email: u.koordinatorEmail ?? '' }
+        : undefined,
+    }));
+
+/* ── Stadig i kode: opremsninger der sjældent ændrer sig ──────────────── */
 
 /** Det akademiet selv fremhæver om uddannelsessamarbejdet. */
 export const uddannelseFakta = [
@@ -234,13 +233,7 @@ export const uddannelseFakta = [
   'Skolernes gratis, frivillige aktiviteter efter skoletid kan bruges frit',
 ];
 
-/* ── Eliteidræt ───────────────────────────────────────────────────────── */
-
-export interface Traening {
-  dag: string;
-  tid: string;
-  indhold: string;
-}
+export interface Traening { dag: string; tid: string; indhold: string }
 
 /** Akademitræninger, fra velkomstfolderen. */
 export const akademitraening: Traening[] = [
@@ -253,17 +246,17 @@ export const akademitraening: Traening[] = [
 
 export const eliteTilbud = [
   { titel: 'Kost tilpasset eliteidræt',
-    tekst: 'Samarbejdsaftale med Nordic Food College, der leverer varm mad ' +
-           'alle hverdage med udgangspunkt i en eliteidrætsudøvers behov.' },
+    tekst: 'Samarbejdsaftale med Nordic Food College, der leverer varm mad '
+      + 'alle hverdage med udgangspunkt i en eliteidrætsudøvers behov.' },
   { titel: 'Fysioterapi og skadesforebyggelse',
-    tekst: 'Fysioterapeuter fra Morsø Fysiologi står for skadesforebyggende ' +
-           'træning og behandling i forbindelse med akademitræningerne.' },
+    tekst: 'Fysioterapeuter fra Morsø Fysiologi står for skadesforebyggende '
+      + 'træning og behandling i forbindelse med akademitræningerne.' },
   { titel: 'Mentaltræning',
     tekst: 'Aftale med mentalcoach, der er tilknyttet hverdagen på akademiet.' },
   { titel: 'Adgang til faciliteterne',
-    tekst: 'Haller, fitnesscenter, padelhal, fodboldbaner og udendørs ' +
-           'træningsanlæg — plus adgangskode til Arena Mors Fitness.' },
+    tekst: 'Haller, fitnesscenter, padelhal, fodboldbaner og udendørs '
+      + 'træningsanlæg — plus adgangskode til Arena Mors Fitness.' },
   { titel: 'Tæt på ligatruppen',
-    tekst: 'Tæt samarbejde med den sportslige ledelse i Mors-Thy Håndbold, ' +
-           'og holdet følges til kampe.' },
+    tekst: 'Tæt samarbejde med den sportslige ledelse i Mors-Thy Håndbold, '
+      + 'og holdet følges til kampe.' },
 ];

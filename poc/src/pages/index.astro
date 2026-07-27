@@ -5,7 +5,8 @@ import NyhedsKort from '../components/NyhedsKort.astro';
 import { hold, truppen, personer } from '../data/akademi';
 import { billede } from '../lib/billeder';
 import { nyheder } from '../data/nyheder';
-import { MOTTO, ligatrupTal, vaerdier, titler, titelTekst } from '../data/vaerdier';
+import { MOTTO, ligatrupTal, forsideVaerdier, titler, uddannelser } from '../data/vaerdier';
+import { saeson } from '../data/saeson';
 
 const seneste = nyheder.slice(0, 3);
 const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
@@ -15,7 +16,8 @@ const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
 const heroFoto = billede('dm-2025-vinder');
 const traening = ['traening-hal', 'traening-styrke', 'socialt-4'];
 const faciliteter = [
-  { key: 'traneholm-indgang', h: 'Traneholm', p: '35 værelser i gåafstand fra hal og skole' },
+  { key: 'traneholm-indgang', h: 'Traneholm',
+    p: `${saeson.vaerelser} værelser i gåafstand fra hal og skole` },
   { key: 'traneholm-koekken', h: 'Fælleskøkken', p: 'Fælles køkken og opholdsrum på hver etage' },
   { key: 'drone-2', h: 'Morsø Multipark', p: 'Haller, styrkerum og mødelokaler samlet' },
 ];
@@ -59,8 +61,10 @@ const faciliteter = [
       <dl class="hero__tal" data-seq style="--s:5">
         <div><dt>Spillere</dt><dd class="num">{antalSpillere}</dd></div>
         <div><dt>Professionelle</dt><dd class="num">{personer.length}</dd></div>
-        <div><dt>Uddannelser</dt><dd>STX · HHX · HF</dd></div>
-        <div><dt>Bolig</dt><dd class="num">35 værelser</dd></div>
+        {/* Alle fire tal udregnes. Uddannelserne stod foer som "STX · HHX · HF",
+            hvilket modsagde /uddannelse hvor der er fire veje. */}
+        <div><dt>Uddannelser</dt><dd class="num">{uddannelser.length} veje</dd></div>
+        <div><dt>Bolig</dt><dd class="num">{saeson.vaerelser} værelser</dd></div>
       </dl>
     </div>
   </section>
@@ -175,7 +179,7 @@ const faciliteter = [
         <a href="/vaerdier">Alle værdier →</a>
       </div>
       <div class="grid grid--2">
-        {vaerdier.slice(0, 2).map((v) => (
+        {forsideVaerdier().map((v) => (
           <div class="card vkort">
             <h3>{v.titel}</h3>
             <p>{v.tekst}</p>

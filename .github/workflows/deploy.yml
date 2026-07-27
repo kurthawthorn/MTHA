@@ -43,6 +43,11 @@ jobs:
         id: pages
         uses: actions/configure-pages@v5
 
+      # Cacher KUN npm-pakker. Cach ALDRIG poc/.astro eller
+      # poc/node_modules/.astro: Astro genbruger cachede sider naar
+      # kildefilerne er uaendrede, og en aendring i Sanity aendrer ingen fil.
+      # Resultatet ville vaere at et Udgiv ikke slog igennem — og bygningen
+      # ville melde succes. `npm run build` rydder cachen for at vaere sikker.
       - uses: actions/setup-node@v4
         with:
           node-version: 22

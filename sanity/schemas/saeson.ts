@@ -78,6 +78,10 @@ export default defineType({
       type: 'number', group: 'su' }),
     defineField({ name: 'estimatTransport', title: 'Estimat: transport (kr./md)',
       type: 'number', group: 'su' }),
+    defineField({ name: 'vaerelser', title: 'Antal værelser på Traneholm',
+      type: 'number', group: 'aar',
+      description: 'Vises på forsiden og under faciliteter. Stod før hardkodet '
+        + 'tre steder i koden.' }),
   ],
 
   preview: {

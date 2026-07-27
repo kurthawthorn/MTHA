@@ -6,9 +6,10 @@
   "description": "POC: ny hjemmeside til Mors-Thy Handbold Akademi",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node tools/ryd-cache.mjs && astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "byg-hurtigt": "astro build"
   },
   "dependencies": {
     "@sanity/client": "^7.25.0",

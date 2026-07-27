@@ -4,18 +4,30 @@ import person from './person';
 import sponsor from './sponsor';
 import nyhed from './nyhed';
 import saeson from './saeson';
+import vaerdi from './vaerdi';
+import uddannelse from './uddannelse';
+import titel from './titel';
+import indstillinger from './indstillinger';
 
 /**
- * Seks dokumenttyper dækker hele akademiets indhold.
+ * Ti dokumenttyper daekker hele akademiets indhold.
  *
- *   nyhed     det redaktørerne bruger oftest
- *   spiller   54 elever
- *   hold      årgangene — definerer hvilke fødselsår de består af
- *   person    trænere, ansatte og bestyrelse i én model
- *   sponsor   50 virksomheder og partnere
- *   saeson    ét dokument med alle priser og satser
+ *   nyhed          det redaktoererne bruger oftest
+ *   spiller        54 elever
+ *   hold           aargangene — definerer hvilke foedselsaar de bestaar af
+ *   person         traenere, ansatte og bestyrelse i én model
+ *   sponsor        51 virksomheder og partnere
+ *   vaerdi         de fire baerende vaerdier
+ *   uddannelse     fire veje, med koordinatorernes kontaktoplysninger
+ *   titel          mesterskaberne i trofaeskabet
+ *   saeson         ét dokument med alle priser og satser
+ *   indstillinger  ét dokument med motto, tal og kontakt
  *
- * Formen er den samme som poc/src/data/ i prototypen, så etape 2 er et skift
- * af datakilde og ikke en omskrivning.
+ * Efter dette findes der intet indhold tilbage i kodefiler. Alt kan rettes
+ * i studioet.
  */
-export const schemaTypes = [nyhed, spiller, hold, person, sponsor, saeson];
+export const schemaTypes = [
+  nyhed, spiller, hold, person, sponsor,
+  vaerdi, uddannelse, titel,
+  saeson, indstillinger,
+];

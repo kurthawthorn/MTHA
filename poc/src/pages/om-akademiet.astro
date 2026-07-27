@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { billede } from '../lib/billeder';
+import { saeson } from '../data/saeson';
 import { altFor, iKategori } from '../data/billeder';
 
 const faciliteter = [
@@ -10,7 +11,7 @@ const faciliteter = [
   { key: 'multipark-front', h: 'Sparekassen Thy Arena | Mors',
     p: 'Hjemmebane for kampe og en del af den daglige træning.' },
   { key: 'traneholm-indgang', h: 'Traneholm',
-    p: '35 værelser i kollegielignende bolig i gåafstand fra hal og uddannelse.' },
+    p: `${saeson.vaerelser} værelser i kollegielignende bolig i gåafstand fra hal og uddannelse.` },
   { key: 'traneholm-koekken', h: 'Fælleskøkken',
     p: 'Fælleskøkken og opholdsrum på hver etage.' },
   { key: 'traneholm-ophold', h: 'Opholdsrum',
