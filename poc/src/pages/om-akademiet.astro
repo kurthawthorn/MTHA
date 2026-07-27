@@ -19,12 +19,6 @@ const faciliteter = [
     p: 'Hal, bolig og uddannelse ligger inden for gåafstand af hinanden.' },
 ];
 
-const uddannelser = [
-  { h: 'STX', p: 'Morsø Gymnasium' },
-  { h: 'HHX', p: 'EUC Nordvest' },
-  { h: 'HF', p: 'HF Mors' },
-];
-
 const traening = ['traening-hal', 'traening-styrke'];
 const socialt = iKategori('fotos', 'socialt').map((f) => f.key);
 const top = billede('hold-udenfor');
@@ -62,7 +56,10 @@ const top = billede('hold-udenfor');
         Morsø Fysiologi står for skadesforebyggende træning, og en mentaltræner
         er tilknyttet hverdagen.
       </p>
-      <p><a href="/staben">Se hele staben omkring akademiet →</a></p>
+      <p>
+        <a href="/vaerdier">Læs om akademiets værdier →</a><br />
+        <a href="/staben">Se hele staben omkring akademiet →</a>
+      </p>
     </section>
 
     <section class="section">
@@ -81,15 +78,15 @@ const top = billede('hold-udenfor');
     </section>
 
     <section class="section">
-      <div class="section__head"><h2>Uddannelse</h2></div>
-      <div class="grid grid--3">
-        {uddannelser.map((u) => (
-          <div class="card kort">
-            <h3>{u.h}</h3>
-            <p>{u.p}</p>
-          </div>
-        ))}
+      <div class="section__head">
+        <h2>Uddannelse og eliteidræt</h2>
+        <a href="/uddannelse">Se alle fire veje →</a>
       </div>
+      <p class="lead">
+        Det er et krav, at opholdet kombineres med en ungdomsuddannelse. Der er
+        en koordinator på hvert uddannelsessted, lektiehjælp og et skema, der er
+        lagt så træning og undervisning går op.
+      </p>
     </section>
 
     <section class="section">

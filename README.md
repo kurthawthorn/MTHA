@@ -93,6 +93,8 @@ kun nødvendige for Thisted Forsikring.
 | `/bliv-elev` | Optagelse, uddannelse, priser, ansøgning |
 | `/bliv-elev/oekonomi` | To regnestykker med SU — fra PDF til side |
 | `/bolig` | Traneholm College med priser og indskud |
+| `/vaerdier` | ”Sammen er vi stærkere”, de fire værdier, historien 2012→ |
+| `/uddannelse` | Fire uddannelsesveje med links, koordinatorer, træningsskema |
 | `/om-akademiet` | Vision, fysisk udvikling, faciliteter, hverdag |
 | `/privatlivspolitik` | GDPR-tekst som side |
 | `/dokumenter` | 3 underskrevne PDF'er + hvor resten er flyttet hen |
@@ -138,7 +140,7 @@ kan gøre det.
 
 ## Fundet undervejs
 
-Tre ting akademiet bør se på, alle fundet ved at trække indhold ud af PDF'erne:
+Otte ting akademiet bør se på, alle fundet ved at trække indhold ud af PDF'erne:
 
 1. **Prisen står to steder og er ikke ens.** Forsiden på m-tha.dk oplyser
    2.495 kr./md for ophold; brochuren skriver 2.395 kr./md.
@@ -146,7 +148,18 @@ Tre ting akademiet bør se på, alle fundet ved at trække indhold ud af PDF'ern
    College Mors" med adressen H.C. Ørstedsvej 2, mens sitet oplyser Tranevej 4.
 3. **Hjemmeboende-muligheden er usynlig.** Brochuren nævner 595–695 kr./md for
    hjemmeboende elever — det står ikke på hjemmesiden.
-4. **To sponsornavne var forkerte i mit første udtræk**, fundet ved at validere
+4. **Prisen står faktisk i TRE versioner.** Ud over de to ovenfor skriver
+   visionsbrochuren 2.255 kr./md for ophold, 316 kr. i forbrug og 495 kr. for
+   hjemmeboende. Tre kilder, tre priser på samme post.
+5. **Deres bedste argument er begravet.** ”17 af 19 spillere i Mors-Thy
+   Håndbolds ligatrup 2023/24 er eller har været i akademiets talentmiljø” stod
+   nederst på side 1 i en PDF. Det står nu på forsiden.
+6. **Værdiordet bruges ikke.** ”Sammen er vi stærkere” står på brochurens
+   forside, men ingen steder på hjemmesiden. Det har nu fået sin egen side.
+7. **Koordinatorernes direkte kontaktoplysninger** — navn, mobil og mail på
+   Morsø Gymnasium og EUC Nordvest — stod kun i velkomstfolderen til nye
+   elever, ikke på sitet.
+8. **To sponsornavne var forkerte i mit første udtræk**, fundet ved at validere
    hvert logo mod domænet i linket: `image001.jpg` er Kop & Kande, og `Thy.JPG`
    er Thy Sport — ikke Sparekassen Thy.
 
@@ -157,7 +170,7 @@ Tre ting akademiet bør se på, alle fundet ved at trække indhold ud af PDF'ern
 | Forside, blokerende | 672 KB HTML alene, før 213 billeder | 152–346 KB inkl. hero-foto |
 | Forside, HTML | 687.871 bytes | 22 KB (5 KB gzip) |
 | JavaScript | 41 scripts | 0 |
-| Rigtige sider | 1 | 71 |
+| Rigtige sider | 1 | 73 |
 | Byggetid | — | ~3 sek |
 
 ## Om dataene

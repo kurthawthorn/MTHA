@@ -28,7 +28,16 @@
  * på syv sider.
  *
  * KILDE  Tallene er akademiets egne, fra "Forældreovervejelser" og
- *        Domea-flyeren. Se noten om uoverensstemmelsen på 2.395/2.495 kr.
+ *        Domea-flyeren.
+ *
+ * ⚠︎ TRE KILDER, TRE PRISER — samme post, tre forskellige beløb
+ *      m-tha.dk forside .......... 2.495 kr./md   ophold
+ *      Forældreovervejelser ...... 2.395 kr./md   ophold · forbrug 516 kr.
+ *      Visionsbrochuren .......... 2.255 kr./md   ophold · forbrug 316 kr.
+ *                                    495 kr./md   hjemmeboende
+ *    Vi bruger Forældreovervejelsernes tal her, fordi den er den nyeste med
+ *    fuldt regnestykke. Akademiet må afgøre hvad der er gældende — og netop
+ *    det her er hele argumentet for at priser kun må stå ét sted.
  */
 
 export interface Takst {

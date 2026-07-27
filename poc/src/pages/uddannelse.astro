@@ -1,0 +1,228 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import {
+  uddannelser, uddannelseFakta, akademitraening, eliteTilbud,
+} from '../data/vaerdier';
+import { billede } from '../lib/billeder';
+import { altFor } from '../data/billeder';
+
+const foto = billede('traening-styrke');
+---
+
+<Base titel="Uddannelse og eliteidræt"
+      beskrivelse="STX, HHX, EUX Business, HF eller erhvervsuddannelse — kombineret med elitehåndbold. Koordinator på hvert uddannelsessted, lektiehjælp og et skema der hænger sammen.">
+  <div class="wrap">
+    <header class="top">
+      <span class="eyebrow">Dannelse og udvikling går hånd i hånd</span>
+      <h1>Uddannelse og eliteidræt</h1>
+      <p class="lead">
+        Det er et krav, at opholdet på akademiet kombineres med en boglig eller
+        praktisk ungdomsuddannelse. Til gengæld er skemaet lagt, så træning og
+        undervisning går op — og der er en koordinator på hvert
+        uddannelsessted hele vejen.
+      </p>
+    </header>
+
+    <section class="section">
+      <div class="section__head">
+        <h2>Fire veje</h2>
+        <span class="antal num">{uddannelser.length} muligheder</span>
+      </div>
+      <div class="ugrid">
+        {uddannelser.map((u) => (
+          <article class="ukort">
+            <header>
+              <span class="ukort__kort">{u.kort}</span>
+              <h3>{u.navn}</h3>
+              <a href={u.url} rel="noopener" target="_blank" class="ukort__sted">
+                {u.sted} <span aria-hidden="true">↗</span>
+              </a>
+            </header>
+            <p>{u.beskrivelse}</p>
+            {u.koordinator && (
+              <footer class="ukort__koord">
+                <span class="ukort__label">Koordinator</span>
+                <strong>{u.koordinator.navn}</strong>
+                <a href={`tel:+45${u.koordinator.telefon.replace(/\s/g, '')}`}>
+                  {u.koordinator.telefon}
+                </a>
+                <a href={`mailto:${u.koordinator.email}`}>{u.koordinator.email}</a>
+              </footer>
+            )}
+          </article>
+        ))}
+      </div>
+      <p class="note">
+        Alle linjer kan vælges på både EUD &amp; EUX Business, Morsø
+        Handelsgymnasium og Morsø Gymnasium. Koordinatorernes direkte numre og
+        mails stod indtil nu kun i en PDF-folder til nye elever.
+      </p>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Sådan hænger det sammen</h2></div>
+      <ul class="liste">
+        {uddannelseFakta.map((f) => <li>{f}</li>)}
+      </ul>
+      <blockquote class="citat">
+        Samarbejdet med de lokale uddannelsesinstitutioner og virksomheder er
+        noget, vi er meget stolte af på akademiet.
+      </blockquote>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Eliteidrætten omkring dig</h2></div>
+      <div class="egrid">
+        {eliteTilbud.map((e) => (
+          <div class="card ekort">
+            <h3>{e.titel}</h3>
+            <p>{e.tekst}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__head"><h2>Akademitræninger</h2></div>
+      <div class="skema">
+        <div class="tblwrap">
+          <table>
+            <caption>
+              Faste akademitræninger ud over klubtræningen. Skal du have
+              behandling, gives besked til fysioterapeuten inden kl. 21 dagen før.
+            </caption>
+            <thead>
+              <tr><th scope="col">Dag</th><th scope="col">Tid</th><th scope="col">Indhold</th></tr>
+            </thead>
+            <tbody>
+              {akademitraening.map((t) => (
+                <tr>
+                  <td>{t.dag}</td>
+                  <td class="num">{t.tid}</td>
+                  <td>{t.indhold}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {foto && (
+          <figure class="skema__foto">
+            <Image src={foto} alt={altFor('traening-styrke')} widths={[420, 760]}
+                   sizes="(max-width: 860px) 92vw, 340px" quality={80} loading="lazy" />
+          </figure>
+        )}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card cta">
+        <h2>Spørgsmål til uddannelsen?</h2>
+        <p>
+          Tag fat i koordinatoren på det uddannelsessted, du overvejer — eller
+          ring til akademiets daglige leder.
+        </p>
+        <div class="cta__btns">
+          <a href="tel:+4530624304" class="btn btn--primary">30 62 43 04</a>
+          <a href="/bliv-elev" class="btn btn--ghost">Bliv elev</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .top { display: flex; flex-direction: column; gap: 0.5rem;
+         padding-block: 1.8rem 1.1rem; border-bottom: 2px solid var(--navy); }
+  .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
+  .antal { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-faint); }
+
+  .ugrid { display: grid; gap: 1.1rem;
+           grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); }
+  .ukort {
+    background: var(--surface); border: 1px solid var(--line-soft);
+    border-radius: var(--radius); overflow: hidden;
+    display: flex; flex-direction: column; gap: 0.6rem;
+    padding: 1.1rem 1.2rem 1.2rem;
+  }
+  .ukort header { display: flex; flex-direction: column; gap: 0.28rem; }
+  .ukort__kort {
+    align-self: flex-start;
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.09em; font-size: 0.66rem; font-weight: 700;
+    background: var(--navy); color: #fff;
+    padding: 0.2rem 0.5rem; border-radius: 2px;
+  }
+  .ukort h3 { font-size: 1.02rem; }
+  .ukort__sted {
+    font-size: 0.88rem; font-weight: 600; text-decoration: none;
+    color: var(--navy-600); border-bottom: 2px solid var(--orange);
+    align-self: flex-start;
+  }
+  .ukort__sted:hover { color: var(--orange-600); }
+  .ukort > p { font-size: 0.92rem; color: var(--text-dim); flex: 1; }
+
+  .ukort__koord {
+    display: flex; flex-direction: column; gap: 0.14rem;
+    border-top: 1px solid var(--line-soft); padding-top: 0.65rem;
+    font-size: 0.85rem;
+  }
+  .ukort__label {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 0.6rem; font-weight: 600;
+    color: var(--text-faint);
+  }
+  .ukort__koord strong { font-size: 0.9rem; }
+  .ukort__koord a { color: var(--navy-600); text-decoration: none; }
+  .ukort__koord a:hover { text-decoration: underline; }
+
+  .liste { margin: 0; padding: 0; list-style: none;
+           display: flex; flex-direction: column; gap: 0.45rem; max-width: 70ch; }
+  .liste li { padding-left: 1.4rem; position: relative; color: var(--text-dim); }
+  .liste li::before {
+    content: ''; position: absolute; left: 0; top: 0.62em;
+    width: 7px; height: 7px; border-radius: 50%; background: var(--orange);
+  }
+
+  .citat {
+    margin: 1.4rem 0 0; padding: 0.5rem 0 0.5rem 1.1rem;
+    border-left: 3px solid var(--orange);
+    font-size: 1.12rem; color: var(--text); max-width: 60ch;
+    font-style: italic;
+  }
+
+  .egrid { display: grid; gap: 1rem;
+           grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+  .ekort { padding: 1.05rem 1.15rem 1.15rem; gap: 0.35rem; }
+  .ekort h3 { font-size: 0.98rem; }
+  .ekort p { font-size: 0.9rem; color: var(--text-dim); }
+
+  .skema { display: grid; gap: 1.1rem; align-items: start;
+           grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 860px) { .skema { grid-template-columns: minmax(0, 1fr) 20rem; } }
+  .skema__foto { margin: 0; aspect-ratio: 4 / 5; overflow: hidden;
+                 border-radius: var(--radius); border: 1px solid var(--line-soft); }
+  .skema__foto :global(img) { width: 100%; height: 100%; object-fit: cover; }
+
+  .tblwrap { overflow-x: auto; border: 1px solid var(--line-soft);
+             border-radius: var(--radius); }
+  table { border-collapse: collapse; width: 100%; min-width: 24rem; font-size: 0.93rem; }
+  caption { text-align: left; padding: 0.75rem 1rem; font-size: 0.8rem;
+            color: var(--text-faint); border-bottom: 1px solid var(--line-soft); }
+  th, td { text-align: left; padding: 0.6rem 1rem; border-bottom: 1px solid var(--line-soft); }
+  th { font-family: var(--font-display); text-transform: uppercase;
+       letter-spacing: 0.09em; font-size: 0.66rem; color: var(--text-dim);
+       background: var(--surface-2); }
+  td { color: var(--text-dim); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  .note { font-size: 0.82rem; color: var(--text-faint); margin-top: 0.9rem;
+          max-width: 70ch; }
+
+  .cta { padding: 1.6rem 1.7rem; gap: 0.6rem; align-items: flex-start;
+         background: var(--surface-2); }
+  .cta h2 { font-size: 1.3rem; }
+  .cta p { color: var(--text-dim); max-width: 56ch; }
+  .cta__btns { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.4rem; }
+</style>

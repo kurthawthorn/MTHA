@@ -5,6 +5,7 @@ import Base from '../layouts/Base.astro';
 import NyhedsKort from '../components/NyhedsKort.astro';
 import { hold, truppen, personer } from '../data/akademi';
 import { billede } from '../lib/billeder';
+import { MOTTO, ligatrupTal, vaerdier } from '../data/vaerdier';
 
 const nyheder = (await getCollection('nyheder'))
   .sort((a, b) => b.data.dato.getTime() - a.data.dato.getTime());
@@ -34,6 +35,7 @@ const faciliteter = [
       <div class="hero__text">
         <span class="eyebrow">Nykøbing Mors · Danmarksmestre U19</span>
         <h1>Vi skaber<br />fremtidens stjerner</h1>
+        <p class="hero__motto">”{MOTTO}”</p>
         <p class="lead">
           Elitehåndbold og ungdomsuddannelse samlet ét sted. Træning, skole og
           fællesskab i Morsø Multipark — med bolig i gåafstand fra hallen.
@@ -66,6 +68,25 @@ const faciliteter = [
                       kilde={n.data.kilde} fotoKey={n.data.fotoKey} />
         ))}
       </div>
+    </section>
+
+    <!-- Akademiets stærkeste argument. Det stod nederst på side 1 i en PDF. -->
+    <section class="section">
+      <a class="bevis" href="/vaerdier">
+        <div class="bevis__tal">
+          <strong class="num">{ligatrupTal.iMiljoeet}</strong>
+          <span class="num">af {ligatrupTal.iTrup}</span>
+        </div>
+        <div class="bevis__txt">
+          <h2>Spillere i ligatruppen kommer herfra</h2>
+          <p>
+            Af de {ligatrupTal.iTrup} spillere i Mors-Thy Håndbolds ligatrup
+            {' '}{ligatrupTal.saeson} er eller har {ligatrupTal.iMiljoeet} været
+            en del af akademiets talentmiljø.
+          </p>
+          <span class="bevis__link">Se vores værdier →</span>
+        </div>
+      </a>
     </section>
 
     <section class="section">
@@ -137,6 +158,45 @@ const faciliteter = [
         })}
       </div>
     </section>
+
+    <section class="section">
+      <div class="section__head">
+        <h2>Det vi bygger på</h2>
+        <a href="/vaerdier">Alle værdier →</a>
+      </div>
+      <div class="grid grid--2">
+        {vaerdier.slice(0, 2).map((v) => (
+          <div class="card vkort">
+            <h3>{v.titel}</h3>
+            <p>{v.tekst}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__head">
+        <h2>Uddannelse</h2>
+        <a href="/uddannelse">Uddannelse og eliteidræt →</a>
+      </div>
+      <div class="grid grid--3">
+        <div class="card vkort">
+          <h3>Fire veje</h3>
+          <p>STX, HHX og EUX Business, HF — eller en erhvervsuddannelse med
+             læreplads hos en lokal virksomhed.</p>
+        </div>
+        <div class="card vkort">
+          <h3>Koordinator hele vejen</h3>
+          <p>Fra de indledende samtaler til afgangsprøven er der en koordinator
+             tilknyttet på uddannelsesstedet.</p>
+        </div>
+        <div class="card vkort">
+          <h3>Skemaet hænger sammen</h3>
+          <p>Trænere, lærere, koordinator og elev planlægger udviklingen
+             sammen. Der er lektiehjælp på akademiet og på skolerne.</p>
+        </div>
+      </div>
+    </section>
   </div>
 </Base>
 
@@ -177,6 +237,11 @@ const faciliteter = [
     text-shadow: 0 2px 24px rgb(11 13 46 / 55%);
   }
   .hero .lead { color: #D6D7F0; }
+  .hero__motto {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.04em; font-size: clamp(0.95rem, 2.2vw, 1.3rem);
+    font-weight: 700; color: var(--orange);
+  }
   .hero .eyebrow { color: var(--orange); }
   .hero__btns { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.4rem; }
 
