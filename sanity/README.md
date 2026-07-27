@@ -287,13 +287,19 @@ På [sanity.io/manage/project/g4s1nwak/api/webhooks](https://sanity.io/manage/pr
 | Trigger when versions are modified | **fravalgt** |
 | Secret | **tom** |
 
-Under **HTTP Headers**:
+Under **HTTP Headers** — tre rækker. Bemærk at NAME og VALUE er to felter:
 
-```
-Authorization: Bearer ghp_dit_token
-Accept: application/vnd.github+json
-Content-Type: application/json
-```
+| NAME | VALUE |
+|---|---|
+| `Authorization` | `Bearer github_pat_dit_token` |
+| `Accept` | `application/vnd.github+json` |
+| `Content-Type` | `application/json` |
+
+**Intet kolon i NAME.** Kolonet er kun adskilleren i rå HTTP; her er felterne
+delt op, så `Authorization:` bliver et ugyldigt headernavn.
+
+**`Bearer ` skal med i VALUE**, med mellemrum efter. Uden skemaet svarer
+GitHub 401, selvom tokenet er rigtigt.
 
 Sæt **Filter** til `!(_type match "system.*")`, så interne systemdokumenter
 ikke starter en bygning.
