@@ -6,6 +6,7 @@ import { sponsorerPaaNiveau, hovedsponsor, spillere, getSponsor } from '../data/
 const hoved = hovedsponsor();
 const top = sponsorerPaaNiveau('topsponsor');
 const oevrige = sponsorerPaaNiveau('sponsor');
+const partnere = sponsorerPaaNiveau('partner');
 
 // Optalt automatisk ud fra spillerprofilerne — ikke vedligeholdt i hånden
 const personlige = new Map<string, number>();
@@ -25,8 +26,9 @@ const medPersonlige = [...personlige.entries()]
       <span class="eyebrow">Uden dem, intet akademi</span>
       <h1>Sponsorer</h1>
       <p class="lead">
-        Alle {top.length + oevrige.length + 1} sponsorer ligger i ét register.
-        Et logo uploades én gang og vises automatisk her, i sidefoden og på de
+        Alle {top.length + oevrige.length + 1} sponsorer og {partnere.length}
+        samarbejdspartnere ligger i ét register — med logo og link. Et logo
+        uploades én gang og vises automatisk her, i sidefoden og på de
         spillerkort sponsoren støtter.
       </p>
     </header>
@@ -65,11 +67,24 @@ const medPersonlige = [...personlige.entries()]
         {oevrige.map((s) => <SponsorLogo sponsor={s} hoejde={46} />)}
       </div>
       <p class="note">
-        Logoerne er akademiets egne filer fra m-tha.dk. De kommer i vidt
-        forskellige formater — nogle med transparent baggrund, nogle på hvid —
-        så de står alle på en plade med samme højde, for at rækken bliver rolig.
+        Logoerne er akademiets egne filer fra m-tha.dk, og hvert enkelt linker
+        til sponsorens egen hjemmeside. De kommer i vidt forskellige formater —
+        nogle med transparent baggrund, nogle på hvid — så de står alle på en
+        plade med samme højde, for at rækken bliver rolig.
       </p>
     </section>
+
+    {partnere.length > 0 && (
+      <section class="section">
+        <div class="section__head">
+          <h2>Samarbejdspartnere</h2>
+          <span class="antal num">{partnere.length}</span>
+        </div>
+        <div class="logogrid logogrid--stor">
+          {partnere.map((s) => <SponsorLogo sponsor={s} hoejde={52} />)}
+        </div>
+      </section>
+    )}
 
     {medPersonlige.length > 0 && (
       <section class="section">
@@ -83,8 +98,10 @@ const medPersonlige = [...personlige.entries()]
           ))}
         </ul>
         <p class="note">
-          Tallene er talt op automatisk ud fra spillernes profiler. Fordelingen
-          her er eksempeldata — de rigtige sammenhænge indtaster akademiet selv.
+          Alle 54 spillere har en personlig sponsor, og koblingerne er
+          akademiets egne — hentet fra m-tha.dk. Tallene til højre er talt op
+          automatisk ud fra spillerprofilerne, så de aldrig kan komme til at
+          passe dårligt.
         </p>
       </section>
     )}

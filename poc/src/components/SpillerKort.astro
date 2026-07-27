@@ -8,6 +8,7 @@ import { initials } from '../lib/slug';
 interface Props { spiller: Spiller }
 const { spiller } = Astro.props;
 const sponsor = getSponsor(spiller.sponsorId);
+const sponsorTekst = sponsor?.navn ?? spiller.sponsorNavn;
 const foto = billede(spiller.fotoKey);
 ---
 
@@ -28,7 +29,7 @@ const foto = billede(spiller.fotoKey);
   <div class="sk__body">
     <h3>{spiller.navn}</h3>
     <p class="sk__pos">{spiller.position}</p>
-    {sponsor && <p class="sk__sponsor">{sponsor.navn}</p>}
+    {sponsorTekst && <p class="sk__sponsor">{sponsorTekst}</p>}
   </div>
 </a>
 

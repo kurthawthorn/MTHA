@@ -1,12 +1,14 @@
 ---
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import { personer, iGruppe, GRUPPE_NAVNE } from '../data/akademi';
+import { personer, iSektion, SEKTION_NAVNE } from '../data/akademi';
 import { billede } from '../lib/billeder';
 import { initials } from '../lib/slug';
 
-const grupper = (Object.keys(GRUPPE_NAVNE) as (keyof typeof GRUPPE_NAVNE)[])
-  .map((g) => ({ id: g, navn: GRUPPE_NAVNE[g], folk: iGruppe(g) }))
+/* Sektionerne er dem der faktisk står på m-tha.dk — fundet ved at læse
+   overskrifterne i deres HTML, ikke gættet ud fra rollen. */
+const grupper = (['professionel', 'ansat', 'bestyrelse'] as const)
+  .map((s) => ({ id: s, navn: SEKTION_NAVNE[s], folk: iSektion(s) }))
   .filter((g) => g.folk.length > 0);
 ---
 
@@ -19,7 +21,7 @@ const grupper = (Object.keys(GRUPPE_NAVNE) as (keyof typeof GRUPPE_NAVNE)[])
       <p class="lead">
         Trænere med DHF-uddannelse, fysioterapeuter fra Morsø Fysiologi,
         uddannelseskoordinatorer på hvert af de tre uddannelsessteder — og en
-        bestyrelse bag det hele.
+        bestyrelse bag det hele. Grupperingen følger akademiets egen inddeling.
       </p>
     </header>
 
@@ -56,9 +58,9 @@ const grupper = (Object.keys(GRUPPE_NAVNE) as (keyof typeof GRUPPE_NAVNE)[])
     ))}
 
     <p class="note">
-      Navne, roller og portrætter er hentet fra m-tha.dk. De fem personer uden
-      rolle står også uden titel på den nuværende side — feltet er klar, så
-      akademiet selv kan udfylde det.
+      Navne, roller, portrætter og inddelingen i sektioner er hentet fra
+      m-tha.dk. De personer der står uden rolle står også uden titel på den
+      nuværende side — feltet er klar, så akademiet selv kan udfylde det.
     </p>
   </div>
 </Base>

@@ -26,13 +26,13 @@ i stedet for fotos.
 
 ## Billeder og dokumenter ligger ikke i git
 
-`tools/fetch_assets.py` henter **142 billeder og 3 PDF'er** fra m-tha.dk:
+`tools/fetch_assets.py` henter **149 billeder og 3 PDF'er** fra m-tha.dk:
 
 | Gruppe | Antal | Hvad |
 |---|---|---|
 | `fotos` | 20 | DM, træning, faciliteter, hverdag |
-| `portraetter` | 80 | 63 spillere + 17 professionelle |
-| `logoer` | 42 | Sponsorlogoer, transparens bevaret |
+| `portraetter` | 79 | 54 spillere + 25 i staben |
+| `logoer` | 50 | Sponsorer og partnere, med links, transparens bevaret |
 | `dokumenter` | 3 | Underskrevne PDF'er |
 
 De er **bevidst holdt uden for git**, fordi:
@@ -71,12 +71,14 @@ Samplet direkte ud af logoet, ikke gættet:
 
 | Farve | Hex | Hvor |
 |---|---|---|
-| Navy | `#2E308D` | Figuren og teksten |
-| Orange | `#E0893E` | Bolden |
+| Navy | `#32348B` | Figuren og teksten |
+| Orange | `#EF8329` | Bolden |
 | Thisted-blå | `#0762A1` | Kun omkring hovedsponsoren |
 
-Værdierne er aflæst fra en JPEG og er tilnærmede. Ret dem når akademiets
-rigtige farvekoder foreligger.
+Samplet fra `mtha-logo-officiel.png` — akademiets egen logofil med ægte
+transparens, fundet på m-tha.dk som `MTHA_Logo_Endelig-ingen baggrund.png`
+(702 × 356). Den bruges i header og sidefod; `split_logo.py`-udklipningerne er
+kun nødvendige for Thisted Forsikring.
 
 ## Sider
 
@@ -85,9 +87,9 @@ rigtige farvekoder foreligger.
 | `/` | Forside med DM-foto, nyheder, årgange, træning, faciliteter |
 | `/nyheder` + `/nyheder/[slug]` | Oversigt og enkelt nyhed |
 | `/hold/u17`, `/hold/u19` | Trup med holdfoto og filtrering |
-| `/spillere/[navn]` | 63 spillerprofiler med portræt og personlig sponsor |
-| `/staben` | 17 professionelle grupperet efter rolle |
-| `/sponsorer` | 43 sponsorer i tre niveauer |
+| `/spillere/[navn]` | 54 spillerprofiler med portræt og personlig sponsor |
+| `/staben` | 25 personer i akademiets egne tre sektioner |
+| `/sponsorer` | 44 sponsorer + 6 partnere, alle med aktivt link |
 | `/bliv-elev` | Optagelse, uddannelse, priser, ansøgning |
 | `/bliv-elev/oekonomi` | To regnestykker med SU — fra PDF til side |
 | `/bolig` | Traneholm College med priser og indskud |
@@ -95,7 +97,28 @@ rigtige farvekoder foreligger.
 | `/privatlivspolitik` | GDPR-tekst som side |
 | `/dokumenter` | 3 underskrevne PDF'er + hvor resten er flyttet hen |
 
-## Sæsonskifte — ét sted
+## Sæsonskifte — spillerne flytter sig selv
+
+Et hold er defineret ved hvilke **fødselsår** det består af, ikke ved en
+spillerliste. Fødselsåret er stamdata der aldrig ændrer sig, så
+holdtilknytningen udregnes — se `holdFor()` i `poc/src/data/akademi.ts`.
+
+Ved sæsonskifte rettes kun årgangene på holdene i `saeson.ts`. Målt på
+prototypen:
+
+| | Før | Efter |
+|---|---|---|
+| U17 | 25 spillere (2008–2009) | 12 spillere (2009–2010) |
+| U19 | 29 spillere (2006–2007) | 28 spillere (2007–2008) |
+
+De 13 født i 2008 rykkede selv op fra U17 til U19; de 14 født i 2006 faldt ud
+af truppen. **Ingen spillere blev redigeret.** Spiller en ung op eller ned,
+sættes en overstyring på netop den spiller.
+
+Se `sanity/README.md` for hvordan det ser ud i administrationen — herunder
+hvordan en spiller og et portræt bindes sammen.
+
+## Priser og satser — ét sted
 
 Alt der varierer fra sæson til sæson står i **`poc/src/data/saeson.ts`** og kun
 der: årstal, årgange, priser, SU-satser og takster. Ingen side hardkoder et
@@ -123,6 +146,9 @@ Tre ting akademiet bør se på, alle fundet ved at trække indhold ud af PDF'ern
    College Mors" med adressen H.C. Ørstedsvej 2, mens sitet oplyser Tranevej 4.
 3. **Hjemmeboende-muligheden er usynlig.** Brochuren nævner 595–695 kr./md for
    hjemmeboende elever — det står ikke på hjemmesiden.
+4. **To sponsornavne var forkerte i mit første udtræk**, fundet ved at validere
+   hvert logo mod domænet i linket: `image001.jpg` er Kop & Kande, og `Thy.JPG`
+   er Thy Sport — ikke Sparekassen Thy.
 
 ## Målt resultat
 
@@ -131,15 +157,16 @@ Tre ting akademiet bør se på, alle fundet ved at trække indhold ud af PDF'ern
 | Forside, blokerende | 672 KB HTML alene, før 213 billeder | 152–346 KB inkl. hero-foto |
 | Forside, HTML | 687.871 bytes | 22 KB (5 KB gzip) |
 | JavaScript | 41 scripts | 0 |
-| Rigtige sider | 1 | 80 |
+| Rigtige sider | 1 | 71 |
 | Byggetid | — | ~3 sek |
 
 ## Om dataene
 
-Spillernes og stabens **navne, roller, årgange og portrætter** er offentlige
-oplysninger fra m-tha.dk. **Position, rygnummer, fødselsår, moderklub,
-uddannelse og personlig sponsor er eksempeldata** — indsat for at vise
-felterne, og skal erstattes.
+Spillernes og stabens **navne, årgange, portrætter, stabens roller og
+sektioner samt alle 54 personlige sponsorkoblinger** er offentlige oplysninger
+fra m-tha.dk. **Position, rygnummer, moderklub og uddannelse er eksempeldata**
+— indsat for at vise felterne, og skal erstattes. Det præcise fødselsår
+indenfor en årgang er også eksempeldata; selve årgangen er den rigtige.
 
 Det står i et banner øverst på hver side og på hver spillerprofil.
 

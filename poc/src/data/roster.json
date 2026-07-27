@@ -4,482 +4,663 @@
    "navn": "Christian Guldhammer Højbak",
    "hold": "u17",
    "key": "spiller-christian-guldhammer-hoejbak",
-   "kilde": "33.png"
+   "kilde": "33.png",
+   "sponsorNavn": "3N Lakering",
+   "sponsorId": "3n-lakering",
+   "foedselsaar": 2008
   },
   {
    "navn": "Gustav Bro Petersen",
    "hold": "u17",
    "key": "spiller-gustav-bro-petersen",
-   "kilde": "18.png"
+   "kilde": "18.png",
+   "sponsorNavn": "Jyske Bank",
+   "sponsorId": null,
+   "foedselsaar": 2009
   },
   {
    "navn": "Gustav Nielsen",
    "hold": "u17",
    "key": "spiller-gustav-nielsen",
-   "kilde": "25.png"
+   "kilde": "25.png",
+   "sponsorNavn": "HJ Byg",
+   "sponsorId": "hj-byg",
+   "foedselsaar": 2008
   },
   {
    "navn": "Hjalte Trangbæk Jørgensen",
    "hold": "u17",
    "key": "spiller-hjalte-trangbaek-joergensen",
-   "kilde": "20.png"
+   "kilde": "20.png",
+   "sponsorNavn": "Morsø Gymnasium",
+   "sponsorId": "morsoe-gymnasium",
+   "foedselsaar": 2009
   },
   {
    "navn": "Hugo Buch Salling Mortensen",
    "hold": "u17",
    "key": "spiller-hugo-buch-salling-mortensen",
-   "kilde": "27.png"
+   "kilde": "27.png",
+   "sponsorNavn": "McDonald's",
+   "sponsorId": "mcdonald-s",
+   "foedselsaar": 2008
   },
   {
    "navn": "Jens Peter Hoxer",
    "hold": "u17",
    "key": "spiller-jens-peter-hoxer",
-   "kilde": "JH.png"
+   "kilde": "JH.png",
+   "sponsorNavn": "Granias",
+   "sponsorId": "granias",
+   "foedselsaar": 2009
   },
   {
    "navn": "Jeppe Knudsen",
    "hold": "u17",
    "key": "spiller-jeppe-knudsen",
-   "kilde": "19.png"
+   "kilde": "19.png",
+   "sponsorNavn": "BDO",
+   "sponsorId": "bdo",
+   "foedselsaar": 2008
   },
   {
    "navn": "Joakim Lindum",
    "hold": "u17",
    "key": "spiller-joakim-lindum",
-   "kilde": "7.png"
+   "kilde": "7.png",
+   "sponsorNavn": "Thisted Forsikring",
+   "sponsorId": "thisted-forsikring",
+   "foedselsaar": 2009
   },
   {
    "navn": "Jonas Bakholdt",
    "hold": "u17",
    "key": "spiller-jonas-bakholdt",
-   "kilde": "28.png"
+   "kilde": "28.png",
+   "sponsorNavn": "Jyske Bank",
+   "sponsorId": null,
+   "foedselsaar": 2008
   },
   {
    "navn": "Jonas Pedersen",
    "hold": "u17",
    "key": "spiller-jonas-pedersen",
-   "kilde": "42.png"
+   "kilde": "42.png",
+   "sponsorNavn": "Jysk Elteknik",
+   "sponsorId": "jysk-elteknik",
+   "foedselsaar": 2009
   },
   {
    "navn": "Jonas Thomsen",
    "hold": "u17",
    "key": "spiller-jonas-thomsen",
-   "kilde": "10.png"
+   "kilde": "10.png",
+   "sponsorNavn": "Thisted Forsikring",
+   "sponsorId": "thisted-forsikring",
+   "foedselsaar": 2008
   },
   {
    "navn": "Julius Christian Nielsen",
    "hold": "u17",
    "key": "spiller-julius-christian-nielsen",
-   "kilde": "81.png"
+   "kilde": "81.png",
+   "sponsorNavn": "Dencker",
+   "sponsorId": "dencker",
+   "foedselsaar": 2009
   },
   {
    "navn": "Lucas Møller Nielsen",
    "hold": "u17",
    "key": "spiller-lucas-moeller-nielsen",
-   "kilde": "79.png"
+   "kilde": "79.png",
+   "sponsorNavn": "Midtbus Jylland",
+   "sponsorId": null,
+   "foedselsaar": 2008
   },
   {
    "navn": "Ludvig Bruun Sørensen",
    "hold": "u17",
    "key": "spiller-ludvig-bruun-soerensen",
-   "kilde": "11.png"
+   "kilde": "11.png",
+   "sponsorNavn": "Malermester Jesper Johansen",
+   "sponsorId": null,
+   "foedselsaar": 2009
   },
   {
    "navn": "Louie Paulsen",
    "hold": "u17",
    "key": "spiller-louie-paulsen",
-   "kilde": "29.png"
+   "kilde": "29.png",
+   "sponsorNavn": "Thy Sport",
+   "sponsorId": "thy-sport",
+   "foedselsaar": 2008
   },
   {
    "navn": "Mads Nørgaard",
    "hold": "u17",
    "key": "spiller-mads-noergaard",
-   "kilde": "87.png"
+   "kilde": "87.png",
+   "sponsorNavn": "Sydthy Kurbad",
+   "sponsorId": "sydthy-kurbad",
+   "foedselsaar": 2009
   },
   {
    "navn": "Malthe Bæk",
    "hold": "u17",
    "key": "spiller-malthe-baek",
-   "kilde": "23.png"
+   "kilde": "23.png",
+   "sponsorNavn": "BDO",
+   "sponsorId": "bdo",
+   "foedselsaar": 2008
   },
   {
    "navn": "Marcus Bundgaard",
    "hold": "u17",
    "key": "spiller-marcus-bundgaard",
-   "kilde": "14.png"
+   "kilde": "14.png",
+   "sponsorNavn": "Kelds Køreskole",
+   "sponsorId": "kelds-koereskole",
+   "foedselsaar": 2009
   },
   {
    "navn": "Mathias Enevoldsen",
    "hold": "u17",
    "key": "spiller-mathias-enevoldsen",
-   "kilde": "89.png"
+   "kilde": "89.png",
+   "sponsorNavn": "RSM",
+   "sponsorId": "rsm",
+   "foedselsaar": 2008
   },
   {
    "navn": "Nicklas Taarnager Andersen",
    "hold": "u17",
    "key": "spiller-nicklas-taarnager-andersen",
-   "kilde": "80.png"
+   "kilde": "80.png",
+   "sponsorNavn": "Jysk Elteknik",
+   "sponsorId": "jysk-elteknik",
+   "foedselsaar": 2009
   },
   {
    "navn": "Oliver Mors",
    "hold": "u17",
    "key": "spiller-oliver-mors",
-   "kilde": "26.png"
+   "kilde": "26.png",
+   "sponsorNavn": "Jesperhus",
+   "sponsorId": "jesperhus",
+   "foedselsaar": 2008
   },
   {
    "navn": "Peter Dalgaard",
    "hold": "u17",
    "key": "spiller-peter-dalgaard",
-   "kilde": "84.png"
+   "kilde": "84.png",
+   "sponsorNavn": "TKC Mad",
+   "sponsorId": null,
+   "foedselsaar": 2009
   },
   {
    "navn": "Rasmus Lang Havemann",
    "hold": "u17",
    "key": "spiller-rasmus-lang-havemann",
-   "kilde": "17.png"
+   "kilde": "17.png",
+   "sponsorNavn": "BR Energy",
+   "sponsorId": "br-energy",
+   "foedselsaar": 2008
   },
   {
    "navn": "Simon Nørmølle Christiansen",
    "hold": "u17",
    "key": "spiller-simon-noermoelle-christiansen",
-   "kilde": "32.png"
+   "kilde": "32.png",
+   "sponsorNavn": "RedOffice",
+   "sponsorId": "redoffice",
+   "foedselsaar": 2009
   },
   {
    "navn": "William Lundt Malling",
    "hold": "u17",
    "key": "spiller-william-lundt-malling",
-   "kilde": "24.png"
+   "kilde": "24.png",
+   "sponsorNavn": "EUC Nordvest - Morsø Handelsgymnasium",
+   "sponsorId": null,
+   "foedselsaar": 2008
   },
   {
    "navn": "Alexander Hamper",
    "hold": "u19",
    "key": "spiller-alexander-hamper",
-   "kilde": "85.png"
+   "kilde": "85.png",
+   "sponsorNavn": "Dagli'Brugsen",
+   "sponsorId": "dagli-brugsen",
+   "foedselsaar": 2007
   },
   {
    "navn": "Christian Lyng Andersen",
    "hold": "u19",
    "key": "spiller-christian-lyng-andersen",
-   "kilde": "46.png"
+   "kilde": "46.png",
+   "sponsorNavn": "RedOffice",
+   "sponsorId": "redoffice",
+   "foedselsaar": 2006
   },
   {
    "navn": "Gustav Sandbæk Sunesen",
    "hold": "u19",
    "key": "spiller-gustav-sandbaek-sunesen",
-   "kilde": "86.png"
+   "kilde": "86.png",
+   "sponsorNavn": "Davidsen",
+   "sponsorId": "davidsen",
+   "foedselsaar": 2007
   },
   {
    "navn": "Isak Andersen",
    "hold": "u19",
    "key": "spiller-isak-andersen",
-   "kilde": "40.png"
+   "kilde": "40.png",
+   "sponsorNavn": "3N Lakering",
+   "sponsorId": "3n-lakering",
+   "foedselsaar": 2006
   },
   {
    "navn": "Johannes Dalsgaard",
    "hold": "u19",
    "key": "spiller-johannes-dalsgaard",
-   "kilde": "48.png"
+   "kilde": "48.png",
+   "sponsorNavn": "EUC Nordvest - Morsø Handelsgymnasium",
+   "sponsorId": null,
+   "foedselsaar": 2007
   },
   {
    "navn": "Jonathan Rokkjær",
    "hold": "u19",
    "key": "spiller-jonathan-rokkjaer",
-   "kilde": "16.png"
+   "kilde": "16.png",
+   "sponsorNavn": "3N Lakering",
+   "sponsorId": "3n-lakering",
+   "foedselsaar": 2006
   },
   {
    "navn": "Kasper Vestby",
    "hold": "u19",
    "key": "spiller-kasper-vestby",
-   "kilde": "MTHA 2025-2026 (1).png"
+   "kilde": "MTHA 2025-2026 (1).png",
+   "sponsorNavn": "e-stimate",
+   "sponsorId": "e-stimate",
+   "foedselsaar": 2007
   },
   {
    "navn": "Mads Fuglsang",
    "hold": "u19",
    "key": "spiller-mads-fuglsang",
-   "kilde": "49.png"
+   "kilde": "49.png",
+   "sponsorNavn": "Krabbe Invest",
+   "sponsorId": "krabbe-invest",
+   "foedselsaar": 2006
   },
   {
    "navn": "Mads Guldhammer Højbak",
    "hold": "u19",
    "key": "spiller-mads-guldhammer-hoejbak",
-   "kilde": "51.png"
+   "kilde": "51.png",
+   "sponsorNavn": "J.A. Plast",
+   "sponsorId": "j-a-plast",
+   "foedselsaar": 2007
   },
   {
    "navn": "Magnus Pagh Haagaard",
    "hold": "u19",
    "key": "spiller-magnus-pagh-haagaard",
-   "kilde": "95.png"
+   "kilde": "95.png",
+   "sponsorNavn": "RedOffice",
+   "sponsorId": "redoffice",
+   "foedselsaar": 2006
   },
   {
    "navn": "Malthe Tang Jønsson",
    "hold": "u19",
    "key": "spiller-malthe-tang-joensson",
-   "kilde": "35.png"
+   "kilde": "35.png",
+   "sponsorNavn": "Invita",
+   "sponsorId": "invita",
+   "foedselsaar": 2007
   },
   {
    "navn": "Nikolaj Madsen",
    "hold": "u19",
    "key": "spiller-nikolaj-madsen",
-   "kilde": "45.png"
+   "kilde": "45.png",
+   "sponsorNavn": "Budolfi Privathospital",
+   "sponsorId": "budolfi-privathospital",
+   "foedselsaar": 2006
   },
   {
    "navn": "Niels Clausen",
    "hold": "u19",
    "key": "spiller-niels-clausen",
-   "kilde": "34.png"
+   "kilde": "34.png",
+   "sponsorNavn": "Jyske Bank",
+   "sponsorId": null,
+   "foedselsaar": 2007
   },
   {
    "navn": "Noam Emil Kleinberger",
    "hold": "u19",
    "key": "spiller-noam-emil-kleinberger",
-   "kilde": "52.png"
+   "kilde": "52.png",
+   "sponsorNavn": "Halkjærs Auto",
+   "sponsorId": "halkjaers-auto",
+   "foedselsaar": 2006
   },
   {
    "navn": "Simun Jóhannus Eliassen",
    "hold": "u19",
    "key": "spiller-simun-johannus-eliassen",
-   "kilde": "22.png"
+   "kilde": "22.png",
+   "sponsorNavn": "iSolv",
+   "sponsorId": "isolv",
+   "foedselsaar": 2007
   },
   {
    "navn": "Anton Sunesen",
    "hold": "u19",
    "key": "spiller-anton-sunesen",
-   "kilde": "38.png"
+   "kilde": "38.png",
+   "sponsorNavn": "Davidsen",
+   "sponsorId": "davidsen",
+   "foedselsaar": 2006
   },
   {
    "navn": "Anton Lund Gregersen",
    "hold": "u19",
    "key": "spiller-anton-lund-gregersen",
-   "kilde": "39.png"
+   "kilde": "39.png",
+   "sponsorNavn": "Malermester Jesper Johansen",
+   "sponsorId": null,
+   "foedselsaar": 2007
   },
   {
    "navn": "Frederik Brorson Hansen",
    "hold": "u19",
    "key": "spiller-frederik-brorson-hansen",
-   "kilde": "36.png"
+   "kilde": "36.png",
+   "sponsorNavn": "Mr. Torben Jensen",
+   "sponsorId": "mr-torben-jensen",
+   "foedselsaar": 2006
   },
   {
    "navn": "Gustav Tandrup",
    "hold": "u19",
    "key": "spiller-gustav-tandrup",
-   "kilde": "5.png"
+   "kilde": "5.png",
+   "sponsorNavn": "MTH Biler",
+   "sponsorId": "mth-biler",
+   "foedselsaar": 2007
   },
   {
    "navn": "Hjalte Bro Pedersen",
    "hold": "u19",
    "key": "spiller-hjalte-bro-pedersen",
-   "kilde": "83.png"
+   "kilde": "83.png",
+   "sponsorNavn": "e-stimate",
+   "sponsorId": "e-stimate",
+   "foedselsaar": 2006
   },
   {
    "navn": "Jasper Møller Vangsgaard",
    "hold": "u19",
    "key": "spiller-jasper-moeller-vangsgaard",
-   "kilde": "43.png"
+   "kilde": "43.png",
+   "sponsorNavn": "Mul10metal",
+   "sponsorId": null,
+   "foedselsaar": 2007
   },
   {
    "navn": "Lorik Zogaj",
    "hold": "u19",
    "key": "spiller-lorik-zogaj",
-   "kilde": "88.png"
+   "kilde": "88.png",
+   "sponsorNavn": "Jysk Elteknik",
+   "sponsorId": "jysk-elteknik",
+   "foedselsaar": 2006
   },
   {
    "navn": "Lucas Kjær Krintel",
    "hold": "u19",
    "key": "spiller-lucas-kjaer-krintel",
-   "kilde": "15.png"
+   "kilde": "15.png",
+   "sponsorNavn": "Autohuset Limfjorden",
+   "sponsorId": "autohuset-limfjorden",
+   "foedselsaar": 2007
   },
   {
    "navn": "Marius Linnemann Heide",
    "hold": "u19",
    "key": "spiller-marius-linnemann-heide",
-   "kilde": "31.png"
+   "kilde": "31.png",
+   "sponsorNavn": "Jyske Bank",
+   "sponsorId": null,
+   "foedselsaar": 2006
   },
   {
    "navn": "Mikkel Lomholdt Jensen",
    "hold": "u19",
    "key": "spiller-mikkel-lomholdt-jensen",
-   "kilde": "47.png"
+   "kilde": "47.png",
+   "sponsorNavn": "Sparekassen Danmark",
+   "sponsorId": "sparekassen-danmark",
+   "foedselsaar": 2007
   },
   {
    "navn": "Noah Skovgaard Henriksen",
    "hold": "u19",
    "key": "spiller-noah-skovgaard-henriksen",
-   "kilde": "94.png"
+   "kilde": "94.png",
+   "sponsorNavn": "Sparekassen Danmark",
+   "sponsorId": "sparekassen-danmark",
+   "foedselsaar": 2006
   },
   {
    "navn": "Philip Villesen Markussen",
    "hold": "u19",
    "key": "spiller-philip-villesen-markussen",
-   "kilde": "44.png"
+   "kilde": "44.png",
+   "sponsorNavn": "Ornestation Mors",
+   "sponsorId": "ornestation-mors",
+   "foedselsaar": 2007
   },
   {
    "navn": "Victor Bjerre Nyfjeld",
    "hold": "u19",
    "key": "spiller-victor-bjerre-nyfjeld",
-   "kilde": "82.png"
+   "kilde": "82.png",
+   "sponsorNavn": "RedOffice",
+   "sponsorId": "redoffice",
+   "foedselsaar": 2006
   },
   {
    "navn": "Viggo Bransholm Mikkelsen",
    "hold": "u19",
    "key": "spiller-viggo-bransholm-mikkelsen",
-   "kilde": "41.png"
-  },
-  {
-   "navn": "Hans Riisager Holst",
-   "hold": "u19",
-   "key": "spiller-hans-riisager-holst",
-   "kilde": "az.png"
-  },
-  {
-   "navn": "Jens Jørgen Jensen",
-   "hold": "u19",
-   "key": "spiller-jens-joergen-jensen",
-   "kilde": "af.png"
-  },
-  {
-   "navn": "Henrik Markmøller Bro",
-   "hold": "u19",
-   "key": "spiller-henrik-markmoeller-bro",
-   "kilde": "at.png"
-  },
-  {
-   "navn": "Tore Müller",
-   "hold": "u19",
-   "key": "spiller-tore-muller",
-   "kilde": "ay.png"
-  },
-  {
-   "navn": "Kim Standly",
-   "hold": "u19",
-   "key": "spiller-kim-standly",
-   "kilde": "au.png"
-  },
-  {
-   "navn": "Preben Dahlgaard",
-   "hold": "u19",
-   "key": "spiller-preben-dahlgaard",
-   "kilde": "ad.png"
-  },
-  {
-   "navn": "Kenny Thomsen",
-   "hold": "u19",
-   "key": "spiller-kenny-thomsen",
-   "kilde": "dada.png"
-  },
-  {
-   "navn": "Jesper Kjær Nannerup",
-   "hold": "u19",
-   "key": "spiller-jesper-kjaer-nannerup",
-   "kilde": "ap.png"
-  },
-  {
-   "navn": "Ian Marko Fog",
-   "hold": "u19",
-   "key": "spiller-ian-marko-fog",
-   "kilde": "asas.png"
+   "kilde": "41.png",
+   "sponsorNavn": "Morsø Tømrer & Snedker",
+   "sponsorId": null,
+   "foedselsaar": 2007
   }
  ],
  "stab": [
   {
+   "navn": "Hans Riisager Holst",
+   "key": "person-hans-riisager-holst",
+   "kilde": "az.png",
+   "sektion": "bestyrelse",
+   "rolle": ""
+  },
+  {
+   "navn": "Jens Jørgen Jensen",
+   "key": "person-jens-joergen-jensen",
+   "kilde": "af.png",
+   "sektion": "bestyrelse",
+   "rolle": ""
+  },
+  {
+   "navn": "Henrik Markmøller Bro",
+   "key": "person-henrik-markmoeller-bro",
+   "kilde": "at.png",
+   "sektion": "bestyrelse",
+   "rolle": ""
+  },
+  {
+   "navn": "Tore Müller",
+   "key": "person-tore-muller",
+   "kilde": "ay.png",
+   "sektion": "bestyrelse",
+   "rolle": ""
+  },
+  {
+   "navn": "Kim Standly",
+   "key": "person-kim-standly",
+   "kilde": "au.png",
+   "sektion": "bestyrelse",
+   "rolle": ""
+  },
+  {
+   "navn": "Preben Dahlgaard",
+   "key": "person-preben-dahlgaard",
+   "kilde": "ad.png",
+   "sektion": "bestyrelse",
+   "rolle": ""
+  },
+  {
+   "navn": "Kenny Thomsen",
+   "key": "person-kenny-thomsen",
+   "kilde": "dada.png",
+   "sektion": "bestyrelse",
+   "rolle": ""
+  },
+  {
+   "navn": "Ian Marko Fog",
+   "key": "person-ian-marko-fog",
+   "kilde": "asas.png",
+   "sektion": "bestyrelse",
+   "rolle": ""
+  },
+  {
    "navn": "Lars Svane Nielsen",
    "key": "person-lars-svane-nielsen",
    "kilde": "1.png",
-   "rolle": "Daglig leder af akademiet"
+   "sektion": "professionel",
+   "rolle": "Daglig leder af Akademiet"
   },
   {
    "navn": "Mikkel Møller Aggerholm",
    "key": "person-mikkel-moeller-aggerholm",
    "kilde": "53.png",
-   "rolle": "Træningsansvarlig — fysisk"
+   "sektion": "professionel",
+   "rolle": "Træningsansvarlig – Fysisk"
   },
   {
    "navn": "Henrik Tilsted",
    "key": "person-henrik-tilsted",
    "kilde": "ae.png",
-   "rolle": "Cheftræner U19-1"
+   "sektion": "professionel",
+   "rolle": "Cheftræner U19-1 Tal"
   },
   {
    "navn": "Rune Lanng",
    "key": "person-rune-lanng",
    "kilde": "ar.png",
-   "rolle": "Cheftræner U17-1"
+   "sektion": "professionel",
+   "rolle": "Cheftræner u17-1 Assiste"
   },
   {
    "navn": "Rasmus Herbst",
    "key": "person-rasmus-herbst",
    "kilde": "aq.png",
-   "rolle": "Assistenttræner U19-2"
+   "sektion": "professionel",
+   "rolle": "Assistenttræner U19-2 <spa"
   },
   {
    "navn": "Nicolas Birke",
    "key": "person-nicolas-birke",
    "kilde": "110.png",
+   "sektion": "professionel",
    "rolle": "Målmandstræner"
   },
   {
    "navn": "Maja Rysz Clausen",
    "key": "person-maja-rysz-clausen",
    "kilde": "55.png",
-   "rolle": "Fysioterapeut og diætist"
+   "sektion": "professionel",
+   "rolle": "Fysioterapeut og diætist </"
   },
   {
    "navn": "Helle F. Thøgersen",
    "key": "person-helle-f-thoegersen",
    "kilde": "Helle.JPG",
-   "rolle": "Fysioterapeut"
+   "sektion": "professionel",
+   "rolle": "Fysioterapeut </"
   },
   {
    "navn": "Sara Kankelborg Poulsen",
    "key": "person-sara-kankelborg-poulsen",
    "kilde": "54.png",
-   "rolle": "Fysioterapeut"
+   "sektion": "professionel",
+   "rolle": "Fysioterapeut </d"
   },
   {
    "navn": "Anders Hove",
    "key": "person-anders-hove",
    "kilde": "as.png",
-   "rolle": "Fysioterapeut"
+   "sektion": "professionel",
+   "rolle": "Fysioterapeut </d"
   },
   {
    "navn": "Elsebeth Overgaard",
    "key": "person-elsebeth-overgaard",
    "kilde": "ao.png",
-   "rolle": "Koordinator, EUC Nordvest"
+   "sektion": "professionel",
+   "rolle": "Koordinator EUC Nordvest <"
   },
   {
    "navn": "Jesper Kjær Nannerup",
    "key": "person-jesper-kjaer-nannerup",
    "kilde": "asqasa.png",
-   "rolle": "Koordinator, Morsø Gymnasium (STX)"
+   "sektion": "professionel",
+   "rolle": "Koordinator Morsø Gymnasium ST"
   },
   {
    "navn": "Louise Skovgaard Henriksen",
    "key": "person-louise-skovgaard-henriksen",
    "kilde": "3.png",
+   "sektion": "ansat",
    "rolle": ""
   },
   {
    "navn": "Jonas Fangel",
    "key": "person-jonas-fangel",
    "kilde": "MTHA 2025-2026JF.png",
+   "sektion": "ansat",
    "rolle": ""
   },
   {
    "navn": "Peter Lillebæk",
    "key": "person-peter-lillebaek",
    "kilde": "Peter Li.png",
+   "sektion": "ansat",
    "rolle": ""
   },
   {
    "navn": "Bente Bukhave Morgan",
    "key": "person-bente-bukhave-morgan",
    "kilde": "Bente.png",
+   "sektion": "ansat",
    "rolle": ""
   },
   {
    "navn": "Connie Christoffersen",
    "key": "person-connie-christoffersen",
    "kilde": "2.png",
+   "sektion": "ansat",
    "rolle": ""
   }
  ],
@@ -488,253 +669,351 @@
    "navn": "3N Lakering",
    "niveau": "sponsor",
    "key": "logo-3n-lakering",
-   "kilde": "3N lakering.png"
+   "kilde": "3N lakering.png",
+   "url": "https://3nlakering.dk/"
   },
   {
    "navn": "Arena Mors Fitness",
    "niveau": "sponsor",
    "key": "logo-arena-mors-fitness",
-   "kilde": "Arena Mors Fitness - Logo.png"
+   "kilde": "Arena Mors Fitness - Logo.png",
+   "url": "https://arenamors.dk/"
   },
   {
    "navn": "Autohuset Limfjorden",
    "niveau": "sponsor",
    "key": "logo-autohuset-limfjorden",
-   "kilde": "Autohuset limfjorden.png"
+   "kilde": "Autohuset limfjorden.png",
+   "url": "https://dinbilpartner.dk/vaerksteder/din-bilpartner-autohuset-limfjorden/"
   },
   {
    "navn": "BR Energy",
    "niveau": "sponsor",
    "key": "logo-br-energy",
-   "kilde": "BR ENERGY LOGO (002).png"
+   "kilde": "BR ENERGY LOGO (002).png",
+   "url": "https://brenergy.dk/"
   },
   {
    "navn": "Beierholm",
    "niveau": "sponsor",
    "key": "logo-beierholm",
-   "kilde": "Beierholm.png"
+   "kilde": "Beierholm.png",
+   "url": "https://www.beierholm.dk/kontor/beierholm-skive"
   },
   {
    "navn": "Budolfi Privathospital",
    "niveau": "sponsor",
    "key": "logo-budolfi-privathospital",
-   "kilde": "Budolfi.JPG"
+   "kilde": "Budolfi.JPG",
+   "url": "https://budolfiprivathospital.dk/"
   },
   {
    "navn": "Davidsen",
    "niveau": "sponsor",
    "key": "logo-davidsen",
-   "kilde": "Davidsen.jpg"
+   "kilde": "Davidsen.jpg",
+   "url": "https://www.davidsen.dk/"
   },
   {
    "navn": "Dencker",
    "niveau": "sponsor",
    "key": "logo-dencker",
-   "kilde": "Dencker.jpg"
+   "kilde": "Dencker.jpg",
+   "url": "https://www.dencker.net/"
   },
   {
    "navn": "Ejner Hessel",
    "niveau": "sponsor",
    "key": "logo-ejner-hessel",
-   "kilde": "Ejner_hessel_pos.png"
+   "kilde": "Ejner_hessel_pos.png",
+   "url": "https://www.hessel.dk/kontakt/afdelinger/aarhus-tilst-mercedes-benz"
   },
   {
    "navn": "Fysio-shop",
    "niveau": "sponsor",
    "key": "logo-fysio-shop",
-   "kilde": "Fysio-shop.jpeg"
+   "kilde": "Fysio-shop.jpeg",
+   "url": "https://fysio-shop.dk/"
   },
   {
    "navn": "Granias",
    "niveau": "sponsor",
    "key": "logo-granias",
-   "kilde": "Granias.PNG"
+   "kilde": "Granias.PNG",
+   "url": "https://www.grainas.dk/"
   },
   {
    "navn": "HJ Byg",
    "niveau": "sponsor",
    "key": "logo-hj-byg",
-   "kilde": "HJBYG_email.png"
+   "kilde": "HJBYG_email.png",
+   "url": "http://www.hjbygaps.dk"
   },
   {
    "navn": "Idealcombi",
    "niveau": "sponsor",
    "key": "logo-idealcombi",
-   "kilde": "Idealcombi CMYK UdvikletTestetProduceret_Thy.png"
+   "kilde": "Idealcombi CMYK UdvikletTestetProduceret_Thy.png",
+   "url": "https://idealcombi.dk/"
   },
   {
    "navn": "Invita",
    "niveau": "sponsor",
    "key": "logo-invita",
-   "kilde": "Invita_Logo_white.jpg"
+   "kilde": "Invita_Logo_white.jpg",
+   "url": "https://www.invita.dk/butikker/ostjylland/invita-arhus/"
   },
   {
    "navn": "J.A. Plast",
    "niveau": "sponsor",
    "key": "logo-j-a-plast",
-   "kilde": "J.A Logo.png"
+   "kilde": "J.A Logo.png",
+   "url": "https://japlast.com/"
   },
   {
    "navn": "Jesperhus",
    "niveau": "sponsor",
    "key": "logo-jesperhus",
-   "kilde": "Jesperhus Logo.jpg"
+   "kilde": "Jesperhus Logo.jpg",
+   "url": "https://www.jesperhus.dk/"
   },
   {
    "navn": "Kelds Køreskole",
    "niveau": "sponsor",
    "key": "logo-kelds-koereskole",
-   "kilde": "Kelds Køreskole.png"
+   "kilde": "Kelds Køreskole.png",
+   "url": "https://keldk.dk/"
   },
   {
    "navn": "Hotel Traneparken",
    "niveau": "sponsor",
    "key": "logo-hotel-traneparken",
-   "kilde": "Logo Traneparken.png"
+   "kilde": "Logo Traneparken.png",
+   "url": "https://hoteltraneparken.dk/"
   },
   {
    "navn": "Halkjærs Auto",
    "niveau": "sponsor",
    "key": "logo-halkjaers-auto",
-   "kilde": "Logo halkjærsauto.png"
+   "kilde": "Logo halkjærsauto.png",
+   "url": "https://www.halkjaersauto.dk/"
   },
   {
    "navn": "MTS",
    "niveau": "sponsor",
    "key": "logo-mts",
-   "kilde": "MTS logo.jpg"
+   "kilde": "MTS logo.jpg",
+   "url": "https://mtsmors.dk/"
   },
   {
    "navn": "Mr. Torben Jensen",
    "niveau": "sponsor",
    "key": "logo-mr-torben-jensen",
-   "kilde": "Mr Torben Jensen.png"
+   "kilde": "Mr Torben Jensen.png",
+   "url": "https://www.mr.dk/butik/mr-torben-jensen"
   },
   {
    "navn": "Rengøringsgården",
    "niveau": "sponsor",
    "key": "logo-rengoeringsgaarden",
-   "kilde": "Rengøringsg..jpg"
+   "kilde": "Rengøringsg..jpg",
+   "url": "https://www.facebook.com/profile.php?id=100070151208929"
   },
   {
    "navn": "Sportigan Nykøbing Mors",
    "niveau": "sponsor",
    "key": "logo-sportigan-nykoebing-mors",
-   "kilde": "SPORTIGAN NYKØBING MORS-3-28-BB0113.png"
+   "kilde": "SPORTIGAN NYKØBING MORS-3-28-BB0113.png",
+   "url": "https://sportigan.dk/"
   },
   {
    "navn": "Spar Nord",
    "niveau": "sponsor",
    "key": "logo-spar-nord",
-   "kilde": "Spar nord.JPG"
+   "kilde": "Spar nord.JPG",
+   "url": "https://www.sparnord.dk/"
   },
   {
    "navn": "Sparekassen Danmark",
    "niveau": "sponsor",
    "key": "logo-sparekassen-danmark",
-   "kilde": "SparD_sort_m_visuel_element.jpg"
+   "kilde": "SparD_sort_m_visuel_element.jpg",
+   "url": "https://www.spard.dk/"
   },
   {
    "navn": "Sydthy Kurbad",
    "niveau": "sponsor",
    "key": "logo-sydthy-kurbad",
-   "kilde": "Sydthy Kurbad.jpg"
+   "kilde": "Sydthy Kurbad.jpg",
+   "url": "https://www.sydthykurbad.dk/"
   },
   {
    "navn": "TKC",
    "niveau": "sponsor",
    "key": "logo-tkc",
-   "kilde": "TKC_logo, nyt 2024. jpg.jpg"
+   "kilde": "TKC_logo, nyt 2024. jpg.jpg",
+   "url": "https://tkcmad.dk/"
   },
   {
    "navn": "Thy-Mors Energi",
    "niveau": "sponsor",
    "key": "logo-thy-mors-energi",
-   "kilde": "Thy-Mors Energi.jpg"
+   "kilde": "Thy-Mors Energi.jpg",
+   "url": "https://www.thymors.dk/"
   },
   {
-   "navn": "Sparekassen Thy",
+   "navn": "Thy Sport",
    "niveau": "hovedsponsor",
-   "key": "logo-sparekassen-thy",
-   "kilde": "Thy.JPG"
+   "key": "logo-thy-sport",
+   "kilde": "Thy.JPG",
+   "url": "https://thisted-bryghus.dk/thy-sport/"
   },
   {
    "navn": "Witt Care",
    "niveau": "sponsor",
    "key": "logo-witt-care",
-   "kilde": "Witt Care.jpg"
+   "kilde": "Witt Care.jpg",
+   "url": "https://www.wittcare.com/"
   },
   {
    "navn": "Altibox",
    "niveau": "sponsor",
    "key": "logo-altibox",
-   "kilde": "altibox logo.png"
+   "kilde": "altibox logo.png",
+   "url": "https://www.altibox.dk/"
   },
   {
    "navn": "BDO",
    "niveau": "sponsor",
    "key": "logo-bdo",
-   "kilde": "bdo.png"
+   "kilde": "bdo.png",
+   "url": "https://www.bdo.dk/da-dk/kontorsteder/nykoebing-mors?gclid=Cj0KCQjw9rSoBhCiARIsAFOipll2izmgbZ-DM864LRFlmaxbkBPtcowwpQaQVM45QGYJR8lMTjAjOAcaAgo0EALw_wcB"
   },
   {
    "navn": "Dagli'Brugsen",
    "niveau": "sponsor",
    "key": "logo-dagli-brugsen",
-   "kilde": "brugsen.PNG"
+   "kilde": "brugsen.PNG",
+   "url": "https://brugsen.coop.dk/"
   },
   {
    "navn": "e-stimate",
    "niveau": "sponsor",
    "key": "logo-e-stimate",
-   "kilde": "e-stamate.png"
+   "kilde": "e-stamate.png",
+   "url": "https://www.e-stimate.dk/?gclid=Cj0KCQjw9rSoBhCiARIsAFOipllipk69UvjVdQPu2835BR5O6Xv-KNruktpy9Nsxqf4yWH_OEhs-rREaAgHvEALw_wcB"
   },
   {
-   "navn": "Sponsor",
+   "navn": "Kop & Kande",
    "niveau": "sponsor",
-   "key": "logo-sponsor",
-   "kilde": "image001.jpg"
+   "key": "logo-kop-og-kande",
+   "kilde": "image001.jpg",
+   "url": "https://www.kop-kande.dk/find-butik/kop-kande-nykobing-mors"
   },
   {
    "navn": "iSolv",
    "niveau": "sponsor",
    "key": "logo-isolv",
-   "kilde": "isolv.JPG"
+   "kilde": "isolv.JPG",
+   "url": "https://www.isolveit.net/"
   },
   {
    "navn": "Krabbe Invest",
    "niveau": "sponsor",
    "key": "logo-krabbe-invest",
-   "kilde": "krabbeinvest.png"
+   "kilde": "krabbeinvest.png",
+   "url": "https://krabbeinvesthandel.dk/"
   },
   {
    "navn": "McDonald's",
    "niveau": "sponsor",
    "key": "logo-mcdonald-s",
-   "kilde": "mcd.JPG"
+   "kilde": "mcd.JPG",
+   "url": "https://www.mcdonalds.com/dk/da-dk.html"
   },
   {
    "navn": "MUL10",
    "niveau": "sponsor",
    "key": "logo-mul10",
-   "kilde": "mul10-kombineret_-blå.png"
+   "kilde": "mul10-kombineret_-blå.png",
+   "url": "https://www.mul10metal.dk/"
   },
   {
    "navn": "Ornestation Mors",
    "niveau": "sponsor",
    "key": "logo-ornestation-mors",
-   "kilde": "ornestation-mors.png"
+   "kilde": "ornestation-mors.png",
+   "url": "https://ornestationmors.dk/da"
   },
   {
    "navn": "RedOffice",
    "niveau": "sponsor",
    "key": "logo-redoffice",
-   "kilde": "redoffice-logo-payoff-cmyk.png"
+   "kilde": "redoffice-logo-payoff-cmyk.png",
+   "url": "https://konpap.dk/"
   },
   {
    "navn": "RSM",
    "niveau": "sponsor",
    "key": "logo-rsm",
-   "kilde": "rsm1.PNG"
+   "kilde": "rsm1.PNG",
+   "url": "https://www.rsm.global/denmark/da"
+  },
+  {
+   "navn": "Jysk Elteknik",
+   "niveau": "topsponsor",
+   "key": "logo-jysk-elteknik",
+   "kilde": "Jysk Elteknik_Storskærm.jpg",
+   "url": "https://jyskel.dk/"
+  },
+  {
+   "navn": "MTH Biler",
+   "niveau": "topsponsor",
+   "key": "logo-mth-biler",
+   "kilde": "MTH Biler Toyota.JPG",
+   "url": "https://www.mthbiler.dk/afdelinger/nykoebing-m/"
+  },
+  {
+   "navn": "Morsø Gymnasium",
+   "niveau": "partner",
+   "key": "logo-morsoe-gymnasium",
+   "kilde": "Logo_Horisontal_Colour_Positive.jpg",
+   "url": "https://morsoegym.dk/"
+  },
+  {
+   "navn": "EUC Nordvest",
+   "niveau": "partner",
+   "key": "logo-euc-nordvest",
+   "kilde": "euc-nordvest-logo.jpg",
+   "url": "https://eucnordvest.dk/gymnasier/morso-handelsgymnasium-hhx/"
+  },
+  {
+   "navn": "HF Mors",
+   "niveau": "partner",
+   "key": "logo-hf-mors",
+   "kilde": "HF Mors.jpeg",
+   "url": "https://hfmors.dk/"
+  },
+  {
+   "navn": "Morsø Kommune",
+   "niveau": "partner",
+   "key": "logo-morsoe-kommune",
+   "kilde": "morsø kommune.jpg",
+   "url": "https://mors.dk/"
+  },
+  {
+   "navn": "Thisted IK",
+   "niveau": "partner",
+   "key": "logo-thisted-ik",
+   "kilde": "TIK Ny 2022.jpeg",
+   "url": "https://thisted-ik.dk/"
+  },
+  {
+   "navn": "VIA University College",
+   "niveau": "partner",
+   "key": "logo-via-university-college",
+   "kilde": "VIA.png",
+   "url": "https://www.via.dk/uddannelser/laerer/skive"
   }
  ]
 }

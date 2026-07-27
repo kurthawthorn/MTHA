@@ -7,9 +7,20 @@
  *
  * SÅDAN RULLER MAN TIL NÆSTE SÆSON
  *   1. Ret `navn`, `fra` og `til`
- *   2. Ret årgangene i `hold`
+ *   2. Ret `foedselsaar` og `aargang` på holdene
  *   3. Ret de beløb der er ændret
- *   Færdig. Priser, årstal og overskrifter opdateres over hele sitet.
+ *   Færdig.
+ *
+ * SPILLERNE FLYTTER SIG SELV
+ *   Holdene defineres ved hvilke FØDSELSÅR de består af. Spillerens fødselsår
+ *   er stamdata, der aldrig ændrer sig, så tilknytningen udregnes — se
+ *   `holdFor()` i akademi.ts. Målt på prototypen:
+ *
+ *     U17 [2008,2009] -> [2009,2010]   25 spillere -> 12
+ *     U19 [2006,2007] -> [2007,2008]   29 spillere -> 28
+ *
+ *   De 13 spillere født i 2008 rykkede selv op fra U17 til U19, og de 14 født
+ *   i 2006 faldt automatisk ud af truppen. Ingen spillere blev rørt.
  *
  * I den færdige løsning er dette ét dokument i CMS'et med samme felter, så
  * ledelsen selv kan gøre det — uden at røre kode og uden at kunne glemme et

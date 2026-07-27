@@ -22,7 +22,7 @@ export type Position =
   | 'Målvogter' | 'Venstre fløj' | 'Venstre back'
   | 'Playmaker' | 'Streg' | 'Højre back' | 'Højre fløj';
 
-export type SponsorNiveau = 'hovedsponsor' | 'topsponsor' | 'sponsor';
+export type SponsorNiveau = 'hovedsponsor' | 'topsponsor' | 'sponsor' | 'partner';
 
 export interface Sponsor {
   id: string;
@@ -46,15 +46,25 @@ export interface Hold {
 export interface Spiller {
   navn: string;
   slug: string;
-  holdId: string;
   /** Nøgle til portrættet i src/assets/portraetter/ */
   fotoKey: string;
+  /**
+   * Fødselsåret er kilden til holdtilknytning — det er et faktum der aldrig
+   * ændrer sig, mens holdet skifter hver sæson. Se `holdFor()`.
+   */
+  foedselsaar: number;
+  /**
+   * Sættes kun når en spiller spiller op eller ned — fx en stærk 2010'er på
+   * U17. Overstyrer den automatiske tilknytning.
+   */
+  holdOverstyring?: string;
   rygnummer: number;
   position: Position;
-  foedselsaar: number;
   moderklub: string;
   uddannelse: 'STX' | 'HHX' | 'HF';
+  /** Personlig sponsor — hentet fra m-tha.dk, ikke opdigtet. */
   sponsorId?: string;
+  sponsorNavn?: string;
   aktiv: boolean;
 }
 
@@ -63,7 +73,8 @@ export interface Person {
   slug: string;
   rolle: string;
   fotoKey: string;
-  gruppe: 'ledelse' | 'traener' | 'sundhed' | 'uddannelse' | 'bestyrelse';
+  /** Sektionen personen står i på m-tha.dk — ikke gættet. */
+  sektion: 'professionel' | 'ansat' | 'bestyrelse';
 }
 
 const slugFraKey = (key: string) => key.replace(/^(spiller|person|logo)-/, '');
@@ -85,6 +96,8 @@ export const sponsorer: Sponsor[] = [
     navn: s.navn,
     niveau: s.niveau as SponsorNiveau,
     logoKey: s.key,
+    // Linket til sponsorens egen hjemmeside — hentet fra m-tha.dk
+    url: (s as { url?: string }).url,
   })),
 ];
 
@@ -112,66 +125,78 @@ const POS: Position[] = [
 const KLUBBER = ['Thisted IK', 'Mors-Thy Håndbold', 'Skive fH', 'Nykøbing Mors IF',
                  'Hurup IF', 'Sydthy HK', 'Struer HK'];
 const UDD = ['STX', 'HHX', 'HF'] as const;
+/** Hvilke fødselsår hvert hold består af — ét sted, i saeson.ts. */
 const AARGANG: Record<string, number[]> = Object.fromEntries(
   saeson.hold.map((h) => [h.id, h.foedselsaar]),
 );
 
-const personligeSponsorer = roster.sponsorer
-  .filter((s) => s.niveau === 'sponsor')
-  .map((s) => slugFraKey(s.key));
-
 export const spillere: Spiller[] = roster.spillere.map((s, i) => ({
   navn: s.navn,
   slug: slugFraKey(s.key),
-  holdId: s.hold,
   fotoKey: s.key,
+  // STAMDATA: fødselsåret står fast på spilleren og ændrer sig aldrig.
+  // Det er derfor sæsonskiftet kan flytte spillerne af sig selv.
+  // Årgangen er den rigtige fra m-tha.dk; det præcise år indenfor årgangen
+  // er eksempeldata indtil akademiet udfylder det.
+  foedselsaar: s.foedselsaar,
   // ── herfra: eksempeldata ──
   rygnummer: (i % 30) + 1,
   position: POS[i % POS.length]!,
-  foedselsaar: AARGANG[s.hold]![i % 2]!,
   moderklub: KLUBBER[i % KLUBBER.length]!,
   uddannelse: UDD[i % UDD.length]!,
-  // Hver 3. spiller har en personlig sponsor — som i dag på m-tha.dk
-  sponsorId: i % 3 === 0 ? personligeSponsorer[i % personligeSponsorer.length] : undefined,
+  // Personlig sponsor: alle 54 har én, hentet fra m-tha.dk
+  sponsorId: s.sponsorId ?? undefined,
+  sponsorNavn: s.sponsorNavn ?? undefined,
   aktiv: true,
 }));
 
 /* ── Professionelle og bestyrelse ──────────────────────────────────────── */
-
-function gruppeFor(rolle: string): Person['gruppe'] {
-  const r = rolle.toLowerCase();
-  if (r.includes('daglig leder')) return 'ledelse';
-  if (r.includes('træner') || r.includes('træningsansvarlig')) return 'traener';
-  if (r.includes('fysio') || r.includes('diætist') || r.includes('mental')) return 'sundhed';
-  if (r.includes('koordinator')) return 'uddannelse';
-  return 'bestyrelse';
-}
 
 export const personer: Person[] = roster.stab.map((p) => ({
   navn: p.navn,
   slug: slugFraKey(p.key),
   rolle: p.rolle,
   fotoKey: p.key,
-  gruppe: gruppeFor(p.rolle),
+  sektion: p.sektion as Person['sektion'],
 }));
 
-export const GRUPPE_NAVNE: Record<Person['gruppe'], string> = {
-  ledelse: 'Daglig ledelse',
-  traener: 'Trænerteam',
-  sundhed: 'Sundhed og fysik',
-  uddannelse: 'Uddannelseskoordinatorer',
-  bestyrelse: 'Bestyrelse og øvrige',
+/** Sektionsnavnene som de står på m-tha.dk. */
+export const SEKTION_NAVNE: Record<Person['sektion'], string> = {
+  professionel: 'Professionelle omkring akademiet',
+  ansat: 'Ansatte',
+  bestyrelse: 'Bestyrelsen',
 };
 
 /* ── Opslag ────────────────────────────────────────────────────────────── */
 
 export const getHold = (id: string) => hold.find((h) => h.id === id);
+
+/**
+ * Holdet en spiller hører til — UDREGNET ud fra fødselsåret.
+ *
+ * Det er hele pointen: sæsonen definerer hvilke årgange hvert hold består af
+ * (se saeson.ts), og spillerne følger med af sig selv. Ved sæsonskifte rettes
+ * to felter i saeson.ts — ikke 54 spillere.
+ *
+ *   U17: [2008, 2009]  →  bliv til  [2009, 2010]
+ *   U19: [2006, 2007]  →  bliv til  [2007, 2008]
+ *
+ * En spiller der ikke længere passer i nogen årgang falder automatisk ud af
+ * truppen; historikken og profilen består.
+ */
+export const holdFor = (s: Spiller): Hold | undefined => {
+  if (s.holdOverstyring) return getHold(s.holdOverstyring);
+  return hold.find((h) => AARGANG[h.id]?.includes(s.foedselsaar));
+};
+
+/** Spillere der ikke passer i nogen årgang i denne sæson. */
+export const udenHold = () => spillere.filter((s) => s.aktiv && !holdFor(s));
 export const getSponsor = (id?: string) =>
   id ? sponsorer.find((s) => s.id === id) : undefined;
 export const truppen = (holdId: string) =>
-  spillere.filter((s) => s.holdId === holdId && s.aktiv)
+  spillere.filter((s) => s.aktiv && holdFor(s)?.id === holdId)
           .sort((a, b) => a.rygnummer - b.rygnummer);
 export const hovedsponsor = () => HOVEDSPONSOR;
-export const iGruppe = (g: Person['gruppe']) => personer.filter((p) => p.gruppe === g);
+export const iSektion = (s: Person['sektion']) => personer.filter((p) => p.sektion === s);
 export const sponsorerPaaNiveau = (n: SponsorNiveau) =>
   sponsorer.filter((s) => s.niveau === n);

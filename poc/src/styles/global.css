@@ -1,9 +1,10 @@
 /* ==========================================================================
    MTHA — designtokens
-   Farverne er samplet direkte ud af det officielle logo
-   (assets/brand/mtha-logo.png), ikke gaettet:
-     navy   #2E308D   figuren og teksten
-     orange #E0893E   bolden
+   Farverne er samplet ud af akademiets officielle logofil
+   MTHA_Logo_Endelig-ingen baggrund.png (702x356, aegte RGBA) — ikke gaettet,
+   og ikke fra en udklipning af en JPEG:
+     navy   #32348B   figuren og teksten
+     orange #EF8329   bolden
    Thisted Forsikring: #0762A1 / #61A4D8 — bruges kun omkring hovedsponsoren,
    aldrig som akademiets egen farve.
    ========================================================================== */
@@ -11,13 +12,13 @@
 :root {
   --navy-900: #1B1D5C;
   --navy-800: #23256F;
-  --navy: #2E308D;
+  --navy: #32348B;
   --navy-600: #4245A8;
   --navy-300: #A9AAD6;
   --navy-100: #E7E7F4;
 
-  --orange: #E0893E;
-  --orange-600: #C4712A;
+  --orange: #EF8329;
+  --orange-600: #CC6A12;
   --orange-100: #FBEEE1;
 
   --thisted: #0762A1;

@@ -3,7 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import SponsorLogo from '../../components/SponsorLogo.astro';
-import { spillere, getHold, getSponsor } from '../../data/akademi';
+import { spillere, holdFor, getSponsor } from '../../data/akademi';
 import { billede } from '../../lib/billeder';
 import { initials } from '../../lib/slug';
 
@@ -12,17 +12,19 @@ export const getStaticPaths = (() =>
 ) satisfies GetStaticPaths;
 
 const { s } = Astro.props;
-const h = getHold(s.holdId);
+// Holdet udregnes ud fra fødselsåret — se holdFor() i akademi.ts
+const h = holdFor(s);
 const sponsor = getSponsor(s.sponsorId);
+const sponsorNavn = sponsor?.navn ?? s.sponsorNavn;
 const foto = billede(s.fotoKey);
 ---
 
 <Base titel={s.navn}
-      beskrivelse={`${s.navn} spiller ${s.position} for ${h?.navn} på Mors-Thy Håndbold Akademi.`}>
+      beskrivelse={`${s.navn} spiller ${s.position}${h ? ` for ${h.navn}` : ''} på Mors-Thy Håndbold Akademi.`}>
   <div class="wrap">
     <nav class="krumme" aria-label="Sti">
       <a href="/">Forside</a> <span>/</span>
-      <a href={`/hold/${s.holdId}`}>{h?.navn} {h?.aargang}</a> <span>/</span>
+      {h && <a href={`/hold/${h.id}`}>{h.navn} {h.aargang}</a>}{h && <span>/</span>}
       <span>{s.navn}</span>
     </nav>
 
@@ -38,7 +40,7 @@ const foto = billede(s.fotoKey);
       </div>
 
       <div class="profil__info">
-        <span class="eyebrow">{h?.navn} · Årgang {h?.aargang}</span>
+        <span class="eyebrow">{h ? `${h.navn} · Årgang ${h.aargang}` : `Årgang ${s.foedselsaar}`}</span>
         <h1>{s.navn}</h1>
 
         <dl class="fakta">
@@ -49,28 +51,28 @@ const foto = billede(s.fotoKey);
           <div><dt>Uddannelse</dt><dd>{s.uddannelse}</dd></div>
         </dl>
 
-        {sponsor && (
+        {sponsorNavn && (
           <aside class="sponsorboks">
             <div class="sponsorboks__txt">
               <span class="eyebrow">Personlig sponsor</span>
-              <strong>{sponsor.navn}</strong>
+              <strong>{sponsorNavn}</strong>
               <p>
                 Logoet hentes fra sponsorregistret. Skifter sponsoren navn eller
                 logo, opdateres det ét sted og slår igennem på alle de spillere
                 de støtter — og i sidefoden.
               </p>
             </div>
-            <SponsorLogo sponsor={sponsor} hoejde={46} />
+            {sponsor && <SponsorLogo sponsor={sponsor} hoejde={46} />}
           </aside>
         )}
 
         <p class="demo">
-          Navn, årgang og portræt er hentet fra m-tha.dk. Position, rygnummer,
-          moderklub, uddannelse og personlig sponsor er eksempeldata i denne
-          prototype.
+          Navn, årgang, portræt og personlig sponsor er hentet fra m-tha.dk.
+          Position, rygnummer, fødselsår, moderklub og uddannelse er
+          eksempeldata i denne prototype.
         </p>
 
-        <a href={`/hold/${s.holdId}`} class="btn btn--ghost">← Hele truppen</a>
+        {h && <a href={`/hold/${h.id}`} class="btn btn--ghost">← Hele truppen</a>}
       </div>
     </article>
   </div>
