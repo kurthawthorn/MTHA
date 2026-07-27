@@ -14,115 +14,148 @@ const sponsor = hovedsponsor();
 const path = Astro.url.pathname;
 ---
 
+{/*
+  Hvid header — bevidst valg, ikke en tilfældighed.
+
+  Akademiets logo er navy tekst og orange bold på gennemsigtig baggrund. Det er
+  designet til lys bund. På en navy header ville de navy dele forsvinde, og
+  derfor stod logoet før på en hvid plade — hvilket gjorde gennemsigtigheden
+  usynlig og holdt logoet kunstigt lille.
+
+  Med hvid bund kan logoet stå frit og i fuld størrelse, og navy bruges i
+  stedet som accent: menutekst, underkant og den aktive markering.
+*/}
 <header class="hdr">
-  <!-- Hovedsponsor-baand: adskilt fra akademiets egen identitet -->
-  <div class="hdr__sponsor">
-    <div class="wrap hdr__sponsor-in">
-      <span>Hovedsponsor</span>
-      <a href={sponsor.url} rel="noopener" target="_blank">
-        <img src={sponsor.logo} alt={sponsor.navn} width="132" height="72" />
-      </a>
-    </div>
-  </div>
+  <div class="wrap hdr__in">
+    <a href="/" class="hdr__logo" aria-label="Mors-Thy Håndbold Akademi — forside">
+      <img src="/brand/mtha-logo-officiel.png" alt="Mors-Thy Håndbold Akademi"
+           width="702" height="356" />
+    </a>
 
-  <div class="hdr__main">
-    <div class="wrap hdr__main-in">
-      <a href="/" class="hdr__logo" aria-label="Mors-Thy Håndbold Akademi — forside">
-        <img src="/brand/mtha-logo-officiel.png" alt="Mors-Thy Håndbold Akademi"
-             width="702" height="356" />
-      </a>
+    <div class="hdr__hoejre">
+      <p class="hdr__sponsor">
+        <span>Hovedsponsor</span>
+        <a href={sponsor.url} rel="noopener" target="_blank">
+          <img src="/brand/thisted-forsikring.png" alt={sponsor.navn}
+               width="314" height="173" />
+        </a>
+      </p>
 
-      <nav aria-label="Hovedmenu">
-        <ul>
-          {nav.map((i) => (
-            <li>
-              <a href={i.href}
-                 aria-current={path.startsWith(i.href) ? 'page' : undefined}>{i.label}</a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <a href="/bliv-elev" class="btn btn--primary hdr__cta">Bliv elev</a>
+      <div class="hdr__bund">
+        <nav aria-label="Hovedmenu">
+          <ul>
+            {nav.map((i) => (
+              <li>
+                <a href={i.href}
+                   aria-current={path.startsWith(i.href) ? 'page' : undefined}>{i.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <a href="/bliv-elev" class="btn btn--primary hdr__cta">Bliv elev</a>
+      </div>
     </div>
   </div>
 </header>
 
 <style>
-  .hdr { background: var(--navy); color: #fff; }
-
-  .hdr__sponsor {
+  .hdr {
     background: #fff;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 3px solid var(--navy);
   }
-  .hdr__sponsor-in {
+  .hdr__in {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 0.85rem;
-    padding-block: 0.4rem;
-  }
-  .hdr__sponsor-in span {
-    font-family: var(--font-display);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-size: 0.62rem;
-    font-weight: 600;
-    color: #6b6d92;
-  }
-  .hdr__sponsor-in img { width: auto; height: 30px; }
-
-  .hdr__main-in {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    padding-block: 0.7rem;
+    gap: 1.6rem 2rem;
+    padding-block: 0.85rem 0.7rem;
     flex-wrap: wrap;
   }
 
-  /* Logoet staar paa hvid plade: det er en JPEG-original med hvid baggrund,
-     og en plade er mere respektfuld over for maerket end en daarlig udklipning */
-  .hdr__logo {
-    background: #fff;
-    border-radius: var(--radius);
-    padding: 0.35rem 0.5rem;
-    line-height: 0;
-    flex: none;
-  }
-  .hdr__logo img { width: auto; height: 52px; }
+  /* Logoet står frit — ingen plade, ingen ramme. Højden er sat efter at det er
+     et bredt mærke (702 x 356), så 78 px højde giver ca. 154 px bredde. */
+  .hdr__logo { flex: none; line-height: 0; }
+  .hdr__logo img { width: auto; height: 78px; }
 
-  nav { margin-left: auto; }
+  .hdr__hoejre {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .hdr__sponsor {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .hdr__sponsor span {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #7a7c9e;
+  }
+  .hdr__sponsor a { line-height: 0; }
+  .hdr__sponsor img { width: auto; height: 30px; }
+
+  .hdr__bund {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
   nav ul {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
-    gap: 1.35rem;
+    gap: 1.3rem;
     flex-wrap: wrap;
   }
   nav a {
     font-family: var(--font-display);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.82rem;
+    letter-spacing: 0.09em;
+    font-size: 0.84rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--navy);
     text-decoration: none;
-    padding-block: 0.3rem;
+    padding-block: 0.25rem;
     border-bottom: 2px solid transparent;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, color 0.15s;
   }
-  nav a:hover { border-bottom-color: rgb(255 255 255 / 50%); }
-  nav a[aria-current='page'] { border-bottom-color: var(--orange); }
+  nav a:hover { border-bottom-color: var(--navy-300); }
+  nav a[aria-current='page'] {
+    border-bottom-color: var(--orange);
+    color: var(--orange-600);
+  }
 
   .hdr__cta { flex: none; }
 
-  @media (max-width: 720px) {
-    .hdr__main-in { gap: 0.8rem; }
-    .hdr__logo img { height: 42px; }
-    nav { margin-left: 0; order: 3; width: 100%; }
+  /* Mørk visning: headeren bliver ikke navy, men en meget lys plade, så
+     logoet stadig kan læses. Det er mærket der bestemmer, ikke temaet. */
+  @media (prefers-color-scheme: dark) {
+    .hdr { background: #F2F3FA; border-bottom-color: var(--orange); }
+    nav a { color: #23256F; }
+    nav a[aria-current='page'] { color: #A85E06; }
+    .hdr__sponsor span { color: #6b6d92; }
+  }
+
+  @media (max-width: 900px) {
+    .hdr__in { gap: 0.8rem 1rem; }
+    .hdr__logo img { height: 62px; }
+    .hdr__hoejre { align-items: stretch; }
+    .hdr__bund { justify-content: space-between; width: 100%; }
     nav ul { gap: 1rem; }
-    nav a { font-size: 0.76rem; }
-    .hdr__cta { margin-left: auto; }
+    nav a { font-size: 0.78rem; }
+  }
+  @media (max-width: 560px) {
+    .hdr__logo img { height: 54px; }
+    .hdr__sponsor { justify-content: flex-end; }
   }
 </style>

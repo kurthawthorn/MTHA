@@ -30,6 +30,8 @@ export interface Sponsor {
   niveau: SponsorNiveau;
   /** Nøgle til logofilen i src/assets/logoer/ */
   logoKey?: string;
+  /** Færdig sti i public/ — bruges kun til hovedsponsoren */
+  logo?: string;
   url?: string;
 }
 
@@ -86,7 +88,9 @@ const HOVEDSPONSOR: Sponsor = {
   id: 'thisted-forsikring',
   navn: 'Thisted Forsikring',
   niveau: 'hovedsponsor',
-  url: 'https://thistedforsikring.dk',
+  url: 'https://www.thistedforsikring.dk/',
+  // Ligger i public/brand/, udskilt af det kombinerede logo med split_logo.py
+  logo: '/brand/thisted-forsikring.png',
 };
 
 export const sponsorer: Sponsor[] = [

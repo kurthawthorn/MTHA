@@ -74,6 +74,31 @@ export const historie: Milepael[] = [
  */
 export const ligatrupTal = { iMiljoeet: 17, iTrup: 19, saeson: '2023/24' };
 
+/* ── Trofæer ──────────────────────────────────────────────────────────── */
+
+export interface Titel {
+  aar: number;
+  raekke: string;
+  modstander?: string;
+  resultat?: string;
+}
+
+/**
+ * U19-danmarksmesterskaber. Tre gange i fire år.
+ *
+ * KILDE  2025-titlen er dokumenteret på akademiets eget site med filen
+ *        "Officiel vinderbillede U19 DM 2025.jpg". Årene bekræftet i pressen:
+ *        2025-dækningen skriver "tredje gang i fire år", og 2023-dækningen
+ *        skriver "anden år i træk" — hvilket giver 2022, 2023 og 2025.
+ */
+export const titler: Titel[] = [
+  { aar: 2025, raekke: 'U19 Drenge', modstander: 'GOG Håndbold', resultat: '36–31' },
+  { aar: 2023, raekke: 'U19 Drenge', resultat: '34–33' },
+  { aar: 2022, raekke: 'U19 Drenge' },
+];
+
+export const titelTekst = 'Tre danmarksmesterskaber i fire år';
+
 /* ── Uddannelser ──────────────────────────────────────────────────────── */
 
 export interface Uddannelse {

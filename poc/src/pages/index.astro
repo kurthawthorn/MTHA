@@ -5,7 +5,7 @@ import Base from '../layouts/Base.astro';
 import NyhedsKort from '../components/NyhedsKort.astro';
 import { hold, truppen, personer } from '../data/akademi';
 import { billede } from '../lib/billeder';
-import { MOTTO, ligatrupTal, vaerdier } from '../data/vaerdier';
+import { MOTTO, ligatrupTal, vaerdier, titler, titelTekst } from '../data/vaerdier';
 
 const nyheder = (await getCollection('nyheder'))
   .sort((a, b) => b.data.dato.getTime() - a.data.dato.getTime());
@@ -33,9 +33,21 @@ const faciliteter = [
     <div class="hero__slor"></div>
     <div class="wrap hero__in">
       <div class="hero__text">
-        <span class="eyebrow">Nykøbing Mors · Danmarksmestre U19</span>
         <h1>Vi skaber<br />fremtidens stjerner</h1>
         <p class="hero__motto">”{MOTTO}”</p>
+
+        {/* Trofæskab: årene står som medaljer, nyeste først */}
+        <div class="trofae">
+          <span class="trofae__label">Danmarksmestre U19</span>
+          <ul class="trofae__aar">
+            {titler.map((t) => (
+              <li>
+                <span class="num">{t.aar}</span>
+                {t.resultat && <em class="num">{t.resultat}</em>}
+              </li>
+            ))}
+          </ul>
+        </div>
         <p class="lead">
           Elitehåndbold og ungdomsuddannelse samlet ét sted. Træning, skole og
           fællesskab i Morsø Multipark — med bolig i gåafstand fra hallen.
@@ -244,6 +256,31 @@ const faciliteter = [
   }
   .hero .eyebrow { color: var(--orange); }
   .hero__btns { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.4rem; }
+
+  /* Medaljerne: guldkant og orange årstal, som en række pokaler i et skab */
+  .trofae { display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.2rem; }
+  .trofae__label {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.16em; font-size: 0.66rem; font-weight: 600; color: #A8ABDC;
+  }
+  .trofae__aar { list-style: none; margin: 0; padding: 0; display: flex;
+                 flex-wrap: wrap; gap: 0.5rem; }
+  .trofae__aar li {
+    display: flex; flex-direction: column; align-items: center; gap: 0.05rem;
+    background: rgb(255 255 255 / 10%);
+    border: 1px solid var(--orange);
+    border-radius: var(--radius);
+    padding: 0.34rem 0.7rem 0.4rem;
+    backdrop-filter: blur(3px);
+  }
+  .trofae__aar li span {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 1.32rem; line-height: 1; color: var(--orange);
+  }
+  .trofae__aar li em {
+    font-style: normal; font-family: var(--font-mono);
+    font-size: 0.62rem; color: #BDBFE6;
+  }
 
   .hero__tal {
     margin: 0;
