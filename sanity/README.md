@@ -146,6 +146,29 @@ Kortlægningen fra `33.png` til det rigtige navn er lavet **én gang** maskinelt
 ud af den nuværende side, og ligger i `tools/assets.json`. Den skal aldrig
 laves igen.
 
+## Kladde og udgivet — det første man støder på
+
+Åbner man et dokument, står felterne grå og kan ikke redigeres. Det er ikke en
+fejl: man kigger på den **udgivne** version, og den er låst.
+
+Øverst er der to faneblade:
+
+```
+● Published     den version besøgende ser. Låst.
+● Draft         din arbejdskopi. Her redigerer du.
+```
+
+**Tryk Draft, ret, og tryk Publish.**
+
+Det virker som en omvej, men det er den rigtige model for et akademi: en
+holdleder kan skrive videre på en nyhed over flere dage, uden at halve
+sætninger går live. Og det passer med webhooken — kladdeændringer starter
+ingen bygning, kun Publish gør. Ellers ville sitet bygge om hvert par
+sekunder mens nogen skriver.
+
+Vis Lars det her først. Det er den ting der ellers får folk til at tro at de
+ikke har rettigheder.
+
 ## De fire ting man gør
 
 ### Ny spiller — ca. 40 sekunder
