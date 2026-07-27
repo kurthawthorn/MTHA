@@ -1,22 +1,26 @@
 /**
- * POC-datalag.
+ * Datalaget — henter nu fra Sanity.
  *
- * Formen er identisk med Sanity-skemaet i forslaget, saa etape 2 er et skift
- * af datakilde og ikke en omskrivning: `truppen()` gaar fra at laese denne fil
- * til at kalde Sanity, og siderne aendres ikke.
+ * KILDE
+ *   Alt hentes fra Sanity på byggetidspunktet. Kan Sanity ikke nås, bruges
+ *   `roster.json` som reserve, og der skrives en advarsel i byggeloggen.
+ *   Sitet bliver derfor altid udgivet; i værste fald med indhold der er en
+ *   smule gammelt. Se `lib/sanity.ts`.
  *
- * DATAKILDE
- *   roster.json er udtrukket maskinelt fra m-tha.dk og indeholder de
- *   OFFENTLIGE oplysninger: navn, aargang, stabens roller, sponsornavne — samt
- *   noeglen til det tilhoerende billede.
+ * BILLEDER
+ *   Kommer fra Sanitys CDN, som selv beskærer og komprimerer. Findes der
+ *   intet Sanity-billede, falder komponenterne tilbage på de lokale filer i
+ *   `src/assets/` via `fotoKey`.
  *
- *   Position, rygnummer, foedselsaar, moderklub, uddannelse og personlig
- *   sponsor er EKSEMPELDATA, indsat for at vise felterne. De skal erstattes af
- *   akademiets egne oplysninger.
+ * FORMEN ER UÆNDRET
+ *   Grænsefladerne herunder er de samme som før. Siderne kender ikke forskel
+ *   på om dataene kom fra en fil eller fra Sanity — det var hele pointen med
+ *   at bygge prototypen på denne form fra starten.
  */
 
 import roster from './roster.json';
 import { saeson } from './saeson';
+import { hentEllerFallback } from '../lib/sanity';
 
 export type Position =
   | 'Målvogter' | 'Venstre fløj' | 'Venstre back'
@@ -28,9 +32,11 @@ export interface Sponsor {
   id: string;
   navn: string;
   niveau: SponsorNiveau;
-  /** Nøgle til logofilen i src/assets/logoer/ */
+  /** Nøgle til logofilen i src/assets/logoer/ — reserve */
   logoKey?: string;
-  /** Færdig sti i public/ — bruges kun til hovedsponsoren */
+  /** Logo fra Sanitys CDN — foretrækkes når det findes */
+  logoUrl?: string;
+  /** Færdig sti i public/ — bruges kun til hovedsponsoren i header og fod */
   logo?: string;
   url?: string;
 }
@@ -41,30 +47,27 @@ export interface Hold {
   aargang: string;
   raekke: string;
   traener?: string;
-  /** Nøgle til holdfoto */
   fotoKey: string;
 }
 
 export interface Spiller {
   navn: string;
   slug: string;
-  /** Nøgle til portrættet i src/assets/portraetter/ */
+  /** Nøgle til portrættet i src/assets/portraetter/ — reserve */
   fotoKey: string;
+  /** Portræt fra Sanitys CDN — foretrækkes når det findes */
+  fotoUrl?: string;
   /**
-   * Fødselsåret er kilden til holdtilknytning — det er et faktum der aldrig
-   * ændrer sig, mens holdet skifter hver sæson. Se `holdFor()`.
+   * Fødselsåret er kilden til holdtilknytning — et faktum der aldrig ændrer
+   * sig, mens holdet skifter hver sæson. Se `holdFor()`.
    */
   foedselsaar: number;
-  /**
-   * Sættes kun når en spiller spiller op eller ned — fx en stærk 2010'er på
-   * U17. Overstyrer den automatiske tilknytning.
-   */
+  /** Sættes kun når en spiller spiller op eller ned. Overstyrer udregningen. */
   holdOverstyring?: string;
   rygnummer: number;
   position: Position;
   moderklub: string;
   uddannelse: 'STX' | 'HHX' | 'HF';
-  /** Personlig sponsor — hentet fra m-tha.dk, ikke opdigtet. */
   sponsorId?: string;
   sponsorNavn?: string;
   aktiv: boolean;
@@ -75,51 +78,123 @@ export interface Person {
   slug: string;
   rolle: string;
   fotoKey: string;
+  fotoUrl?: string;
+  telefon?: string;
+  email?: string;
   /** Sektionen personen står i på m-tha.dk — ikke gættet. */
   sektion: 'professionel' | 'ansat' | 'bestyrelse';
 }
 
-const slugFraKey = (key: string) => key.replace(/^(spiller|person|logo)-/, '');
+const udenPraefiks = (id: string) =>
+  id.replace(/^(spiller|person|logo|sponsor|hold)-/, '');
 
-/* ── Sponsorer ─────────────────────────────────────────────────────────── */
+/* ── Forespørgsler ────────────────────────────────────────────────────── */
 
-/**
- * Sponsorerne kommer ALLE fra registret — også hovedsponsoren.
- *
- * Den var før hardkodet her, og det gav to fejl som først blev fanget da
- * indholdet skulle migreres til Sanity: Thy Sport havde arvet niveauet
- * "hovedsponsor" og blev derfor vist ingen steder, og de to spillere med
- * Thisted Forsikring som personlig sponsor havde ingen at pege på.
- * Derfor: ét register, ingen undtagelser.
- */
-export const sponsorer: Sponsor[] = roster.sponsorer.map((s) => ({
-  id: slugFraKey(s.key),
-  navn: s.navn,
-  niveau: s.niveau as SponsorNiveau,
-  logoKey: s.key,
-  // Linket til sponsorens egen hjemmeside — hentet fra m-tha.dk
+type SanitySponsor = { id: string; navn: string; niveau: string;
+                       url?: string; logoUrl?: string };
+type SanityHold = { id: string; navn: string; foedselsaar?: number[];
+                    raekke?: string; traener?: string };
+type SanitySpiller = {
+  navn: string; slug?: string; foedselsaar?: number; rygnummer?: number;
+  position?: string; moderklub?: string; uddannelse?: string;
+  sponsorId?: string; sponsorNavn?: string; fotoUrl?: string;
+  holdOverstyring?: string;
+};
+type SanityPerson = {
+  navn: string; slug?: string; rolle?: string; sektion?: string;
+  telefon?: string; email?: string; fotoUrl?: string;
+};
+
+const Q_SPONSORER = `*[_type == "sponsor" && aktiv != false] | order(navn asc) {
+  "id": _id, navn, niveau, url, "logoUrl": logo.asset->url
+}`;
+
+const Q_HOLD = `*[_type == "hold"] | order(raekkefoelge asc) {
+  "id": _id, navn, foedselsaar, raekke, "traener": traenere[0]->navn
+}`;
+
+const Q_SPILLERE = `*[_type == "spiller" && aktiv != false] {
+  navn, "slug": slug.current, foedselsaar, rygnummer, position,
+  moderklub, uddannelse,
+  "sponsorId": sponsor->_id, "sponsorNavn": sponsor->navn,
+  "fotoUrl": portraet.asset->url,
+  "holdOverstyring": holdOverstyring->_id
+}`;
+
+const Q_PERSONER = `*[_type == "person" && aktiv != false]
+  | order(raekkefoelge asc, navn asc) {
+  navn, "slug": slug.current, rolle, sektion, telefon, email,
+  "fotoUrl": portraet.asset->url
+}`;
+
+/* ── Reservedata, hvis Sanity ikke svarer ─────────────────────────────── */
+
+const R_SPONSORER: SanitySponsor[] = roster.sponsorer.map((s) => ({
+  id: s.key, navn: s.navn, niveau: s.niveau,
   url: (s as { url?: string }).url,
-  // Hovedsponsorens logo ligger også i public/, fordi header og sidefod
-  // viser det uden Astros billedbehandling.
+}));
+const R_SPILLERE: SanitySpiller[] = roster.spillere.map((s, i) => ({
+  navn: s.navn, slug: udenPraefiks(s.key), foedselsaar: s.foedselsaar,
+  rygnummer: (i % 30) + 1,
+  sponsorId: s.sponsorId ? `sponsor-${s.sponsorId}` : undefined,
+  sponsorNavn: s.sponsorNavn ?? undefined,
+}));
+const R_PERSONER: SanityPerson[] = roster.stab.map((p) => ({
+  navn: p.navn, slug: udenPraefiks(p.key), rolle: p.rolle, sektion: p.sektion,
+}));
+const R_HOLD: SanityHold[] = saeson.hold.map((h) => ({
+  id: `hold-${h.id}`, navn: h.navn, foedselsaar: h.foedselsaar, raekke: h.raekke,
+}));
+
+const [sp, ho, spi, pe] = await Promise.all([
+  hentEllerFallback('sponsorer', Q_SPONSORER, R_SPONSORER),
+  hentEllerFallback('hold', Q_HOLD, R_HOLD),
+  hentEllerFallback('spillere', Q_SPILLERE, R_SPILLERE),
+  hentEllerFallback('personer', Q_PERSONER, R_PERSONER),
+]);
+
+/** Sand når indholdet kom fra Sanity. Vises i POC-banneret. */
+export const fraSanity = sp.fraSanity && spi.fraSanity && pe.fraSanity;
+
+/* ── Sponsorer ────────────────────────────────────────────────────────── */
+
+export const sponsorer: Sponsor[] = sp.data.map((s) => ({
+  id: udenPraefiks(s.id),
+  navn: s.navn,
+  niveau: (s.niveau as SponsorNiveau) ?? 'sponsor',
+  logoKey: `logo-${udenPraefiks(s.id)}`,
+  logoUrl: s.logoUrl,
+  url: s.url,
+  // Header og sidefod viser hovedsponsoren uden Astros billedbehandling
   logo: s.niveau === 'hovedsponsor' ? '/brand/thisted-forsikring.png' : undefined,
 }));
 
-/* ── Hold ──────────────────────────────────────────────────────────────── */
+/* ── Hold ─────────────────────────────────────────────────────────────── */
 
-/** Holdene kommer fra sæsonen — ingen årstal skrevet ind her. */
-const TRAENER: Record<string, string> = { u17: 'Rune Lanng', u19: 'Henrik Tilsted' };
+/** Årgangsteksten udregnes af fødselsårene — ingen årstal skrives i hånden. */
+const aargangTekst = (aar: number[] = []) =>
+  aar.length ? [...aar].sort().join('–') : '';
+
 const HOLDFOTO: Record<string, string> = { u17: 'hold-samlet', u19: 'hold-udenfor' };
 
-export const hold: Hold[] = saeson.hold.map((h) => ({
-  id: h.id,
-  navn: h.navn,
-  aargang: h.aargang,
-  raekke: h.raekke,
-  traener: TRAENER[h.id],
-  fotoKey: HOLDFOTO[h.id] ?? 'hold-samlet',
-}));
+export const hold: Hold[] = ho.data.map((h) => {
+  const id = udenPraefiks(h.id);
+  return {
+    id,
+    navn: h.navn,
+    aargang: aargangTekst(h.foedselsaar),
+    raekke: h.raekke ?? '',
+    traener: h.traener,
+    fotoKey: HOLDFOTO[id] ?? 'hold-samlet',
+  };
+});
 
-/* ── Spillere ──────────────────────────────────────────────────────────── */
+/** Hvilke fødselsår hvert hold består af — kommer fra Sanity. */
+const AARGANG: Record<string, number[]> = Object.fromEntries(
+  ho.data.map((h) => [udenPraefiks(h.id), h.foedselsaar ?? []]),
+);
+
+/* ── Spillere ─────────────────────────────────────────────────────────── */
 
 const POS: Position[] = [
   'Målvogter', 'Venstre fløj', 'Venstre back', 'Playmaker',
@@ -128,40 +203,42 @@ const POS: Position[] = [
 const KLUBBER = ['Thisted IK', 'Mors-Thy Håndbold', 'Skive fH', 'Nykøbing Mors IF',
                  'Hurup IF', 'Sydthy HK', 'Struer HK'];
 const UDD = ['STX', 'HHX', 'HF'] as const;
-/** Hvilke fødselsår hvert hold består af — ét sted, i saeson.ts. */
-const AARGANG: Record<string, number[]> = Object.fromEntries(
-  saeson.hold.map((h) => [h.id, h.foedselsaar]),
-);
 
-export const spillere: Spiller[] = roster.spillere.map((s, i) => ({
-  navn: s.navn,
-  slug: slugFraKey(s.key),
-  fotoKey: s.key,
-  // STAMDATA: fødselsåret står fast på spilleren og ændrer sig aldrig.
-  // Det er derfor sæsonskiftet kan flytte spillerne af sig selv.
-  // Årgangen er den rigtige fra m-tha.dk; det præcise år indenfor årgangen
-  // er eksempeldata indtil akademiet udfylder det.
-  foedselsaar: s.foedselsaar,
-  // ── herfra: eksempeldata ──
-  rygnummer: (i % 30) + 1,
-  position: POS[i % POS.length]!,
-  moderklub: KLUBBER[i % KLUBBER.length]!,
-  uddannelse: UDD[i % UDD.length]!,
-  // Personlig sponsor: alle 54 har én, hentet fra m-tha.dk
-  sponsorId: s.sponsorId ?? undefined,
-  sponsorNavn: s.sponsorNavn ?? undefined,
-  aktiv: true,
-}));
+export const spillere: Spiller[] = spi.data
+  .map((s, i) => ({
+    navn: s.navn,
+    slug: s.slug ?? '',
+    fotoKey: `spiller-${s.slug ?? ''}`,
+    fotoUrl: s.fotoUrl,
+    foedselsaar: s.foedselsaar ?? 0,
+    holdOverstyring: s.holdOverstyring ? udenPraefiks(s.holdOverstyring) : undefined,
+    rygnummer: s.rygnummer ?? i + 1,
+    // Felter akademiet endnu ikke har udfyldt vises som eksempeldata, så
+    // siden ikke står med huller mens de bliver gennemgået.
+    position: (s.position as Position) ?? POS[i % POS.length]!,
+    moderklub: s.moderklub ?? KLUBBER[i % KLUBBER.length]!,
+    uddannelse: (s.uddannelse as Spiller['uddannelse']) ?? UDD[i % UDD.length]!,
+    sponsorId: s.sponsorId ? udenPraefiks(s.sponsorId) : undefined,
+    sponsorNavn: s.sponsorNavn,
+    aktiv: true,
+  }))
+  .filter((s) => s.slug)
+  .sort((a, b) => a.rygnummer - b.rygnummer);
 
-/* ── Professionelle og bestyrelse ──────────────────────────────────────── */
+/* ── Staben ───────────────────────────────────────────────────────────── */
 
-export const personer: Person[] = roster.stab.map((p) => ({
-  navn: p.navn,
-  slug: slugFraKey(p.key),
-  rolle: p.rolle,
-  fotoKey: p.key,
-  sektion: p.sektion as Person['sektion'],
-}));
+export const personer: Person[] = pe.data
+  .map((p) => ({
+    navn: p.navn,
+    slug: p.slug ?? '',
+    rolle: p.rolle ?? '',
+    fotoKey: `person-${p.slug ?? ''}`,
+    fotoUrl: p.fotoUrl,
+    telefon: p.telefon,
+    email: p.email,
+    sektion: (p.sektion as Person['sektion']) ?? 'bestyrelse',
+  }))
+  .filter((p) => p.slug);
 
 /** Sektionsnavnene som de står på m-tha.dk. */
 export const SEKTION_NAVNE: Record<Person['sektion'], string> = {
@@ -170,22 +247,22 @@ export const SEKTION_NAVNE: Record<Person['sektion'], string> = {
   bestyrelse: 'Bestyrelsen',
 };
 
-/* ── Opslag ────────────────────────────────────────────────────────────── */
+/* ── Opslag ───────────────────────────────────────────────────────────── */
 
 export const getHold = (id: string) => hold.find((h) => h.id === id);
 
 /**
  * Holdet en spiller hører til — UDREGNET ud fra fødselsåret.
  *
- * Det er hele pointen: sæsonen definerer hvilke årgange hvert hold består af
- * (se saeson.ts), og spillerne følger med af sig selv. Ved sæsonskifte rettes
- * to felter i saeson.ts — ikke 54 spillere.
+ * Sæsonen definerer hvilke årgange hvert hold består af, og spillerne følger
+ * med af sig selv. Ved sæsonskifte rettes årgangene på HOLDET i Sanity —
+ * ikke på 54 spillere.
  *
- *   U17: [2008, 2009]  →  bliv til  [2009, 2010]
- *   U19: [2006, 2007]  →  bliv til  [2007, 2008]
+ *   U17: [2008, 2009]  →  [2009, 2010]   25 spillere → 12
+ *   U19: [2006, 2007]  →  [2007, 2008]   29 spillere → 28
  *
  * En spiller der ikke længere passer i nogen årgang falder automatisk ud af
- * truppen; historikken og profilen består.
+ * truppen; profilen og historikken består.
  */
 export const holdFor = (s: Spiller): Hold | undefined => {
   if (s.holdOverstyring) return getHold(s.holdOverstyring);
@@ -194,13 +271,23 @@ export const holdFor = (s: Spiller): Hold | undefined => {
 
 /** Spillere der ikke passer i nogen årgang i denne sæson. */
 export const udenHold = () => spillere.filter((s) => s.aktiv && !holdFor(s));
+
 export const getSponsor = (id?: string) =>
   id ? sponsorer.find((s) => s.id === id) : undefined;
+
 export const truppen = (holdId: string) =>
   spillere.filter((s) => s.aktiv && holdFor(s)?.id === holdId)
           .sort((a, b) => a.rygnummer - b.rygnummer);
-export const hovedsponsor = () =>
-  sponsorer.find((s) => s.niveau === 'hovedsponsor')!;
-export const iSektion = (s: Person['sektion']) => personer.filter((p) => p.sektion === s);
+
+export const hovedsponsor = (): Sponsor =>
+  sponsorer.find((s) => s.niveau === 'hovedsponsor')
+  ?? { id: 'thisted-forsikring', navn: 'Thisted Forsikring',
+       niveau: 'hovedsponsor',
+       logo: '/brand/thisted-forsikring.png',
+       url: 'https://www.thistedforsikring.dk/' };
+
+export const iSektion = (s: Person['sektion']) =>
+  personer.filter((p) => p.sektion === s);
+
 export const sponsorerPaaNiveau = (n: SponsorNiveau) =>
   sponsorer.filter((s) => s.niveau === n);

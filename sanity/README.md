@@ -247,8 +247,85 @@ Prisen er at der skal en udvikler til for at ændre *hvilke felter* der findes.
 Men det er sjældent — og det er netop den begrænsning der gør at siden ikke
 kan forfalde.
 
+## Webhook: et Udgiv skal opdatere hjemmesiden
+
+Sitet læser fra Sanity, men det sker på **byggetidspunktet**. Uden en webhook
+ville en rettelse først slå igennem næste gang nogen pusher kode — og så er vi
+lige vidt.
+
+Workflowet er klar til det. Der mangler to ting, som kun kan laves med et login.
+
+### 1. Et GitHub-token
+
+Opret et **fine-grained personal access token** på
+[github.com/settings/personal-access-tokens](https://github.com/settings/personal-access-tokens):
+
+| Felt | Værdi |
+|---|---|
+| Navn | `sanity-udgiver` |
+| Repository access | Kun `kurthawthorn/MTHA` |
+| Permissions | **Contents: Read and write** |
+| Udløber | 1 år (sæt en påmindelse) |
+
+`Contents: write` er det mindste der virker til `repository_dispatch`. Giv ikke
+mere end det.
+
+### 2. Webhooken i Sanity
+
+På [sanity.io/manage/project/g4s1nwak/api/webhooks](https://sanity.io/manage/project/g4s1nwak/api/webhooks)
+→ **Create webhook**:
+
+| Felt | Værdi |
+|---|---|
+| Name | `Genopbyg hjemmesiden` |
+| URL | `https://api.github.com/repos/kurthawthorn/MTHA/dispatches` |
+| Dataset | `production` |
+| Trigger on | Create, Update, Delete |
+| HTTP method | `POST` |
+| API version | `v2024-01-01` |
+| Projection | `{"event_type":"sanity-udgivelse"}` |
+
+Under **HTTP Headers**:
+
+```
+Authorization: Bearer ghp_dit_token
+Accept: application/vnd.github+json
+Content-Type: application/json
+```
+
+Sæt **Filter** til `!(_type match "system.*")`, så interne systemdokumenter
+ikke starter en bygning.
+
+### Sådan virker kæden
+
+```
+Lars trykker Udgiv i studioet
+   → Sanity sender webhooken til GitHub
+   → GitHub Actions starter "Byg og udgiv prototypen"
+   → sitet bygges med det nye indhold
+   → live efter ca. 2 minutter
+```
+
+### Sikkerhedsnet
+
+Workflowet kører også **hver nat kl. 04:12**. Skulle webhooken være slået fra
+eller fejle, er indholdet aldrig mere end et døgn gammelt. Det er billigt at
+have, og det fjerner en hel klasse af fejl der ellers er svære at opdage.
+
+### Sådan ser du om det virker
+
+Øverst på hver side står en indikator i POC-banneret:
+
+- **● Indhold fra Sanity** (grøn) — sidste bygning hentede fra Sanity
+- **● Reservedata** (rød) — Sanity kunne ikke nås, `roster.json` blev brugt
+
+Bygningen fejler aldrig fordi Sanity er nede. Den falder tilbage og skriver en
+advarsel i loggen. Sitet er altid oppe; i værste fald med indhold der er en
+smule gammelt.
+
 ## Herfra
 
-Når studioet står med indholdet, mangler kun at prototypen læser fra Sanity i
-stedet for fra `poc/src/data/`. Formen er allerede den samme, så det er
-`truppen()` og `getCollection()` der skifter datakilde — siderne ændres ikke.
+**Nyheder mangler stadig.** De ligger som markdown-filer i
+`poc/src/content/nyheder/`, ikke i Sanity. Skemaet `nyhed.ts` er klar, men
+indholdet er ikke migreret, og siderne læser stadig fra filerne. Det er det
+sidste led — og det vigtigste for Lars, fordi nyheder er det man laver oftest.

@@ -2,14 +2,28 @@
 import { Image } from 'astro:assets';
 import type { Sponsor } from '../data/akademi';
 import { billede } from '../lib/billeder';
+import { billedUrl, billedSrcset } from '../lib/sanity';
 
 interface Props {
   sponsor: Sponsor;
   hoejde?: number;
 }
 const { sponsor, hoejde = 44 } = Astro.props;
-const logo = billede(sponsor.logoKey);
+
+/**
+ * Billedet kan komme tre steder fra, i denne rækkefølge:
+ *   1. Sanitys CDN, hvis logoet er uploadet i studioet
+ *   2. den lokale fil i src/assets/logoer/, fra udtrækket af m-tha.dk
+ *   3. hvis ingen af dem findes: navnet som tekst
+ *
+ * Det gør at et logo en redaktør uploader i morgen virker med det samme,
+ * uden at de 50 der allerede er der, skal røres.
+ */
+const fraSanity = sponsor.logoUrl;
+const lokal = fraSanity ? undefined : billede(sponsor.logoKey);
+
 const Tag = sponsor.url ? 'a' : 'div';
+const bredder = [hoejde * 3, hoejde * 6];
 ---
 
 <Tag class="logo"
@@ -18,8 +32,13 @@ const Tag = sponsor.url ? 'a' : 'div';
      target={sponsor.url ? '_blank' : undefined}
      style={`--h:${hoejde}px`}
      title={sponsor.navn}>
-  {logo ? (
-    <Image src={logo} alt={sponsor.navn} widths={[160, 320]}
+  {fraSanity ? (
+    <img src={billedUrl(fraSanity, { b: hoejde * 6, kvalitet: 88 })}
+         srcset={billedSrcset(fraSanity, bredder, undefined, 88)}
+         sizes={`${hoejde * 4}px`}
+         alt={sponsor.navn} loading="lazy" decoding="async" />
+  ) : lokal ? (
+    <Image src={lokal} alt={sponsor.navn} widths={[160, 320]}
            sizes={`${hoejde * 4}px`} quality={88} loading="lazy" />
   ) : (
     <span class="logo__tekst">{sponsor.navn}</span>
@@ -28,8 +47,8 @@ const Tag = sponsor.url ? 'a' : 'div';
 
 <style>
   /* Logoerne kommer i vidt forskellige formater og baggrunde — nogle med
-     transparens, nogle med hvid bund. Derfor staar de alle paa en hvid plade
-     med samme hoejde, saa raekken bliver rolig. */
+     transparens, nogle med hvid bund. Derfor står de alle på en hvid plade
+     med samme højde, så rækken bliver rolig. */
   .logo {
     display: grid;
     place-items: center;
@@ -43,7 +62,7 @@ const Tag = sponsor.url ? 'a' : 'div';
   }
   a.logo:hover { border-color: var(--navy-300); transform: translateY(-2px); }
 
-  .logo :global(img) {
+  .logo :global(img), .logo img {
     max-height: var(--h);
     width: auto;
     max-width: 100%;

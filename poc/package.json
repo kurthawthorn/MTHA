@@ -11,6 +11,7 @@
     "check": "astro check"
   },
   "dependencies": {
+    "@sanity/client": "^7.25.0",
     "astro": "^7.1.3",
     "sharp": "^0.34.4"
   }

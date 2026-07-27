@@ -1,10 +1,25 @@
 name: Byg og udgiv prototypen
 
-# Kører ved hvert push til main, og kan startes manuelt fra Actions-fanen.
+# Fire måder at starte en udgivelse:
 on:
+  # 1. Et push til main — når koden ændrer sig
   push:
     branches: [main]
+
+  # 2. Manuelt fra Actions-fanen
   workflow_dispatch:
+
+  # 3. En webhook fra Sanity — når en redaktør trykker Udgiv.
+  #    Det er DET led der gør at Lars' arbejde bliver synligt uden at nogen
+  #    skal røre en terminal. Opsætning står i sanity/README.md.
+  repository_dispatch:
+    types: [sanity-udgivelse]
+
+  # 4. Hver nat kl. 04:12. Et sikkerhedsnet: skulle webhooken være slået fra
+  #    eller fejle, er indholdet aldrig mere end et døgn gammelt. Skæve
+  #    minutter, fordi GitHub er belastet på runde tidspunkter.
+  schedule:
+    - cron: '12 4 * * *'
 
 # Rettigheder GitHub Pages kræver
 permissions:

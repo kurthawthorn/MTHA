@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { personer, iSektion, SEKTION_NAVNE } from '../data/akademi';
 import { billede } from '../lib/billeder';
+import { billedUrl, billedSrcset } from '../lib/sanity';
 import { initials } from '../lib/slug';
 
 /* Sektionerne er dem der faktisk står på m-tha.dk — fundet ved at læse
@@ -33,11 +34,16 @@ const grupper = (['professionel', 'ansat', 'bestyrelse'] as const)
         </div>
         <div class="grid personer">
           {g.folk.map((p) => {
-            const foto = billede(p.fotoKey);
+            const fraSanity = p.fotoUrl;
+            const foto = fraSanity ? undefined : billede(p.fotoKey);
             return (
               <article class="card pk">
-                <div class:list={['pk__foto', !foto && 'pk__foto--tom']}>
-                  {foto ? (
+                <div class:list={['pk__foto', !foto && !fraSanity && 'pk__foto--tom']}>
+                  {fraSanity ? (
+                    <img src={billedUrl(fraSanity, { b: 300, h: 400 })}
+                         srcset={billedSrcset(fraSanity, [180, 300], 4 / 3)}
+                         sizes="180px" alt={p.navn} loading="lazy" decoding="async" />
+                  ) : foto ? (
                     <Image src={foto} alt={p.navn} widths={[180, 300]}
                            sizes="180px" quality={82} loading="lazy" />
                   ) : (
@@ -78,7 +84,7 @@ const grupper = (['professionel', 'ansat', 'bestyrelse'] as const)
     aspect-ratio: 3 / 4; overflow: hidden;
     background: linear-gradient(178deg, #FFFFFF 0%, #EEF0F7 100%);
   }
-  .pk__foto :global(img) {
+  .pk__foto :global(img), .pk__foto img {
     width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%;
   }
   .pk__foto--tom {

@@ -5,6 +5,7 @@ import Base from '../../layouts/Base.astro';
 import SponsorLogo from '../../components/SponsorLogo.astro';
 import { spillere, holdFor, getSponsor } from '../../data/akademi';
 import { billede } from '../../lib/billeder';
+import { billedUrl, billedSrcset } from '../../lib/sanity';
 import { initials } from '../../lib/slug';
 
 export const getStaticPaths = (() =>
@@ -16,7 +17,8 @@ const { s } = Astro.props;
 const h = holdFor(s);
 const sponsor = getSponsor(s.sponsorId);
 const sponsorNavn = sponsor?.navn ?? s.sponsorNavn;
-const foto = billede(s.fotoKey);
+const fraSanity = s.fotoUrl;
+const foto = fraSanity ? undefined : billede(s.fotoKey);
 ---
 
 <Base titel={s.navn}
@@ -29,8 +31,13 @@ const foto = billede(s.fotoKey);
     </nav>
 
     <article class="profil">
-      <div class:list={['profil__foto', !foto && 'profil__foto--tom']}>
-        {foto ? (
+      <div class:list={['profil__foto', !foto && !fraSanity && 'profil__foto--tom']}>
+        {fraSanity ? (
+          <img src={billedUrl(fraSanity, { b: 520, h: 693, kvalitet: 86 })}
+               srcset={billedSrcset(fraSanity, [320, 520, 600], 4 / 3, 86)}
+               sizes="(max-width: 760px) 70vw, 300px"
+               alt={s.navn} loading="eager" decoding="async" />
+        ) : foto ? (
           <Image src={foto} alt={s.navn} widths={[320, 520, 600]}
                  sizes="(max-width: 760px) 70vw, 300px" quality={86} loading="eager" />
         ) : (
@@ -97,7 +104,7 @@ const foto = billede(s.fotoKey);
     background: linear-gradient(178deg, #FFFFFF 0%, #EBEDF6 100%);
     max-width: 19rem;
   }
-  .profil__foto :global(img) {
+  .profil__foto :global(img), .profil__foto img {
     width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%;
   }
   .profil__foto--tom {

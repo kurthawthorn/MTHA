@@ -3,21 +3,30 @@ import { Image } from 'astro:assets';
 import type { Spiller } from '../data/akademi';
 import { getSponsor } from '../data/akademi';
 import { billede } from '../lib/billeder';
+import { billedUrl, billedSrcset } from '../lib/sanity';
 import { initials } from '../lib/slug';
 
 interface Props { spiller: Spiller }
 const { spiller } = Astro.props;
 const sponsor = getSponsor(spiller.sponsorId);
 const sponsorTekst = sponsor?.navn ?? spiller.sponsorNavn;
-const foto = billede(spiller.fotoKey);
+/* Sanitys CDN foerst, den lokale fil som reserve. Se SponsorLogo. */
+const fraSanity = spiller.fotoUrl;
+const foto = fraSanity ? undefined : billede(spiller.fotoKey);
 ---
 
 <a class="card sk"
    href={`/spillere/${spiller.slug}`}
    data-position={spiller.position}
    data-aar={spiller.foedselsaar}>
-  <div class:list={['sk__foto', !foto && 'sk__foto--tom']}>
-    {foto ? (
+  <div class:list={['sk__foto', !foto && !fraSanity && 'sk__foto--tom']}>
+    {fraSanity ? (
+      <img src={billedUrl(fraSanity, { b: 300, h: 400 })}
+           srcset={billedSrcset(fraSanity, [180, 300, 420], 4 / 3)}
+           sizes="(max-width: 640px) 45vw, 200px"
+           alt={`${spiller.navn}, ${spiller.position}`}
+           loading="lazy" decoding="async" />
+    ) : foto ? (
       <Image src={foto} alt={`${spiller.navn}, ${spiller.position}`}
              widths={[180, 300, 420]} sizes="(max-width: 640px) 45vw, 200px"
              quality={82} loading="lazy" />
@@ -44,12 +53,14 @@ const foto = billede(spiller.fotoKey);
     position: relative;
     overflow: hidden;
   }
-  .sk__foto :global(img) {
+  .sk__foto :global(img), .sk__foto img {
     width: 100%; height: 100%;
     object-fit: cover; object-position: 50% 12%;
     transition: transform 0.35s ease;
   }
-  a.card:hover .sk__foto :global(img) { transform: scale(1.035); }
+  a.card:hover .sk__foto :global(img), a.card:hover .sk__foto img {
+    transform: scale(1.035);
+  }
 
   .sk__foto--tom {
     background: linear-gradient(168deg, var(--navy-600), var(--navy-800));
