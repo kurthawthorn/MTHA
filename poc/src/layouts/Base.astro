@@ -33,6 +33,18 @@ const kanonisk = new URL(Astro.url.pathname, Astro.site);
     <meta name="theme-color" content="#2E308D" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
+    <!--
+      Tænder bevægelseslaget FØR første tegning, så der ikke kommer et blink.
+      Sættes kun hvis brugeren ikke har bedt om mindre bevægelse — og kun med
+      JS slået til. Uden dette flag vises alt indhold straks og uden animation,
+      så siden aldrig kan ende med usynlig tekst.
+    -->
+    <script is:inline>
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('anim');
+      }
+    </script>
+
     <!-- Struktureret data: fortaeller Google at der er tale om en
          sportsorganisation med adresse. Findes ikke paa den nuvaerende side. -->
     <script type="application/ld+json" set:html={JSON.stringify({
@@ -74,6 +86,45 @@ const kanonisk = new URL(Astro.url.pathname, Astro.site);
     <Header />
     <main id="indhold"><slot /></main>
     <Footer />
+
+    <script>
+      // Indtoning ved rul + optælling af nøgletal. Under 900 bytes.
+      // Kører kun når bevægelseslaget er tændt; ellers står alt som det er.
+      if (document.documentElement.classList.contains('anim')) {
+        // Sektioner uden for hero'en tones ind når de kommer i syne
+        const emner = [...document.querySelectorAll<HTMLElement>('main .section')]
+          .filter((s) => !s.closest('.hero, .motto'));
+        emner.forEach((s) => s.setAttribute('data-reveal', ''));
+
+        const io = new IntersectionObserver(
+          (poster) => {
+            for (const p of poster) {
+              if (!p.isIntersecting) continue;
+              p.target.classList.add('is-in');
+              io.unobserve(p.target);
+
+              // Store tal tæller op — kun én gang, og kun hele tal
+              for (const el of p.target.querySelectorAll<HTMLElement>('[data-taeller]')) {
+                const maal = Number(el.textContent);
+                if (!Number.isFinite(maal) || maal <= 0) continue;
+                const start = performance.now();
+                const varighed = 900;
+                const tik = (nu: number) => {
+                  const t = Math.min((nu - start) / varighed, 1);
+                  // ease-out, så tallet lander blødt
+                  el.textContent = String(Math.round(maal * (1 - (1 - t) ** 3)));
+                  if (t < 1) requestAnimationFrame(tik);
+                };
+                el.textContent = '0';
+                requestAnimationFrame(tik);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
+        );
+        emner.forEach((s) => io.observe(s));
+      }
+    </script>
 
     <style>
       .skip {

@@ -194,3 +194,62 @@ a.card:hover {
 .prose h2 { font-size: 1.3rem; margin-top: 0.6rem; }
 .prose ul { margin: 0; padding-left: 1.2rem; color: var(--text-dim); }
 .lead { font-size: 1.1rem; color: var(--text-dim); max-width: 62ch; }
+
+/* ==========================================================================
+   BEVÆGELSE
+   Ét orkestreret forløb ved sideindlæsning, plus rolige indtoninger når man
+   ruller. Alt ligger bag klassen .anim, som kun sættes af et lille script i
+   <head> — og kun hvis brugeren ikke har bedt om mindre bevægelse. Uden JS,
+   eller med prefers-reduced-motion, vises alt med det samme og uden animation.
+   Det er derfor indholdet aldrig kan blive usynligt.
+   ========================================================================== */
+
+/* Sekvens: hero'ens elementer rejser sig ét for ét. --s er rækkefølgen. */
+.anim [data-seq] {
+  opacity: 0;
+  animation: rejs 0.62s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  animation-delay: calc(var(--s, 0) * 95ms);
+}
+@keyframes rejs {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Medaljerne lander ét ad gangen med et lille overshoot — som pokaler
+   der sættes på plads i skabet. */
+.anim .trofae__aar li {
+  opacity: 0;
+  animation: medalje 0.52s cubic-bezier(0.2, 1.55, 0.35, 1) forwards;
+  animation-delay: calc(560ms + var(--i, 0) * 120ms);
+}
+@keyframes medalje {
+  from { opacity: 0; transform: scale(0.72) translateY(-10px); }
+  60%  { opacity: 1; }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Hero-fotoet zoomer meget langsomt ind én gang. Giver liv til et
+   stillbillede uden at gøre opmærksom på sig selv. */
+.anim .hero__bg, .anim .motto__bg {
+  animation: naerm 22s ease-out forwards;
+  transform-origin: 50% 40%;
+}
+@keyframes naerm {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
+}
+
+/* Indtoning ved rul. Sættes på sektioner af scriptet i Base.astro. */
+.anim [data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.anim [data-reveal].is-in { opacity: 1; transform: none; }
+
+/* Logoet i headeren tones ind uden at flytte sig — mærket skal stå roligt. */
+.anim .hdr__logo img {
+  opacity: 0;
+  animation: ton 0.7s ease forwards;
+}
+@keyframes ton { to { opacity: 1; } }

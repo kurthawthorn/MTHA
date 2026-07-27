@@ -79,8 +79,6 @@ export const ligatrupTal = { iMiljoeet: 17, iTrup: 19, saeson: '2023/24' };
 export interface Titel {
   aar: number;
   raekke: string;
-  modstander?: string;
-  resultat?: string;
 }
 
 /**
@@ -92,8 +90,8 @@ export interface Titel {
  *        skriver "anden år i træk" — hvilket giver 2022, 2023 og 2025.
  */
 export const titler: Titel[] = [
-  { aar: 2025, raekke: 'U19 Drenge', modstander: 'GOG Håndbold', resultat: '36–31' },
-  { aar: 2023, raekke: 'U19 Drenge', resultat: '34–33' },
+  { aar: 2025, raekke: 'U19 Drenge' },
+  { aar: 2023, raekke: 'U19 Drenge' },
   { aar: 2022, raekke: 'U19 Drenge' },
 ];
 

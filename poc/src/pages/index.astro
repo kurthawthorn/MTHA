@@ -33,32 +33,29 @@ const faciliteter = [
     <div class="hero__slor"></div>
     <div class="wrap hero__in">
       <div class="hero__text">
-        <h1>Vi skaber<br />fremtidens stjerner</h1>
-        <p class="hero__motto">”{MOTTO}”</p>
+        <h1 data-seq style="--s:0">Vi skaber<br />fremtidens stjerner</h1>
+        <p class="hero__motto" data-seq style="--s:1">”{MOTTO}”</p>
 
         {/* Trofæskab: årene står som medaljer, nyeste først */}
-        <div class="trofae">
+        <div class="trofae" data-seq style="--s:2">
           <span class="trofae__label">Danmarksmestre U19</span>
           <ul class="trofae__aar">
-            {titler.map((t) => (
-              <li>
-                <span class="num">{t.aar}</span>
-                {t.resultat && <em class="num">{t.resultat}</em>}
-              </li>
+            {titler.map((t, i) => (
+              <li style={`--i:${i}`}><span class="num">{t.aar}</span></li>
             ))}
           </ul>
         </div>
-        <p class="lead">
+        <p class="lead" data-seq style="--s:3">
           Elitehåndbold og ungdomsuddannelse samlet ét sted. Træning, skole og
           fællesskab i Morsø Multipark — med bolig i gåafstand fra hallen.
         </p>
-        <div class="hero__btns">
+        <div class="hero__btns" data-seq style="--s:4">
           <a href="/bliv-elev" class="btn btn--primary">Bliv elev</a>
           <a href="/nyheder" class="btn btn--onnavy">Se nyheder</a>
         </div>
       </div>
 
-      <dl class="hero__tal">
+      <dl class="hero__tal" data-seq style="--s:5">
         <div><dt>Spillere</dt><dd class="num">{antalSpillere}</dd></div>
         <div><dt>Professionelle</dt><dd class="num">{personer.length}</dd></div>
         <div><dt>Uddannelser</dt><dd>STX · HHX · HF</dd></div>
@@ -86,7 +83,7 @@ const faciliteter = [
     <section class="section">
       <a class="bevis" href="/vaerdier">
         <div class="bevis__tal">
-          <strong class="num">{ligatrupTal.iMiljoeet}</strong>
+          <strong class="num" data-taeller>{ligatrupTal.iMiljoeet}</strong>
           <span class="num">af {ligatrupTal.iTrup}</span>
         </div>
         <div class="bevis__txt">
@@ -266,7 +263,7 @@ const faciliteter = [
   .trofae__aar { list-style: none; margin: 0; padding: 0; display: flex;
                  flex-wrap: wrap; gap: 0.5rem; }
   .trofae__aar li {
-    display: flex; flex-direction: column; align-items: center; gap: 0.05rem;
+    display: flex; align-items: center;
     background: rgb(255 255 255 / 10%);
     border: 1px solid var(--orange);
     border-radius: var(--radius);
@@ -277,10 +274,7 @@ const faciliteter = [
     font-family: var(--font-display); font-weight: 700;
     font-size: 1.32rem; line-height: 1; color: var(--orange);
   }
-  .trofae__aar li em {
-    font-style: normal; font-family: var(--font-mono);
-    font-size: 0.62rem; color: #BDBFE6;
-  }
+
 
   .hero__tal {
     margin: 0;

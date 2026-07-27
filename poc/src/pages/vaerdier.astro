@@ -20,9 +20,9 @@ const fælles = billede('hold-udenfor');
     )}
     <div class="motto__slor"></div>
     <div class="wrap motto__in">
-      <span class="eyebrow">Vores værdier</span>
-      <p class="motto__citat">”{MOTTO}”</p>
-      <p class="motto__under">
+      <span class="eyebrow" data-seq style="--s:0">Vores værdier</span>
+      <p class="motto__citat" data-seq style="--s:1">”{MOTTO}”</p>
+      <p class="motto__under" data-seq style="--s:2">
         Fire ord, der har fulgt akademiet siden 2012 — gennem navneskifte og
         vækst fra 4 til 38 elever.
       </p>
@@ -53,7 +53,7 @@ const fælles = billede('hold-udenfor');
     <section class="section">
       <div class="bevis">
         <div class="bevis__tal">
-          <strong class="num">{ligatrupTal.iMiljoeet}</strong>
+          <strong class="num" data-taeller>{ligatrupTal.iMiljoeet}</strong>
           <span class="num">af {ligatrupTal.iTrup}</span>
         </div>
         <div class="bevis__txt">
@@ -73,16 +73,12 @@ const fælles = billede('hold-udenfor');
         <span class="antal">{titelTekst}</span>
       </div>
       <ul class="pokaler">
-        {titler.map((t) => (
-          <li>
+        {titler.map((t, i) => (
+          <li style={`--i:${i}`}>
             <span class="pokaler__aar num">{t.aar}</span>
             <span class="pokaler__txt">
-              <strong>Danmarksmestre · {t.raekke}</strong>
-              {(t.modstander || t.resultat) && (
-                <em>
-                  {t.resultat}{t.modstander && ` i finalen mod ${t.modstander}`}
-                </em>
-              )}
+              <strong>Danmarksmestre</strong>
+              <em>{t.raekke}</em>
             </span>
           </li>
         ))}
