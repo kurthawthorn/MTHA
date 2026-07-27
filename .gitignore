@@ -37,3 +37,10 @@ poc/public/dokumenter/*.pdf
 
 # Logoerne BLIVER i git: de er små, og uden dem kan designet ikke
 # rendere. Det er en anden sag end 142 fotos af mindreårige.
+
+# Sanity Studio
+sanity/node_modules/
+sanity/dist/
+sanity/.sanity/
+.env
+.env.local
