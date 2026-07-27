@@ -282,8 +282,10 @@ På [sanity.io/manage/project/g4s1nwak/api/webhooks](https://sanity.io/manage/pr
 | Dataset | `production` |
 | Trigger on | Create, Update, Delete |
 | HTTP method | `POST` |
-| API version | `v2024-01-01` |
+| API version | **`v2025-02-19`** — den nyeste i rullelisten |
 | Projection | `{"event_type":"sanity-udgivelse"}` |
+| Trigger when versions are modified | **fravalgt** |
+| Secret | **tom** |
 
 Under **HTTP Headers**:
 
@@ -295,6 +297,19 @@ Content-Type: application/json
 
 Sæt **Filter** til `!(_type match "system.*")`, så interne systemdokumenter
 ikke starter en bygning.
+
+**Tre faldgruber på den skærm:**
+
+*API version* er ikke den samme som klientens API-version i koden. Feltet
+her styrer kun hvilken GROQ-version filteret og projectionen fortolkes med.
+Vælg den nyeste; vores udtryk er simple og virker i begge.
+
+*Trigger webhook when versions are modified* skal være **fravalgt**. Slået til
+fyrer webhooken hver gang nogen retter i en kladde — altså potentielt hvert
+par sekunder mens en redaktør skriver. Vi vil kun bygge når der trykkes Udgiv.
+
+*Secret* skal stå **tomt**. Feltet er til modtagere der selv verificerer
+afsenderen. GitHub gør det ikke; den stoler på `Authorization`-headeren.
 
 ### Sådan virker kæden
 
