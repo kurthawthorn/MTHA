@@ -32,6 +32,11 @@
   const dlg = document.getElementById('spiller-modal') as HTMLDialogElement | null;
   const krop = dlg?.querySelector<HTMLElement>('[data-sm-krop]');
 
+  // Basisstien kan være "/" lokalt og "/MTHA/" på GitHub Pages. Scriptet må
+  // ikke antage roden, ellers holder modalen op med at virke ved deploy.
+  const basis = (document.documentElement.dataset.base ?? '/').replace(/\/+$/, '');
+  const spillerSti = `${basis}/spillere/`;
+
   if (dlg && krop) {
     const cache = new Map<string, string>();
 
@@ -67,7 +72,8 @@
     document.addEventListener('click', (e) => {
       const m = e as MouseEvent;
       if (m.metaKey || m.ctrlKey || m.shiftKey || m.altKey || m.button !== 0) return;
-      const link = (m.target as HTMLElement)?.closest<HTMLAnchorElement>('a[href^="/spillere/"]');
+      const link = (m.target as HTMLElement)?.closest<HTMLAnchorElement>(
+        `a[href^="${spillerSti}"]`);
       if (!link) return;
       e.preventDefault();
       aabn(link.getAttribute('href')!);
@@ -75,7 +81,8 @@
 
     // Forhent ved hover, så modalen føles øjeblikkelig
     document.addEventListener('mouseover', (e) => {
-      const link = (e.target as HTMLElement)?.closest<HTMLAnchorElement>('a[href^="/spillere/"]');
+      const link = (e.target as HTMLElement)?.closest<HTMLAnchorElement>(
+        `a[href^="${spillerSti}"]`);
       if (link) hent(link.getAttribute('href')!).catch(() => {});
     }, { passive: true });
 
@@ -87,7 +94,7 @@
 
     // Tilbage/frem i browseren styrer modalen
     addEventListener('popstate', () => {
-      if (location.pathname.startsWith('/spillere/')) aabn(location.pathname, false);
+      if (location.pathname.startsWith(spillerSti)) aabn(location.pathname, false);
       else luk(false);
     });
   }

@@ -18,7 +18,7 @@ const kanonisk = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang="da">
+<html lang="da" data-base={import.meta.env.BASE_URL}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -30,8 +30,17 @@ const kanonisk = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={beskrivelse} />
     <meta property="og:url" content={kanonisk} />
     <meta property="og:locale" content="da_DK" />
-    <meta name="theme-color" content="#2E308D" />
+    <meta name="theme-color" content="#32348B" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!--
+      Prototypen må ikke indekseres. Den viser portrætter af mindreårige og
+      eksempeldata, og den er ikke akademiets officielle hjemmeside.
+      robots.txt blokerer crawlere; denne linje sikrer at et link der alligevel
+      bliver delt videre, ikke ender i søgeresultaterne.
+      Fjernes når løsningen går i luften på m-tha.dk.
+    -->
+    <meta name="robots" content="noindex, nofollow" />
 
     <!--
       Tænder bevægelseslaget FØR første tegning, så der ikke kommer et blink.

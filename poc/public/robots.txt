@@ -1,0 +1,11 @@
+# Prototype — må IKKE indekseres.
+#
+# Sitet indeholder portrætter af mindreårige og eksempeldata, og det er ikke
+# akademiets officielle hjemmeside. Et delelink til bestyrelsen er én ting;
+# at ligge i Googles indeks er en anden.
+#
+# Når løsningen en dag går i luften på m-tha.dk, skal denne fil erstattes af
+# en der tillader indeksering og peger på sitemap.xml.
+
+User-agent: *
+Disallow: /
