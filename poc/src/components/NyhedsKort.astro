@@ -5,6 +5,12 @@ import { billedUrl, billedSrcset } from '../lib/sanity';
 import { danishDate } from '../lib/slug';
 
 interface Props {
+  /**
+   * Overskriftsniveau. Et kort under en <h2> skal bruge h3; staar kortene
+   * direkte under sidens <h1> — som paa /nyheder og /hold — skal de bruge h2,
+   * ellers springes et niveau over i hierarkiet.
+   */
+  niveau?: 2 | 3;
   slug: string;
   titel: string;
   dato: Date;
@@ -14,7 +20,7 @@ interface Props {
   fotoKey?: string;
   fotoUrl?: string;
 }
-const { slug, titel, dato, kategori, resume, kilde, fotoKey, fotoUrl } = Astro.props;
+const { slug, titel, dato, kategori, resume, kilde, fotoKey, fotoUrl, niveau = 3 } = Astro.props;
 /* Sanitys CDN foerst, den lokale fil som reserve */
 const fraSanity = fotoUrl;
 const foto = fraSanity ? undefined : billede(fotoKey);
@@ -22,6 +28,7 @@ const foto = fraSanity ? undefined : billede(fotoKey);
 /* Pladsholder-vinkel varieres ud fra overskriften, saa kortene ikke ser ens ud
    naar billederne ikke er hentet. */
 const vinkel = 120 + ([...titel].reduce((a, c) => a + c.charCodeAt(0), 0) % 90);
+const Overskrift = `h${niveau}` as 'h2' | 'h3';
 ---
 
 <a class="card nk" href={`/nyheder/${slug}`}>
@@ -40,7 +47,7 @@ const vinkel = 120 + ([...titel].reduce((a, c) => a + c.charCodeAt(0), 0) % 90);
     {kilde === 'instagram' && <span class="nk__auto">via Instagram</span>}
   </div>
   <div class="nk__body">
-    <h3>{titel}</h3>
+    <Overskrift>{titel}</Overskrift>
     <time datetime={dato.toISOString()}>{danishDate(dato)}</time>
     <p>{resume}</p>
   </div>
@@ -83,7 +90,7 @@ const vinkel = 120 + ([...titel].reduce((a, c) => a + c.charCodeAt(0), 0) % 90);
     padding: 0.85rem 0.95rem 1.05rem;
     display: flex; flex-direction: column; gap: 0.35rem;
   }
-  .nk__body h3 { font-size: 1.02rem; letter-spacing: 0.02em; }
+  .nk__body h2, .nk__body h3 { font-size: 1.02rem; letter-spacing: 0.02em; }
   .nk__body time { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-faint); }
   .nk__body p { font-size: 0.9rem; color: var(--text-dim); }
 </style>

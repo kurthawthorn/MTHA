@@ -22,7 +22,8 @@ const fælles = billede('hold-udenfor');
     <div class="motto__slor"></div>
     <div class="wrap motto__in">
       <span class="eyebrow" data-seq style="--s:0">Vores værdier</span>
-      <p class="motto__citat" data-seq style="--s:1">”{MOTTO}”</p>
+      {/* Sidens h1. Mottoet ER overskriften her — der fandtes ingen h1 foer. */}
+      <h1 class="motto__citat" data-seq style="--s:1">”{MOTTO}”</h1>
       <p class="motto__under" data-seq style="--s:2">
         Fire ord, der har fulgt akademiet siden 2012 — gennem navneskifte og
         vækst fra 4 til 38 elever.
@@ -154,6 +155,7 @@ const fælles = billede('hold-udenfor');
   .motto__in { position: relative; display: flex; flex-direction: column; gap: 0.7rem; }
   .motto .eyebrow { color: var(--orange); }
   .motto__citat {
+    margin: 0;
     font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
     font-size: clamp(2.1rem, 7vw, 4.6rem); line-height: 1;
     letter-spacing: -0.005em; text-wrap: balance; max-width: 24ch;

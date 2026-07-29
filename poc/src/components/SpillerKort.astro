@@ -6,13 +6,20 @@ import { billede } from '../lib/billeder';
 import { billedUrl, billedSrcset } from '../lib/sanity';
 import { initials } from '../lib/slug';
 
-interface Props { spiller: Spiller }
-const { spiller } = Astro.props;
+interface Props {
+  /**
+   * Overskriftsniveau. Et kort under en <h2> skal bruge h3; staar kortene
+   * direkte under sidens <h1> — som paa /nyheder og /hold — skal de bruge h2,
+   * ellers springes et niveau over i hierarkiet.
+   */
+  niveau?: 2 | 3; spiller: Spiller }
+const { spiller, niveau = 3 } = Astro.props;
 const sponsor = getSponsor(spiller.sponsorId);
 const sponsorTekst = sponsor?.navn ?? spiller.sponsorNavn;
 /* Sanitys CDN foerst, den lokale fil som reserve. Se SponsorLogo. */
 const fraSanity = spiller.fotoUrl;
 const foto = fraSanity ? undefined : billede(spiller.fotoKey);
+const Overskrift = `h${niveau}` as 'h2' | 'h3';
 ---
 
 <a class="card sk"
@@ -36,7 +43,7 @@ const foto = fraSanity ? undefined : billede(spiller.fotoKey);
     <span class="sk__nr num" aria-hidden="true">{spiller.rygnummer}</span>
   </div>
   <div class="sk__body">
-    <h3>{spiller.navn}</h3>
+    <Overskrift>{spiller.navn}</Overskrift>
     <p class="sk__pos">{spiller.position}</p>
     {sponsorTekst && <p class="sk__sponsor">{sponsorTekst}</p>}
   </div>
@@ -84,7 +91,7 @@ const foto = fraSanity ? undefined : billede(spiller.fotoKey);
     display: flex; flex-direction: column; gap: 0.1rem;
     border-top: 2px solid var(--orange);
   }
-  .sk__body h3 { font-size: 0.84rem; letter-spacing: 0.01em; }
+  .sk__body h2, .sk__body h3 { font-size: 0.84rem; letter-spacing: 0.01em; }
   .sk__pos { font-size: 0.76rem; color: var(--text-dim); }
   .sk__sponsor {
     margin-top: 0.28rem; padding-top: 0.28rem;

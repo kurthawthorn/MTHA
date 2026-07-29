@@ -71,7 +71,7 @@ const aargange = [...new Set(trup.map((s) => s.foedselsaar))].sort();
       </div>
 
       <div class="grid trupgrid" data-trup>
-        {trup.map((s) => <SpillerKort spiller={s} />)}
+        {trup.map((s) => <SpillerKort spiller={s} niveau={2} />)}
       </div>
       <p class="tom" data-tom hidden>Ingen spillere matcher filtrene.</p>
     </section>

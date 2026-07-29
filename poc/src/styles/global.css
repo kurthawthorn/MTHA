@@ -418,3 +418,38 @@ a.card:hover {
   position: relative;
   z-index: 1;
 }
+
+/* ==========================================================================
+   TRYK PÅ TOUCHSKÆRM
+   To ting der kun betyder noget på telefon og tablet, og som derfor er nemme
+   at overse når man udvikler på en computer med mus.
+
+   touch-action: manipulation fjerner browserens ventetid på ~300 ms før et
+   tryk registreres. Forsinkelsen findes fordi browseren venter på at se om
+   der kommer et dobbelttryk (zoom). Vi har intet dobbelttryk-zoom at bevare
+   på knapper og links, så ventetiden er ren forsinkelse.
+
+   :active er den eneste kvittering en finger kan få. En mus har hover; en
+   finger har ikke. Uden :active er der intet der bekræfter at trykket blev
+   registreret — og så trykker folk igen.
+   ========================================================================== */
+
+a, button, [role='button'], summary, label, input, select, textarea {
+  touch-action: manipulation;
+}
+
+.btn:active,
+a.card:active,
+.chip:active,
+.tk:active {
+  transform: translateY(1px);
+  transition-duration: 0.05s;
+}
+
+/* Kortene løfter sig ved hover, så de skal ned igen ved tryk — ikke bare
+   blive hvor de er. Ellers ser trykket ud som om det ikke gjorde noget. */
+a.card:active { box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active, a.card:active, .chip:active, .tk:active { transform: none; }
+}

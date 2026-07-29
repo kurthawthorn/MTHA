@@ -194,6 +194,35 @@ const AARGANG: Record<string, number[]> = Object.fromEntries(
   ho.data.map((h) => [udenPraefiks(h.id), h.foedselsaar ?? []]),
 );
 
+/*
+ * ADVAR HVIS TO HOLD SLÅS OM SAMME ÅRGANG.
+ *
+ * `holdFor()` tager det FØRSTE hold der matcher spillerens fødselsår. Det er
+ * forudsigeligt, men kun hvis årgangene ikke overlapper. Gør de det, forsvinder
+ * halvdelen af en trup over i det andet hold — og siden ser helt normal ud.
+ *
+ * Det skete i praksis: et hold "U17-1" blev oprettet med årgangene 2010 og
+ * 2009, mens U17 også havde 2009. U17 gik fra 25 til 13 spillere uden at
+ * noget så forkert ud.
+ *
+ * Derfor: skriv det i byggeloggen. En stille halvering af en trup er præcis
+ * den slags fejl ingen opdager før nogen spørger hvorfor de mangler.
+ */
+{
+  const set = new Map<number, string[]>();
+  for (const [id, aar] of Object.entries(AARGANG)) {
+    for (const a of aar) set.set(a, [...(set.get(a) ?? []), id]);
+  }
+  for (const [aar, hold] of set) {
+    if (hold.length > 1) {
+      console.warn(
+        `  [hold] Årgang ${aar} findes på flere hold: ${hold.join(', ')}. ` +
+        `Spillerne havner kun på "${hold[0]}". Ret årgangene i studioet.`,
+      );
+    }
+  }
+}
+
 /* ── Spillere ─────────────────────────────────────────────────────────── */
 
 const POS: Position[] = [
