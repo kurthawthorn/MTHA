@@ -191,6 +191,29 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* ==========================================================================
+   [hidden] SKAL FAKTISK SKJULE
+
+   Browserens egen regel er `[hidden] { display: none }` — uden !important.
+   Den taber derfor til enhver author-regel der saetter display, og det gaelder
+   `.card { display: flex }`.
+
+   Konsekvensen var at positionsfiltrene paa holdsiderne ikke virkede. Scriptet
+   satte `k.hidden = true` paa de kort der ikke matchede, taelleren skiftede
+   pligtskyldigt til "Viser 4 af 29" — og alle 29 kort blev staaende. Maalt i
+   browseren: attributten var sat, og computed display var stadig `flex`.
+
+   Fejlen havde vaeret der siden filtrene blev bygget. Ingen af de automatiske
+   tjek kunne se den: HTML'en var korrekt, JavaScriptet var korrekt, CSS'en var
+   korrekt hver for sig. Det var samspillet der var forkert, og det kan kun ses
+   ved at trykke paa knappen.
+
+   !important er her det rigtige. `hidden` er ikke en stilart man forhandler
+   om — det betyder "dette element findes ikke for brugeren", og der maa ikke
+   findes en regel der kan overtrumfe det.
+   ========================================================================== */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

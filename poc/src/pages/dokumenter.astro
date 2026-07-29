@@ -1,5 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
+import { dokumenter } from '../data/dokumenter';
+import { redigerbar } from '../lib/redigering';
 
 /**
  * De 8 PDF'er fra m-tha.dk delt i to.
@@ -22,15 +24,11 @@ const flyttet = [
     href: '/privatlivspolitik' },
 ];
 
-const filer = [
-  { titel: 'Vedtægter', fil: 'vedtaegter.pdf', sider: 5, aar: 2025,
-    hvorfor: 'Underskrevet dokument' },
-  { titel: 'Referat fra generalforsamling, oktober 2025',
-    fil: 'referat-generalforsamling-2025.pdf', sider: 6, aar: 2025,
-    hvorfor: 'Underskrevet referat' },
-  { titel: 'Elevkontrakt', fil: 'kontrakt.pdf', sider: 5, aar: 2024,
-    hvorfor: 'Skal printes og underskrives' },
-];
+/*
+ * Filerne stod foer haardkodet her, og blev hentet fra m-tha.dk ved hver
+ * bygning. Nu kommer baade filen og oplysningerne om den fra Sanity, saa Lars
+ * kan laegge naeste aars referat op selv — se src/data/dokumenter.ts.
+ */
 ---
 
 <Base titel="Dokumenter"
@@ -71,23 +69,32 @@ const filer = [
     <section class="section">
       <div class="section__head">
         <h2>Dokumenter til download</h2>
-        <span class="antal num">{filer.length} filer</span>
+        <span class="antal num">{dokumenter.length} filer</span>
       </div>
-      <ul class="dok">
-        {filer.map((d) => (
-          <li>
-            <a href={`/dokumenter/${d.fil}`} download>
-              <span class="dok__t">{d.titel}</span>
-              <span class="dok__hv">{d.hvorfor}</span>
-            </a>
-            <span class="dok__meta num">{d.aar} · {d.sider} sider · PDF</span>
-          </li>
-        ))}
-      </ul>
+      {dokumenter.length > 0 ? (
+        <ul class="dok">
+          {dokumenter.map((d) => (
+            <li data-sanity={redigerbar('dokument', d.id, 'fil')}>
+              <a href={d.href} rel="noopener">
+                <span class="dok__t">{d.titel}</span>
+                <span class="dok__hv">{d.hvorfor}</span>
+              </a>
+              <span class="dok__meta num">
+                {[d.aar, d.sider && `${d.sider} sider`, d.kb && `${d.kb} kB`, 'PDF']
+                  .filter(Boolean).join(' · ')}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="note">
+          Der ligger ingen filer i redigeringsvinduet endnu.
+        </p>
+      )}
       <p class="note">
-        Disse tre er scannede, underskrevne papirer — der er ingen tekst i dem
-        at trække ud, og de skal blive filer. De hentes fra m-tha.dk med
-        <code>python tools/fetch_assets.py</code>, så de ligger ikke i git.
+        Disse er scannede, underskrevne papirer — der er ingen tekst i dem at
+        trække ud, og de skal blive filer. De ligger i redigeringsvinduet, så
+        akademiet selv kan lægge næste års referat op.
       </p>
     </section>
   </div>

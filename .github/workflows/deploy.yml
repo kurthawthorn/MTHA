@@ -54,43 +54,27 @@ jobs:
           cache: npm
           cache-dependency-path: poc/package-lock.json
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      # KUN DE TRE PDF'ER HENTES NU.
+      # BYGNINGEN RØRER IKKE m-tha.dk. Det er en forudsætning, ikke en
+      # optimering.
       #
-      # Trinnet hentede før alle 149 billeder fra m-tha.dk, hver gang. Det tog
-      # 36 af bygningens 65 sekunder — over halvdelen af tiden — og af de 149
-      # filer blev 13 brugt: portrætter og logoer kom allerede fra Sanitys CDN,
-      # så de blev hentet uden at nogen så på dem.
+      # Sitet skal ERSTATTE m-tha.dk. Så længe bygningen hentede noget derfra,
+      # kunne det ikke: den dag den gamle side lukker, ville billeder og
+      # downloadlinks forsvinde med den. Et site der er afhængigt af det site
+      # det skal afløse, kan aldrig gå i luften.
       #
-      # De redaktionelle fotos ligger nu også i Sanity (sanity/migrer-fotos.mjs),
-      # så bygningen har ingen grund til at røre m-tha.dk for billeder. Tilbage
-      # står de tre underskrevne PDF'er, som er filer og ikke indhold.
+      # Sådan blev de tre trin fjernet:
       #
-      # `continue-on-error` beholdes: er m-tha.dk nede, skal en udgivelse ikke
-      # knække — så mangler der tre downloadlinks, og resten af sitet er intakt.
+      #   149 billeder   →  Sanity (sanity/migrer-fotos.mjs). 36 af bygningens
+      #                     65 sekunder gik med at hente dem, og 13 blev brugt.
+      #   3 PDF'er       →  Sanity (sanity/migrer-dokumenter.mjs). Målt på tre
+      #                     kørsler i træk: 7 s, 8 s og 185 s for de samme tre
+      #                     filer. Den langsomme kostede en redaktør fire
+      #                     minutter, fordi hendes Udgiv stod i kø bag den.
+      #   Python         →  ikke længere nødvendig i bygningen.
       #
-      # TIMEOUT PÅ ÉT MINUT — og hvorfor det tal.
-      #
-      # Målt på tre kørsler i træk: 7 s, 8 s og **185 s**. Den sidste var
-      # One.com der havde en dårlig dag med tre PDF'er, og den kostede en
-      # redaktør fire minutter: hendes eget Udgiv byggede på 24 sekunder, men
-      # stod tre minutter i kø bag den langsomme kørsel.
-      #
-      # `timeout=60` i fetch_assets.py gælder PR. FIL, så tre filer kan tage tre
-      # minutter uden at nogen timeout udløses. Grænsen skal derfor stå på
-      # trinnet. Bliver den ramt, mangler der tre downloadlinks på /dokumenter
-      # indtil næste bygning — det er en langt billigere pris end at hvert
-      # Udgiv i akademiet kan tage fire minutter.
-      - name: Hent de underskrevne PDF'er
-        continue-on-error: true
-        timeout-minutes: 1
-        run: |
-          python -m pip install --quiet pillow numpy
-          python tools/fetch_assets.py dokumenter
-
+      # `tools/fetch_assets.py` bliver liggende, men den er nu et HISTORISK
+      # værktøj: sådan blev akademiets indhold trukket ud af det gamle site én
+      # gang. Den må ikke komme tilbage i dette workflow.
       - name: Installér afhængigheder
         working-directory: poc
         run: npm ci

@@ -1,5 +1,6 @@
 import spiller from './spiller';
 import foto from './foto';
+import dokument from './dokument';
 import hold from './hold';
 import person from './person';
 import sponsor from './sponsor';
@@ -11,9 +12,10 @@ import titel from './titel';
 import indstillinger from './indstillinger';
 
 /**
- * Elleve dokumenttyper daekker hele akademiets indhold.
+ * Tolv dokumenttyper daekker hele akademiets indhold.
  *
- *   foto           de 13 redaktionelle billeder — ét pr. plads paa sitet
+ *   foto           de 18 redaktionelle billeder — ét pr. plads paa sitet
+ *   dokument       de filer der skal hentes: vedtaegter, referat, kontrakt
  *
  *   nyhed          det redaktoererne bruger oftest
  *   spiller        54 elever
@@ -31,6 +33,6 @@ import indstillinger from './indstillinger';
  */
 export const schemaTypes = [
   nyhed, spiller, hold, person, sponsor,
-  vaerdi, uddannelse, titel, foto,
+  vaerdi, uddannelse, titel, foto, dokument,
   saeson, indstillinger,
 ];

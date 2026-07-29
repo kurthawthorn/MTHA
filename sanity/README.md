@@ -38,8 +38,10 @@ npm install
 # 3. Læg prototypens indhold ind — 132 dokumenter og 129 billeder
 export SANITY_STUDIO_PROJECT_ID=dit-projekt-id
 export SANITY_WRITE_TOKEN=sk...
-python ../tools/fetch_assets.py   # billederne skal ligge lokalt først
-node migrer.mjs
+python ../tools/fetch_assets.py   # ENGANG: filerne skal ligge lokalt først
+node migrer.mjs                   # spillere, stab, sponsorer, portraetter, logoer
+node migrer-fotos.mjs --skriv     # de 18 redaktionelle fotos
+node migrer-dokumenter.mjs --skriv  # de tre PDF'er
 
 # 4. Start, og udgiv når det ser rigtigt ud
 npm run dev      # http://localhost:3333
@@ -57,7 +59,12 @@ Tokenet må ikke committes. `.env` er dækket af `.gitignore`.
 | Staben | 25 |
 | Sponsorer og partnere | 50 |
 | Sæson | 1 |
-| Billeder | 129 portrætter og logoer |
+| Portrætter og logoer | 129 |
+| Redaktionelle fotos | 18 |
+| PDF'er til download | 3 |
+
+Efter de tre migreringer henter bygningen **intet** fra m-tha.dk. Det er
+forudsætningen for at sitet kan afløse den gamle side.
 
 Scriptet kan køres igen: dokumenterne får forudsigelige id'er, så en ny
 kørsel opdaterer frem for at lave dubletter.
@@ -89,6 +96,7 @@ Indhold
 ├── Billeder                     ← 18 pladser: forsiden, holdfotos, faciliteter
 │   ├── Alle pladser
 │   └── ⚠ Mangler alt-tekst
+├── Dokumenter til download      ← vedtægter, referat, elevkontrakt
 ├── Sponsorer
 │   ├── Hovedsponsor
 │   ├── Topsponsorer
@@ -322,6 +330,18 @@ frem for et forkert flag, og profilen skriver Kina.
 Rullelisten her i studioet og flaget ude på siden læser den samme fil, så der er
 ikke to steder der kan komme ud af trit.
 
+### Læg et nyt referat op
+
+**Dokumenter til download → + →** titel, træk PDF'en ind, årstal, sidetal →
+**Udgiv.**
+
+Det kunne man ikke før. De tre PDF'er lå på det gamle site, og bygningen hentede
+dem hver gang — så et nyt generalforsamlingsreferat krævede at nogen lagde en fil
+på m-tha.dk. Nu hostes filen af Sanity.
+
+Det var samtidig den sidste ting bygningen hentede fra det gamle site. **Sitet er
+nu uafhængigt af m-tha.dk**, og det er forudsætningen for at det kan afløse den.
+
 ### Skift et billede på sitet — ca. 20 sekunder
 
 **Billeder → vælg pladsen → træk fotoet ind → Udgiv.**
@@ -405,6 +425,7 @@ komme til at passe dårligt.
 |---|---|---|
 | `nyhed.ts` | Nyhed | Færrest mulige felter — bruges oftest |
 | `foto.ts` | Billede | 18 faste pladser på sitet. `noegle` er en rulleliste, ikke fritekst |
+| `dokument.ts` | Dokument | De PDF'er der skal hentes. Filen hostes af Sanity, ikke af det gamle site |
 | `spiller.ts` | Spiller | Fødselsår er påkrævet; holdet udregnes af det. `landshold` tegner dannebrogsmærket |
 | `hold.ts` | Hold | Defineret ved årgange, ikke ved en spillerliste |
 | `person.ts` | Person | Trænere, ansatte og bestyrelse i **én** model |

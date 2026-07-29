@@ -216,6 +216,13 @@ export default defineConfig({
                   ]),
               ),
 
+            // Dokumenterne staar her fordi de hoerer sammen med billederne:
+            // det er de to slags FILER redaktoeren har med at goere.
+            S.listItem()
+              .title('Dokumenter til download')
+              .child(S.documentTypeList('dokument').title('Dokumenter')
+                .defaultOrdering([{ field: 'raekkefoelge', direction: 'asc' }])),
+
             S.listItem()
               .title('Værdier')
               .child(S.documentTypeList('vaerdi').title('De fire værdier')

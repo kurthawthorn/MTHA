@@ -202,6 +202,39 @@ const forkertH1 = alle.filter((h) => (h.match(/<h1[ >]/g) ?? []).length !== 1).l
 tjek('præcis én h1 pr. side', forkertH1 === 0,
   forkertH1 ? `${forkertH1} sider afviger` : '');
 
+/*
+ * INTET MAA PEGE PAA DET GAMLE SITE.
+ *
+ * Sitet skal ERSTATTE m-tha.dk. Peger en side paa den gamle sides filer, holder
+ * netop det billede eller det download op med at virke den dag den gamle side
+ * lukker — og det er praecis den dag ingen tjekker efter.
+ *
+ * Tre gange er den snor blevet bundet: 149 billeder hentet ved hver bygning, tre
+ * PDF'er, og de lokale reservefiler. Alt ligger nu i Sanity. Tjekket her er det
+ * der goer at det bliver ved med at vaere sandt.
+ *
+ * `info@m-tha.dk` og links TIL akademiets side er i orden — det er adresser, ikke
+ * filer sitet er afhaengigt af. Derfor rammes kun mediehosten.
+ */
+const gammelHost = taelIAlle(/impro\.usercontent\.one|m-tha\.dk\/onewebmedia/g);
+tjek('ingen filer hentet fra det gamle site', gammelHost === 0,
+  gammelHost ? `${gammelHost} henvisning(er) til m-tha.dk's filer` : '');
+
+/*
+ * At `hidden` faktisk skjuler.
+ *
+ * Browserens `[hidden] { display: none }` har ingen !important og taber til
+ * `.card { display: flex }`. Positionsfiltrene paa holdsiderne satte derfor
+ * `hidden` paa 25 kort, opdaterede taelleren — og skjulte ingenting.
+ *
+ * Tjekket er svagt: det maaler at reglen STAAR i CSS'en, ikke at filtrene
+ * virker. Det rigtige ville vaere at trykke paa en filterknap i en browser og
+ * taelle synlige kort. Men reglen er én linje, og forsvinder den, forsvinder
+ * filtrene med den — saa det er bedre end ingenting.
+ */
+tjek('[hidden] skjuler faktisk',
+  /\[hidden\][^{]*\{[^}]*display:\s*none\s*!important/.test(byggetCss));
+
 console.log('\n═══ BERØRINGSMÅL ═══\n');
 tjek('knapper har min-height 44px', /\.btn[^{]*\{[^}]*min-height:44px/.test(byggetCss));
 tjek('usynligt trykfelt på små elementer',

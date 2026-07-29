@@ -38,8 +38,9 @@ Sanity Studio  ──webhook──▶  GitHub Actions  ──▶  GitHub Pages
 - `sanity/` — studioet. Ti dokumenttyper. Alt indhold ligger her, intet i kode.
   `sanity/presentation/` er forhåndsvisningen — se nedenfor.
 - `tools/` — scripts der henter billeder og logoer fra m-tha.dk.
-- **Bygningen henter ingen billeder fra m-tha.dk.** Alt ligger i Sanity. Kun de
-  tre underskrevne PDF'er hentes, fordi de er filer og ikke indhold.
+- **Bygningen rører ikke m-tha.dk.** Hverken billeder eller PDF'er. Det er en
+  forudsætning for at sitet kan afløse den gamle side, ikke en optimering — og
+  designtjekket stopper bygningen hvis snoren bindes igen.
 
 **Hvorfor der står React i `poc/package.json`.** Overlejringen til Sanitys
 Presentation mode (`@sanity/visual-editing`) er bygget med React, og den bundles
@@ -50,7 +51,7 @@ statisk og har stadig ingen komponenter der hydreres.
 
 ## Det du skal vide før du rører noget
 
-Ni ting kostede tid at finde. De er alle rettet, men forklaringen er værd at
+Elleve ting kostede tid at finde. De er alle rettet, men forklaringen er værd at
 kende, fordi de kan komme igen.
 
 **1. Astros byggecache lyver om udgivelser.**
@@ -117,6 +118,26 @@ følger med når nogen kopierer et navn ud af siden.
 Her bruges `data-sanity`-attributter i stedet. De ligger uden for teksten,
 koster ca. 90 tegn pr. mærket element, og der findes ingen bygningstilstand der
 kan blive glemt i den forkerte stilling. Se `poc/src/lib/redigering.ts`.
+
+**10. `[hidden]` skjuler ikke, hvis en author-regel sætter `display`.**
+Browserens egen regel er `[hidden] { display: none }` — uden `!important`. Den
+taber derfor til `.card { display: flex }`.
+
+Konsekvensen: **positionsfiltrene på holdsiderne virkede aldrig.** Scriptet satte
+`hidden` på de kort der ikke matchede, tælleren skiftede pligtskyldigt til
+“Viser 4 af 29”, og alle 29 kort blev stående. Målt i browseren: attributten var
+sat, computed `display` var stadig `flex`.
+
+Fejlen havde været der siden filtrene blev bygget. HTML, JavaScript og CSS var
+hver for sig korrekte; det var samspillet der var forkert, og det kan kun ses ved
+at trykke på knappen. Nu står der `[hidden] { display: none !important }` i
+`global.css`.
+
+**11. Din browser cacher CSS'en, også i et testværktøj.**
+Første forsøg efter rettelsen viste stadig `display: flex`. Ikke fordi sitet var
+forkert, men fordi Chrome i testharnesset genbrugte den gamle CSS-fil fra en
+profil der blev delt mellem kørsler. `Network.setCacheDisabled` og en frisk
+`--user-data-dir` pr. kørsel. **Mistro dit eget måleværktøj før du mistror koden.**
 
 ## Tjekkene der kører af sig selv
 
@@ -221,7 +242,7 @@ hvis der dukker HTML-rester op i indhold nogen andet steds.
 - `sanity/.env` indeholder et skrivetoken og er dækket af `.gitignore`.
   **Committ det aldrig.**
 
-### 4. Billederne ligger nu i Sanity — 18 pladser
+### 4. Billederne OG dokumenterne ligger nu i Sanity
 
 Fanen **Billeder** i studioet har 18 navngivne pladser: “Forsiden — det store
 billede øverst”, “Holdfoto U19”, “Faciliteter — fælleskøkkenet”. Lars vælger
@@ -230,6 +251,13 @@ pladsen, trækker et foto ind og trykker Udgiv.
 Flyttet dertil af `sanity/migrer-fotos.mjs`. **Kør den ikke igen uden grund** —
 den springer over pladser der har et billede, men `--tving` overskriver, og så
 ryger et foto Lars har skiftet.
+
+De tre PDF'er ligger under **Dokumenter til download** som rigtige dokumenter
+med titel, årstal og sidetal. Lars kan lægge næste års generalforsamlingsreferat
+op selv — det kunne han ikke før, for det krævede en fil på det gamle site.
+
+Flyttet af `sanity/migrer-dokumenter.mjs`. Samme forbehold som fotos: den er en
+engangsflytning og springer over dokumenter der har en fil.
 
 To ting mangler stadig:
 
@@ -317,6 +345,7 @@ npm run deploy                           # tjekker + udgiver til mtha.sanity.stu
 
 node migrer-fotos.mjs                    # tørkørsel — viser hvad den ville gøre
 node migrer-fotos.mjs --skriv            # ENGANGSFLYTNING, er allerede kørt
+node migrer-dokumenter.mjs --skriv       # ditto, de tre PDF'er
 ```
 
 **Sådan så mobillayoutet efter ved 375 px.** Der er ingen browser i bygningen,

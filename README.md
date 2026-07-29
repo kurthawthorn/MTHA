@@ -7,14 +7,13 @@ Forslag og prototype til Mors-Thy Håndbold Akademis hjemmeside.
 
 ```bash
 cd poc
-npm install                      # kun første gang
-python ../tools/fetch_assets.py  # henter akademiets billeder og dokumenter
-npm run dev                      # http://localhost:4321
-npm run build                    # bygger til poc/dist/
+npm install      # kun første gang
+npm run dev      # http://localhost:4321
+npm run build    # bygger til poc/dist/ og kører designtjekket
 ```
 
-`fetch_assets.py` kan udelades — så bygger prototypen med farvede pladsholdere
-i stedet for fotos.
+Der skal ikke hentes noget. Alt indhold — tekst, billeder og PDF'er — kommer fra
+Sanity på byggetidspunktet.
 
 ## Mapper
 
@@ -24,22 +23,31 @@ i stedet for fotos.
 | `tools/` | `split_logo.py`, `fetch_assets.py`, `assets.json` |
 | `poc/` | Astro-prototypen |
 
-## Bygningen henter ikke længere billeder fra m-tha.dk
+## Bygningen rører ikke m-tha.dk
 
-Alle billeder ligger nu i Sanity — portrætter, logoer, nyhedsfotos og de 18
-redaktionelle fotos. Bygningen henter kun **de tre underskrevne PDF'er**, som er
-filer og ikke indhold.
-
-Sådan så det ud før, målt på en kørsel:
+Det er en **forudsætning**, ikke en optimering. Sitet skal erstatte m-tha.dk, og
+så længe bygningen hentede noget derfra, kunne det ikke: den dag den gamle side
+lukker, forsvinder billeder og downloadlinks med den. Et site der afhænger af det
+site det skal afløse, kan aldrig gå i luften.
 
 | | Før | Nu |
 |---|---|---|
-| Filer hentet fra m-tha.dk | 149 billeder + 3 PDF'er | 3 PDF'er |
-| Tid brugt på det | 36 s af 65 s | ~2 s |
+| Filer hentet fra m-tha.dk | 149 billeder + 3 PDF'er | **0** |
+| Tid brugt på det | 36 s af 65 s, og op til 185 s | 0 s |
+| Python i bygningen | ja | nej |
 | Kunne Lars skifte forsidefotoet? | Nej | Ja, i studioet |
+| Kunne Lars lægge næste års referat op? | Nej | Ja, i studioet |
+
+`poc/tools/tjek-design.mjs` **stopper bygningen** hvis en side igen kommer til at
+pege på det gamle sites filer. Snoren er blevet bundet tre gange; tjekket er det
+der gør at den bliver ved med at være klippet.
 
 De 149 filer var i sig selv spild: **13 af dem blev brugt.** Portrætterne og
 logoerne kom allerede fra Sanitys CDN, så de blev hentet uden at nogen så på dem.
+
+De tre PDF'er var den sidste snor, og den værste: målt på tre kørsler i træk tog
+de 7, 8 og **185** sekunder. Den langsomme kostede en redaktør fire minutter,
+fordi hendes eget Udgiv stod i kø bag den.
 
 Værre var det andet: et nyt forsidebillede krævede at nogen lagde en fil på det
 **gamle** site med det rigtige filnavn, for at det nye kunne hente den. De ligger
@@ -49,11 +57,11 @@ nu i Sanity som 18 navngivne pladser — “Forsiden — det store billede øver
 `poc/src/components/Foto.astro` er det ene sted der ved hvordan et foto hentes:
 Sanity først, den lokale fil som reserve, ellers en pladsholder.
 
-## Filerne bag ligger stadig ikke i git
+## `fetch_assets.py` er nu et historisk værktøj
 
-`tools/fetch_assets.py` kan hente **149 billeder og 3 PDF'er** fra m-tha.dk. Den
-skal køres én gang før `migrer-fotos.mjs`, og ellers kun hvis man vil have
-reservebillederne lokalt:
+Sådan blev akademiets indhold trukket ud af det gamle site **én gang**. Den er
+ikke længere en del af bygningen og må ikke komme tilbage i workflowet. Den kan
+hente **149 billeder og 3 PDF'er**, hvis man vil have reservefilerne lokalt:
 
 | Gruppe | Antal | Hvad |
 |---|---|---|
@@ -124,7 +132,7 @@ kun nødvendige for Thisted Forsikring.
 | `/uddannelse` | Fire uddannelsesveje med links, koordinatorer, træningsskema |
 | `/om-akademiet` | Vision, fysisk udvikling, faciliteter, hverdag |
 | `/privatlivspolitik` | GDPR-tekst som side |
-| `/dokumenter` | 3 underskrevne PDF'er + hvor resten er flyttet hen |
+| `/dokumenter` | De underskrevne PDF'er fra Sanity + hvor brochurerne er flyttet hen |
 
 ## Sæsonskifte — spillerne flytter sig selv
 
