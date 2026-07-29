@@ -339,3 +339,57 @@ a.card:hover {
   animation: ton 0.7s ease forwards;
 }
 @keyframes ton { to { opacity: 1; } }
+
+/* ==========================================================================
+   BERØRINGSMÅL
+   En finger rammer ca. 44×44 px. Mindre end det, og man rammer ved siden af —
+   især i bevægelse, hvilket er præcis situationen her: en forælder der
+   scroller i en hal, eller en spiller i bussen hjem.
+
+   To teknikker, valgt efter hvad elementet er:
+
+   1. min-height på knapper. De SKAL være store; det er hovedhandlinger.
+
+   2. Et usynligt felt omkring små elementer (filtre, menupunkter, årstal).
+      Her ville en større knap ødelægge rytmen i rækken, så i stedet vokser
+      selve trykfeltet uden at udseendet ændrer sig. Det er forskellen på
+      "gør knappen grim" og "gør den nem at ramme".
+
+   Målt før: .btn 36px, .chip 22px, menupunkter 24px, årstal 36px.
+   ========================================================================== */
+
+.btn {
+  min-height: 44px;
+  justify-content: center;
+}
+
+/* Usynligt trykfelt. inset med negative værdier vokser udad fra elementet. */
+.chip,
+.trofae__aar li,
+.mock__tab {
+  position: relative;
+}
+.chip::after,
+.trofae__aar li::after,
+.mock__tab::after {
+  content: '';
+  position: absolute;
+  /* Nok til at nå 44px i højden uden at røre naboen vandret */
+  inset: -11px -2px;
+}
+
+/* Menupunkterne i headeren: samme princip, men de skal også kunne rammes
+   uden at ramme nabopunktet — derfor kun lodret udvidelse. */
+.hdr nav a { position: relative; }
+.hdr nav a::after {
+  content: '';
+  position: absolute;
+  inset: -10px 0;
+}
+
+/* Sikrer at det usynlige felt ikke lægger sig OVER teksten og spiser klikket
+   på et element indeni. */
+.chip > *, .trofae__aar li > *, .mock__tab > *, .hdr nav a > * {
+  position: relative;
+  z-index: 1;
+}

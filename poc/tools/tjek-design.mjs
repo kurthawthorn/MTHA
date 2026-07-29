@@ -154,6 +154,20 @@ tjek('alle billeder har alt-tekst', udenAlt === 0,
 const tommeAlt = taelIAlle(/<img[^>]*\salt(?:=""|(?=[\s>]))/g);
 console.log(`        (${tommeAlt} bevidst tomme alt="" — dekorative billeder)`);
 
+/*
+ * Berøringsmål kan ikke måles præcist uden en browser, men de værdier der ER
+ * i CSS'en kan tjekkes — og det fanger den fejl der faktisk sker: at nogen
+ * tilføjer en lille knap uden at tænke over hvor stor en finger er.
+ *
+ * Målt før rettelsen: .btn 36px, .chip 22px, menupunkter 24px. Alt under 44.
+ */
+console.log('\n═══ BERØRINGSMÅL ═══\n');
+tjek('knapper har min-height 44px', /\.btn[^{]*\{[^}]*min-height:44px/.test(byggetCss));
+tjek('usynligt trykfelt på små elementer',
+  /\.chip[^{]*:after\{[^}]*inset:-11px/.test(byggetCss));
+tjek('menupunkter udvidet lodret',
+  /nav a[^{]*:after\{[^}]*inset:-10px/.test(byggetCss));
+
 console.log('\n═══ YDELSE ═══\n');
 const idx = readFileSync(join(dist, 'index.html'));
 tjek('forside under 50 KB HTML', idx.length < 50000, `${(idx.length / 1024).toFixed(1)} KB`);
