@@ -71,8 +71,22 @@ jobs:
       #
       # `continue-on-error` beholdes: er m-tha.dk nede, skal en udgivelse ikke
       # knække — så mangler der tre downloadlinks, og resten af sitet er intakt.
+      #
+      # TIMEOUT PÅ ÉT MINUT — og hvorfor det tal.
+      #
+      # Målt på tre kørsler i træk: 7 s, 8 s og **185 s**. Den sidste var
+      # One.com der havde en dårlig dag med tre PDF'er, og den kostede en
+      # redaktør fire minutter: hendes eget Udgiv byggede på 24 sekunder, men
+      # stod tre minutter i kø bag den langsomme kørsel.
+      #
+      # `timeout=60` i fetch_assets.py gælder PR. FIL, så tre filer kan tage tre
+      # minutter uden at nogen timeout udløses. Grænsen skal derfor stå på
+      # trinnet. Bliver den ramt, mangler der tre downloadlinks på /dokumenter
+      # indtil næste bygning — det er en langt billigere pris end at hvert
+      # Udgiv i akademiet kan tage fire minutter.
       - name: Hent de underskrevne PDF'er
         continue-on-error: true
+        timeout-minutes: 1
         run: |
           python -m pip install --quiet pillow numpy
           python tools/fetch_assets.py dokumenter
