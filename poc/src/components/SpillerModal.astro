@@ -102,12 +102,33 @@
 
 <style>
   .sm {
+  /*
+   * Placering: SAET position eksplicit.
+   *
+   * Browserens egen regel for en aaben modal er cirka
+   *   dialog:modal { position: fixed; inset: 0; margin: auto; }
+   * Skriver man `position: relative` her — fx for at kunne placere en
+   * lukkeknap absolut — overskriver man `fixed`, og dialogen falder tilbage i
+   * det normale sidflow. Paa en telefon betyder det at den lander der hvor
+   * <dialog> staar i dokumentet, altsaa oeverst paa siden, og man skal rulle
+   * OP for at se den. Det var praecis fejlen her.
+   *
+   * Lukkeknappen virker fint uden `relative`: et fastgjort element er selv
+   * containing block for sine absolut placerede boern.
+   *
+   * dvh frem for vh: paa mobil aendrer browserens adresselinje hoejden paa
+   * viewporten, og vh regner med den STOERSTE. Det giver en modal der er for
+   * hoej, saa toppen skaeres af naar linjen er fremme.
+   */
+  position: fixed;
+  inset: 0;
+  margin: auto;
     border: 0; padding: 0;
     width: min(52rem, calc(100vw - 2rem));
-    max-height: min(90vh, 56rem);
+    max-height: min(90dvh, 56rem);
     background: var(--surface); color: var(--text);
     border-radius: 6px; box-shadow: 0 24px 70px -20px rgb(11 13 46 / 55%);
-    overflow: hidden; position: relative;
+    overflow: hidden;
   }
   .sm::backdrop { background: rgb(11 13 46 / 62%); backdrop-filter: blur(3px); }
   .sm[open] { display: block; }
@@ -125,7 +146,14 @@
   }
   .sm__luk:hover { background: var(--navy-800); }
 
-  .sm__krop { overflow-y: auto; max-height: min(90vh, 56rem); padding: 1.4rem 1.5rem; }
+  .sm__krop {
+    overflow-y: auto;
+    max-height: min(90dvh, 56rem);
+    padding: 1.4rem 1.5rem;
+    /* Uden denne ruller siden BAG modalen videre naar man naar bunden */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
 
   /* Profilen kommer fra /spillere/… og har sine egne scopede klasser, så
      layoutet gentages her — kun det modalen har brug for. */

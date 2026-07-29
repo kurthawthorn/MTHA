@@ -161,8 +161,13 @@ const harKampe = Boolean(t.finale || t.semifinale);
 
   /* Modalen --------------------------------------------------------------- */
   .dl {
+    /* Saettes eksplicit, saa en senere `position` ikke uforvarende river
+       dialogen ud af det oeverste lag. Se noten i SpillerModal.astro. */
+    position: fixed;
+    inset: 0;
+    margin: auto;
     border: 0; padding: 0; max-width: min(46rem, calc(100vw - 2rem));
-    width: 100%; max-height: min(88vh, 52rem);
+    width: 100%; max-height: min(88dvh, 52rem);
     background: var(--surface); color: var(--text);
     border-radius: 6px; box-shadow: 0 24px 70px -20px rgb(11 13 46 / 55%);
     overflow: hidden;
@@ -204,6 +209,7 @@ const harKampe = Boolean(t.finale || t.semifinale);
   .dl__krop {
     padding: 1.2rem 1.3rem 1.3rem;
     overflow-y: auto; display: flex; flex-direction: column; gap: 1.2rem;
+    overscroll-behavior: contain;
   }
   .dl__blok { display: flex; flex-direction: column; gap: 0.5rem; }
   .dl__blok h3 {
