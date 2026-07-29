@@ -52,7 +52,10 @@ const red = (felt: string) => redigerbar('spiller', spiller.docId, felt);
       <span class="sk__initialer" aria-hidden="true">{initials(spiller.navn)}</span>
     )}
     {spiller.landshold && (
-      <Landsholdsmaerke niveau={spiller.landsholdNiveau} stoerrelse="lille" />
+      <Landsholdsmaerke niveau={spiller.landsholdNiveau}
+                        nation={spiller.nationalitet}
+                        nationAndet={spiller.nationalitetAndet}
+                        stoerrelse="lille" />
     )}
     <span class="sk__nr num" aria-hidden="true" data-sanity={red('rygnummer')}
       >{spiller.rygnummer}</span>

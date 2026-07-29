@@ -1,52 +1,61 @@
 ---
+import { flagSvg } from '../lib/flag';
+import { NATION_NAVN, OEVRIGE } from '../data/nationer';
+
 /**
- * LANDSHOLDSMÆRKET — dannebrog øverst til højre på portrættet.
+ * LANDSHOLDSMÆRKET — nationens flag øverst til højre på portrættet.
  *
- * Vises kun når `landshold` er slået til på spilleren i studioet. Der er
- * ingen udregning og intet gæt bag: enten har akademiet sagt det, eller der
- * står ikke noget. Se `sanity/schemas/spiller.ts`.
+ * Vises kun når `landshold` er slået til på spilleren i studioet. Flaget følger
+ * spillerens NATIONALITET, så en norsk elev på akademiet får det norske flag.
+ * Er der ingen nationalitet sat, er det Danmark — det er svaret i langt de
+ * fleste tilfælde, og det er også standardværdien i Sanity.
  *
- * HVORFOR EN SVG OG IKKE ET BILLEDE
- *   Et flag i to farver og to rektangler er 180 bytes som SVG. Som PNG skulle
- *   det hentes i to opløsninger, ligge i `public/`, og en dag blive glemt når
- *   nogen rydder op i mappen. Det skalerer også skarpt i alle størrelser og
- *   følger tekstens størrelse af sig selv, fordi højden er sat i `em`.
+ * BEMÆRK HVAD FLAGET SÅ BETYDER
+ *   Det viser statsborgerskab, ikke hvilket forbund der har udtaget spilleren.
+ *   De to kan pege på hvert sit land: en elev med kosovarisk pas kan være
+ *   udtaget til Danmarks U18. Sådan er det valgt, og det er værd at kende hvis
+ *   nogen en dag spørger hvorfor der står et flag der ikke passer til holdet.
  *
- *   Målene er dannebrogs officielle: 37 : 28, med korsarme på 4 enheder,
- *   den lodrette 12 enheder fra venstre kant.
+ * HVORFOR FLAGET ER PYNT OG TEKSTEN ER OPLYSNINGEN
+ *   Mærket er ca. 13 px bredt. Der er ingen der kan skelne Slovakiet fra
+ *   Slovenien i den størrelse, og det skal de heller ikke: `role="img"` med
+ *   `aria-label` gør flag og tekst til ÉT element, og labelen skriver landet
+ *   ud. Flaget er en farvesignatur — labelen er svaret.
  *
  * PLACERINGEN LIGGER HER
- *   Mærket er `position: absolute`, så det forudsætter en forælder med
- *   `position: relative` — det har alle fire portrætbokse. Placeringen står
- *   bevidst i komponenten frem for på hvert kaldested: "øverst til højre på
- *   billedet" er mærkets definition, ikke en indstilling.
- *
- * TILGÆNGELIGHED
- *   `role="img"` med `aria-label` gør flag og tekst til ÉT element for en
- *   skærmlæser. Uden det ville "U18" blive læst alene, og det siger ikke
- *   nogen noget. Teksten er derfor `aria-hidden` — den er den visuelle
- *   halvdel af samme oplysning, ikke en ekstra.
+ *   Mærket er `position: absolute` og forudsætter en forælder med
+ *   `position: relative` — det har alle fire portrætbokse. "Øverst til højre på
+ *   billedet" er mærkets definition, ikke en indstilling på kaldestedet.
  */
 interface Props {
-  /** Fx "U18". Tomt felt giver teksten "Landshold". */
+  /** Fx "U18" eller "U18+U20". Tomt felt giver teksten "Landshold". */
   niveau?: string;
+  /** ISO-kode fra `nationer.ts`, eller `oevrige`. Standard: Danmark. */
+  nation?: string;
+  /** Landets navn, når `nation` er `oevrige` og nogen har skrevet det. */
+  nationAndet?: string;
   /** `lille` på spillerkortet i truppen, `stor` på profilsiden. */
   stoerrelse?: 'lille' | 'stor';
 }
-const { niveau, stoerrelse = 'lille' } = Astro.props;
+const { niveau, nation = 'DK', nationAndet, stoerrelse = 'lille' } = Astro.props;
 
 const tekst = niveau?.trim() || 'Landshold';
+
+/* Landenavnet til skærmlæsere og til værktøjstippet. Er landet uden for
+   listen, bruges det navn redaktøren har skrevet — ellers ordet "Øvrige",
+   som i det mindste er ærligt om at vi ikke ved mere. */
+const land = nation === OEVRIGE
+  ? (nationAndet?.trim() || NATION_NAVN[OEVRIGE])
+  : (NATION_NAVN[nation] ?? NATION_NAVN[OEVRIGE]);
+
 const beskrivelse = niveau?.trim()
-  ? `Landsholdsspiller, ${niveau.trim()}`
-  : 'Landsholdsspiller';
+  ? `Landsholdsspiller for ${land}, ${niveau.trim()}`
+  : `Landsholdsspiller for ${land}`;
 ---
 
 <span class:list={['lhm', `lhm--${stoerrelse}`]}
       role="img" aria-label={beskrivelse} title={beskrivelse}>
-  <svg class="lhm__flag" viewBox="0 0 37 28" aria-hidden="true" focusable="false">
-    <rect width="37" height="28" fill="#C8102E" />
-    <path d="M0 12h37v4H0zM12 0h4v28h-4z" fill="#fff" />
-  </svg>
+  <span class="lhm__flag" set:html={flagSvg(nation)} />
   <span class="lhm__txt" aria-hidden="true">{tekst}</span>
 </span>
 
@@ -72,12 +81,22 @@ const beskrivelse = niveau?.trim()
     white-space: nowrap;
   }
 
-  /* Flaget følger tekstens størrelse, så de to aldrig kommer ud af trit. */
+  /* Flaget følger tekstens størrelse, så de to aldrig kommer ud af trit.
+     `:global(svg)` fordi SVG'en indsættes med set:html og derfor ikke får
+     Astros scope-attribut — den kan kun rammes gennem forælderen. */
   .lhm__flag {
+    display: flex;
     height: 0.85em;
+    flex: none;
+  }
+  .lhm__flag :global(svg) {
+    height: 100%;
     width: auto;
     display: block;
+    /* En hårfin kant, så et flag med hvid kant — Grønland, Polen, Finland —
+       ikke flyder sammen med den hvide tekst ved siden af. */
     border-radius: 1px;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 35%);
   }
 
   .lhm--lille { font-size: 0.6rem; padding: 0.26rem 0.42rem 0.28rem; }

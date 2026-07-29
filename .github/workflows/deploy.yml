@@ -58,16 +58,24 @@ jobs:
         with:
           python-version: '3.12'
 
-      # Billederne ligger IKKE i git — de tilhører akademiet, sponsorerne og
-      # fotograferne, og portrætterne viser mindreårige. De hentes derfor
-      # frisk fra m-tha.dk her, ud fra manifestet i tools/assets.json.
-      # Bygger uden dem, hvis hentningen fejler: siden falder tilbage på
-      # farvede pladsholdere frem for at deployet knækker.
-      - name: Hent akademiets billeder
+      # KUN DE TRE PDF'ER HENTES NU.
+      #
+      # Trinnet hentede før alle 149 billeder fra m-tha.dk, hver gang. Det tog
+      # 36 af bygningens 65 sekunder — over halvdelen af tiden — og af de 149
+      # filer blev 13 brugt: portrætter og logoer kom allerede fra Sanitys CDN,
+      # så de blev hentet uden at nogen så på dem.
+      #
+      # De redaktionelle fotos ligger nu også i Sanity (sanity/migrer-fotos.mjs),
+      # så bygningen har ingen grund til at røre m-tha.dk for billeder. Tilbage
+      # står de tre underskrevne PDF'er, som er filer og ikke indhold.
+      #
+      # `continue-on-error` beholdes: er m-tha.dk nede, skal en udgivelse ikke
+      # knække — så mangler der tre downloadlinks, og resten af sitet er intakt.
+      - name: Hent de underskrevne PDF'er
         continue-on-error: true
         run: |
           python -m pip install --quiet pillow numpy
-          python tools/fetch_assets.py
+          python tools/fetch_assets.py dokumenter
 
       - name: Installér afhængigheder
         working-directory: poc
@@ -92,13 +100,23 @@ jobs:
         working-directory: poc
         run: node tools/saet-basissti.mjs dist "${{ steps.pages.outputs.base_path }}/"
 
+      # Tjekket talte før .webp-filer i output, altså de billeder Astro selv
+      # havde optimeret fra lokale filer. Nu kommer næsten alle billeder fra
+      # Sanitys CDN, som optimerer på sin side — så Astro laver kun 8 filer, og
+      # tjekket ville advare på hver eneste bygning.
+      #
+      # Det der skal måles er derfor, hvor mange billeder siderne HENVISER til.
+      # Er Sanity nede, falder tallet igennem gulvet, og det er præcis den fejl
+      # der ellers er tavs: siden bygger, den er blot fuld af pladsholdere.
       - name: Tjek at billederne kom med
         working-directory: poc
         run: |
-          ANTAL=$(find dist/_astro -name '*.webp' | wc -l)
-          echo "Optimerede billeder i output: $ANTAL"
-          if [ "$ANTAL" -lt 100 ]; then
-            echo "::warning::Kun $ANTAL billeder — hentningen fra m-tha.dk fejlede muligvis, og siden viser pladsholdere."
+          FRA_SANITY=$(grep -rho 'cdn\.sanity\.io[^" ]*' dist --include='*.html' \
+            | sed 's/?.*//' | sort -u | wc -l)
+          LOKALE=$(find dist/_astro -name '*.webp' | wc -l)
+          echo "Billeder fra Sanity: $FRA_SANITY — optimeret lokalt: $LOKALE"
+          if [ "$FRA_SANITY" -lt 100 ]; then
+            echo "::warning::Kun $FRA_SANITY billeder fra Sanity — datasættet svarede muligvis ikke, og siden viser pladsholdere."
           fi
 
       - uses: actions/upload-pages-artifact@v3

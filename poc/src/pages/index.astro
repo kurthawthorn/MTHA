@@ -1,20 +1,15 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import NyhedsKort from '../components/NyhedsKort.astro';
+import Foto from '../components/Foto.astro';
 import { hold, truppen, personer } from '../data/akademi';
-import { billede } from '../lib/billeder';
 import { nyheder } from '../data/nyheder';
-import { altFor } from '../data/billeder';
 import { MOTTO, ligatrupTal, forsideVaerdier, titler, uddannelser } from '../data/vaerdier';
 import { saeson } from '../data/saeson';
 
 const seneste = nyheder.slice(0, 3);
 const antalSpillere = hold.reduce((n, h) => n + truppen(h.id).length, 0);
 
-/* Hero tåler hård komprimering (quality 58): der ligger et kraftigt navy-slør
-   over fotoet, så artefakter er usynlige. Det halverer forsidens vægt. */
-const heroFoto = billede('dm-2025-vinder');
 const traening = ['traening-hal', 'traening-styrke', 'socialt-4'];
 const faciliteter = [
   { key: 'traneholm-indgang', h: 'Traneholm',
@@ -27,10 +22,14 @@ const faciliteter = [
 <Base titel="forside">
   <!-- Forsidens tese: det mest karakteristiske akademiet har — DM-guldet -->
   <section class="hero">
-    {heroFoto && (
-      <Image src={heroFoto} alt="" class="hero__bg"
-             widths={[760, 1200, 1700]} sizes="100vw" quality={58} loading="eager" />
-    )}
+    {/* Hero tåler hård komprimering (quality 58): der ligger et kraftigt
+        navy-slør over fotoet, så artefakter er usynlige. Det halverer
+        forsidens vægt. alt="" fordi sløret gør det til baggrund — teksten
+        ovenpå siger det hele. */}
+    <Foto noegle="dm-2025-vinder" alt="" klasse="hero__bg"
+          bredder={[760, 1200, 1700]} sizes="100vw" forhold={0.56}
+          kvalitet={58} ivrig />
+
     <div class="hero__slor"></div>
     <div class="wrap hero__in">
       <div class="hero__text">
@@ -110,15 +109,13 @@ const faciliteter = [
         <a href="/hold/u17">Se truppen →</a>
       </div>
       <div class="grid grid--2">
-        {hold.map((h) => {
-          const foto = billede(h.fotoKey);
-          return (
+        {hold.map((h) => (
             <a class="card holdkort" href={`/hold/${h.id}`}>
               <div class="holdkort__foto">
-                {foto && (
-                  <Image src={foto} alt="" widths={[420, 700, 1000]}
-                         sizes="(max-width: 700px) 92vw, 520px" quality={78} loading="lazy" />
-                )}
+                {/* alt="" — overskriften under kortet siger hvilket hold det er */}
+                <Foto noegle={h.fotoKey} alt="" forhold={7 / 16}
+                      bredder={[420, 700, 1000]}
+                      sizes="(max-width: 700px) 92vw, 520px" />
               </div>
               <div class="holdkort__txt">
                 <div class="holdkort__top">
@@ -128,25 +125,22 @@ const faciliteter = [
                 <p class="num">{truppen(h.id).length} spillere{h.traener && ` · træner ${h.traener}`}</p>
               </div>
             </a>
-          );
-        })}
+        ))}
       </div>
     </section>
 
     <section class="section">
       <div class="section__head"><h2>Træning og hverdag</h2></div>
       <div class="stribe">
-        {traening.map((k) => {
-          const foto = billede(k);
-          return foto ? (
-            <div class="stribe__i">
-              {/* Striben har ingen billedtekst, saa alt-teksten er det eneste
-                  der fortaeller hvad man gaar glip af. Derfor ikke tom. */}
-              <Image src={foto} alt={altFor(k)} widths={[400, 700]}
-                     sizes="(max-width: 700px) 92vw, 360px" quality={78} loading="lazy" />
-            </div>
-          ) : null;
-        })}
+        {traening.map((k) => (
+          <div class="stribe__i">
+            {/* Striben har ingen billedtekst, saa alt-teksten er det eneste
+                der fortaeller hvad man gaar glip af. Derfor ikke tom —
+                `<Foto>` henter den fra Sanity. */}
+            <Foto noegle={k} bredder={[400, 700]} forhold={3 / 4}
+                  sizes="(max-width: 700px) 92vw, 360px" />
+          </div>
+        ))}
       </div>
     </section>
 
@@ -156,23 +150,21 @@ const faciliteter = [
         <a href="/om-akademiet">Om akademiet →</a>
       </div>
       <div class="grid grid--3">
-        {faciliteter.map((f) => {
-          const foto = billede(f.key);
-          return (
+        {faciliteter.map((f) => (
             <div class="card fk">
               <div class="fk__foto">
-                {foto && (
-                  <Image src={foto} alt="" widths={[380, 640]}
-                         sizes="(max-width: 700px) 92vw, 340px" quality={78} loading="lazy" />
-                )}
+                {/* alt="" — overskriften og teksten under kortet siger hvad
+                    man ser, saa en beskrivelse ville vaere en gentagelse */}
+                <Foto noegle={f.key} alt="" forhold={10 / 16}
+                      bredder={[380, 640]}
+                      sizes="(max-width: 700px) 92vw, 340px" />
               </div>
               <div class="fk__txt">
                 <h3>{f.h}</h3>
                 <p>{f.p}</p>
               </div>
             </div>
-          );
-        })}
+        ))}
       </div>
     </section>
 

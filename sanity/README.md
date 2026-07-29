@@ -57,7 +57,7 @@ Tokenet må ikke committes. `.env` er dækket af `.gitignore`.
 | Staben | 25 |
 | Sponsorer og partnere | 50 |
 | Sæson | 1 |
-| Billeder | 129 |
+| Billeder | 129 portrætter og logoer |
 
 Scriptet kan køres igen: dokumenterne får forudsigelige id'er, så en ny
 kørsel opdaterer frem for at lave dubletter.
@@ -86,6 +86,9 @@ Indhold
 │   ├── Bestyrelsen              ← akademiets egne tre sektioner
 │   ├── ⚠ Mangler rolle
 │   └── ⚠ Rolle med HTML-rester  ← fem roller er klippet over i udtrækket
+├── Billeder                     ← 18 pladser: forsiden, holdfotos, faciliteter
+│   ├── Alle pladser
+│   └── ⚠ Mangler alt-tekst
 ├── Sponsorer
 │   ├── Hovedsponsor
 │   ├── Topsponsorer
@@ -277,18 +280,73 @@ Straks på det rigtige hold, i truppen, i filtrene og i forsidens tælling.
 
 ### Marker en landsholdsspiller
 
-Slå **Har spillet på landsholdet** til på spilleren. Så kommer der et
-dannebrogsmærke øverst til højre på portrættet — både på spillerkortet i
-truppen og på profilsiden.
+Slå **Har spillet på landsholdet** til på spilleren. Så kommer der et mærke
+øverst til højre på portrættet — både på spillerkortet i truppen og på
+profilsiden.
 
-Udfylder man også **Hvilket landshold** (fx `U18`), står det på mærket; ellers
-står der bare “Landshold”. Feltet er skjult indtil kontakten er slået til.
+Udfylder man også **Hvilket landshold** (fx `U18` eller `U18+U20`), står det på
+mærket; ellers står der bare “Landshold”. Feltet er skjult indtil kontakten er
+slået til.
 
 Der er ingen standardværdi, og intet gættes. Det er en oplysning der står på et
 ungt menneskes cv, og den skal komme fra akademiet.
 
 Listen **Spillere → Landsholdsspillere** viser alle der er markeret, så en
 markering sat ved en fejl kan findes igen.
+
+### Nationalitet — og flaget på mærket
+
+Feltet **Nationalitet** er en rulleliste med hele Europa. Den bestemmer hvilket
+flag der står på landsholdsmærket, så en norsk elev får det norske flag.
+
+**Danmark er standard.** De 54 der blev oprettet før feltet fandtes står derfor
+med dansk flag uden at nogen har taget stilling — og det siger profilen selv:
+“Nationalitet står som Danmark indtil akademiet har udfyldt den.” Sætningen
+forsvinder så snart nogen har valgt et land.
+
+Er eleven ikke fra Europa, vælges **Øvrige (uden for Europa)**, og feltet
+**Hvilket land** dukker op. Skriv fx `Kina`. Mærket viser så et jordklode-mærke
+frem for et forkert flag, og profilen skriver Kina.
+
+> **Bemærk hvad flaget betyder.** Det viser elevens statsborgerskab — ikke
+> hvilket forbund der har udtaget spilleren. De to kan pege på hvert sit land:
+> en elev med kosovarisk pas kan være udtaget til Danmarks U18. Sådan er det
+> valgt. Skal flaget i stedet følge landsholdet, er det et ekstra felt, ikke en
+> rettelse af dette.
+
+**Sådan tilføjer man et land** — fx hvis der mangler et uden for Europa:
+
+1. Skriv landekode og dansk navn i `poc/src/data/nationer.ts`
+2. Kør `node tools/hent-flag.mjs` i `poc/`
+
+Rullelisten her i studioet og flaget ude på siden læser den samme fil, så der er
+ikke to steder der kan komme ud af trit.
+
+### Skift et billede på sitet — ca. 20 sekunder
+
+**Billeder → vælg pladsen → træk fotoet ind → Udgiv.**
+
+Pladserne heder det de er: “Forsiden — det store billede øverst”, “Holdfoto
+U19”, “Faciliteter — fælleskøkkenet”. Man skal ikke vide hvad en fil heder, og
+man kan ikke lægge et billede et sted hvor det ikke bliver vist.
+
+Marker gerne hvad billedet handler om (*hotspot*). Flere af pladserne er brede —
+holdfotoet er 21:8 og forsidens billede fylder hele skærmens bredde — så der
+beskæres kraftigt, og uden et hotspot beskæres der om midten.
+
+**Alt-teksten er påkrævet**, undtagen når billedet er ren pynt. Der er en
+kontakt til det: forsidens store billede og baggrunden på /vaerdier har et
+kraftigt slør og en overskrift oven på sig, og en skærmlæser skal springe dem
+over frem for at få en beskrivelse læst op der ikke hjælper.
+
+> **Hvorfor det her er nyt.** Før lå de 18 fotos som filer på m-tha.dk, og
+> bygningen hentede dem hver gang — 36 af 65 sekunder gik med det. Værre: et nyt
+> forsidebillede krævede at nogen lagde en fil på det GAMLE site med det rigtige
+> filnavn, for at det nye kunne hente den. Nu ligger de her.
+>
+> Der er 18 pladser. Skal der være en mere, kræver det en udvikler — der skal
+> først være et sted på siden at vise den. Det er samme afvejning som med
+> felterne: begrænsningen er grunden til at siden ikke kan forfalde.
 
 ### Ny sponsor — ca. 30 sekunder
 
@@ -346,6 +404,7 @@ komme til at passe dårligt.
 | Fil | Dokument | Bemærk |
 |---|---|---|
 | `nyhed.ts` | Nyhed | Færrest mulige felter — bruges oftest |
+| `foto.ts` | Billede | 18 faste pladser på sitet. `noegle` er en rulleliste, ikke fritekst |
 | `spiller.ts` | Spiller | Fødselsår er påkrævet; holdet udregnes af det. `landshold` tegner dannebrogsmærket |
 | `hold.ts` | Hold | Defineret ved årgange, ikke ved en spillerliste |
 | `person.ts` | Person | Trænere, ansatte og bestyrelse i **én** model |

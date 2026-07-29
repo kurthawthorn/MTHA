@@ -37,6 +37,10 @@ poc/public/dokumenter/*.pdf
 
 # Logoerne BLIVER i git: de er små, og uden dem kan designet ikke
 # rendere. Det er en anden sag end 142 fotos af mindreårige.
+#
+# Det samme gaelder poc/src/assets/flag/ — 53 flag-SVG'er paa 26 kB tilsammen,
+# hentet fra country-flag-icons (MIT) af poc/tools/hent-flag.mjs. De er en del
+# af designet ligesom skrifterne, og de tilhoerer ingen der kan gaa i stykker.
 
 # Sanity Studio
 sanity/node_modules/

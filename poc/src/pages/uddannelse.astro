@@ -1,13 +1,9 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import Foto from '../components/Foto.astro';
 import {
   uddannelser, uddannelseFakta, akademitraening, eliteTilbud,
 } from '../data/vaerdier';
-import { billede } from '../lib/billeder';
-import { altFor } from '../data/billeder';
-
-const foto = billede('traening-styrke');
 ---
 
 <Base titel="Uddannelse og eliteidræt"
@@ -106,12 +102,10 @@ const foto = billede('traening-styrke');
             </tbody>
           </table>
         </div>
-        {foto && (
-          <figure class="skema__foto">
-            <Image src={foto} alt={altFor('traening-styrke')} widths={[420, 760]}
-                   sizes="(max-width: 860px) 92vw, 340px" quality={80} loading="lazy" />
-          </figure>
-        )}
+        <figure class="skema__foto">
+          <Foto noegle="traening-styrke" bredder={[420, 760]} forhold={5 / 4}
+                sizes="(max-width: 860px) 92vw, 340px" kvalitet={80} />
+        </figure>
       </div>
     </section>
 

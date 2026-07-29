@@ -1,4 +1,15 @@
 import { defineField, defineType } from 'sanity';
+/*
+ * Landelisten ligger ÉT sted, i sitet.
+ *
+ * Rullelisten her og flaget på mærket ude på siden skal bruge de samme
+ * landekoder. Stod listen to steder, ville en tilføjelse i det ene sted give
+ * et land der kan vælges men ikke har noget flag — og det ville først blive
+ * opdaget når en redaktør havde valgt det. `poc/src/data/nationer.ts`
+ * importerer selv ingenting, så den kan læses herfra uden at trække sitet med
+ * ind i studioet.
+ */
+import { NATION_VALG } from '../../poc/src/data/nationer';
 
 /**
  * SPILLER — én elev.
@@ -98,6 +109,40 @@ export default defineType({
       },
     }),
     defineField({ name: 'moderklub', title: 'Moderklub', type: 'string' }),
+
+    /*
+     * NATIONALITET — stamdata, og det der bestemmer flaget.
+     *
+     * Feltet står her frem for nede ved landsholdsmærket, fordi det gælder
+     * uanset om spilleren har spillet landshold: det er en oplysning om
+     * eleven, ikke om et mærke.
+     *
+     * En LUKKET liste, ikke fritekst. "Tyskland", "tyskland" og "Germany"
+     * ville ellers give tre svar, hvoraf to gav et tomt flag. Listen kommer
+     * fra `poc/src/data/nationer.ts`, hvor de tilhørende flag også ligger.
+     *
+     * Danmark er standard, fordi det er svaret i langt de fleste tilfælde.
+     */
+    defineField({
+      name: 'nationalitet',
+      title: 'Nationalitet',
+      type: 'string',
+      description:
+        'Bestemmer hvilket flag der står på landsholdsmærket. Er eleven ikke ' +
+        'fra Europa, vælg "Øvrige" og skriv landet i feltet nedenunder.',
+      options: { list: NATION_VALG, layout: 'dropdown' },
+      initialValue: 'DK',
+    }),
+    defineField({
+      name: 'nationalitetAndet',
+      title: 'Hvilket land',
+      type: 'string',
+      description:
+        'Kun når nationaliteten er "Øvrige". Fx "Kina". Står som tekst på ' +
+        'profilen; mærket viser et jordkloden-mærke frem for et forkert flag.',
+      hidden: ({ document }) => document?.nationalitet !== 'oevrige',
+      validation: (Rule) => Rule.max(40),
+    }),
     defineField({
       name: 'uddannelse',
       title: 'Uddannelse',

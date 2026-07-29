@@ -1,0 +1,98 @@
+---
+import { Image } from 'astro:assets';
+import { foto as fraSanity } from '../data/fotos';
+import { billede } from '../lib/billeder';
+import { altFor } from '../data/billeder';
+import { billedUrl, billedSrcset } from '../lib/sanity';
+import { redigerbar } from '../lib/redigering';
+
+/**
+ * ET REDAKTIONELT FOTO — ét sted, tre kilder.
+ *
+ * Rækkefølgen er:
+ *   1. Sanity, hvis pladsen er udfyldt i studioet
+ *   2. den lokale fil i `src/assets/fotos/`, hvis den er hentet
+ *   3. ingenting — så tegner kaldestedet sin egen pladsholder
+ *
+ * HVORFOR EN KOMPONENT OG IKKE 14 KALD
+ *   Før stod der `<Image src={billede('drone-2')} widths={[...]} />` på fjorten
+ *   forskellige steder. Da billederne flyttede til Sanity, skulle alle fjorten
+ *   skifte fra Astros `<Image>` til et `<img>` med srcset — og hvis ét blev
+ *   glemt, ville netop det billede holde op med at kunne skiftes i studioet,
+ *   uden at nogen kunne se det på siden.
+ *
+ *   Nu er der ét sted der ved hvordan et foto hentes, og fjorten steder der
+ *   siger HVILKET foto og hvor bredt.
+ *
+ * WIDTH OG HEIGHT SÆTTES ALTID
+ *   Uden dem kender browseren ikke billedets forhold før filen er hentet, og
+ *   siden hopper når det lander. Astros `<Image>` sætter dem selv; for
+ *   Sanity-vejen regnes de ud af `forhold`, eller af billedets egne mål som
+ *   følger med i forespørgslen.
+ */
+interface Props {
+  /** Pladsen. Se `src/data/fotoslots.ts`. */
+  noegle: string;
+  /** Bredder til srcset, mindst til størst. */
+  bredder: number[];
+  /** `sizes`-attributten. Hvor bredt billedet står ved hvilken skærmbredde. */
+  sizes: string;
+  /**
+   * Højde delt med bredde, når boksen beskærer — fx `9 / 16` til et
+   * 16:9-felt. Udelades den, bruges billedets eget forhold.
+   */
+  forhold?: number;
+  kvalitet?: number;
+  /**
+   * Alt-teksten. Udelades den, bruges den fra Sanity — og ellers manifestet.
+   * Sæt `alt=""` for et billede der er ren pynt.
+   */
+  alt?: string;
+  klasse?: string;
+  /** `true` på det billede der står øverst på siden. Resten hentes ved rul. */
+  ivrig?: boolean;
+}
+
+const { noegle, bredder, sizes, forhold, kvalitet = 78,
+        alt, klasse, ivrig = false } = Astro.props;
+
+const sanity = fraSanity(noegle);
+const lokal = sanity?.url ? undefined : billede(noegle);
+
+/* Alt-tekst: det kaldestedet siger, ellers Sanity, ellers manifestet.
+   `alt=""` fra kaldestedet skal respekteres, så der tjekkes på undefined. */
+const altTekst = alt ?? sanity?.alt ?? altFor(noegle);
+
+/* Den største bredde bruges til `src` og til width/height. */
+const stoerst = Math.max(...bredder);
+const eget = sanity?.bredde && sanity?.hoejde
+  ? sanity.hoejde / sanity.bredde
+  : undefined;
+const brugtForhold = forhold ?? eget;
+const hoejde = brugtForhold ? Math.round(stoerst * brugtForhold) : undefined;
+
+const anker = sanity?.hotspot
+  ? { anker: 'focalpoint' as const, fp: sanity.hotspot }
+  : {};
+
+/* Klik-til-felt i Presentation mode. Peger på billedfeltet på fotodokumentet,
+   så Lars kan klikke på et billede ude på siden og skifte det. */
+const red = redigerbar('foto', sanity?.url ? `foto-${noegle}` : undefined, 'billede');
+---
+
+{sanity?.url ? (
+  <img src={billedUrl(sanity.url, { b: stoerst, h: hoejde, kvalitet, ...anker })}
+       srcset={billedSrcset(sanity.url, bredder, { forhold: brugtForhold, kvalitet, ...anker })}
+       sizes={sizes}
+       width={stoerst}
+       height={hoejde}
+       alt={altTekst}
+       class={klasse}
+       data-sanity={red}
+       loading={ivrig ? 'eager' : 'lazy'}
+       decoding="async" />
+) : lokal ? (
+  <Image src={lokal} alt={altTekst} widths={bredder} sizes={sizes}
+         quality={kvalitet} class={klasse}
+         loading={ivrig ? 'eager' : 'lazy'} />
+) : null}

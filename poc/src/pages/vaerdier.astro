@@ -1,13 +1,8 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import Foto from '../components/Foto.astro';
 import { MOTTO, vaerdier, historie, ligatrupTal, titler, titelTekst } from '../data/vaerdier';
 import TrofaeKort from '../components/TrofaeKort.astro';
-import { billede } from '../lib/billeder';
-import { altFor } from '../data/billeder';
-
-const top = billede('dm-jubel');
-const fælles = billede('hold-udenfor');
 ---
 
 <Base titel="Værdier"
@@ -15,10 +10,10 @@ const fælles = billede('hold-udenfor');
   <!-- Mottoet er akademiets eget og står på forsiden af visionsbrochuren.
        Her får det den plads, det ikke har i dag. -->
   <section class="motto">
-    {top && (
-      <Image src={top} alt="" class="motto__bg" widths={[760, 1200, 1700]}
-             sizes="100vw" quality={56} loading="eager" />
-    )}
+    {/* alt="" — baggrunden bag mottoet. Teksten ovenpaa siger det hele. */}
+    <Foto noegle="dm-jubel" alt="" klasse="motto__bg"
+          bredder={[760, 1200, 1700]} sizes="100vw" forhold={0.56}
+          kvalitet={56} ivrig />
     <div class="motto__slor"></div>
     <div class="wrap motto__in">
       <span class="eyebrow" data-seq style="--s:0">Vores værdier</span>
@@ -91,15 +86,13 @@ const fælles = billede('hold-udenfor');
       </ol>
     </section>
 
-    {fælles && (
-      <section class="section">
-        <figure class="bred">
-          <Image src={fælles} alt={altFor('hold-udenfor')}
-                 widths={[900, 1500, 2200]} sizes="100vw" quality={78} loading="lazy" />
-          <figcaption>Hele akademiet samlet — sammen er vi stærkere.</figcaption>
-        </figure>
-      </section>
-    )}
+    <section class="section">
+      <figure class="bred">
+        <Foto noegle="hold-udenfor" bredder={[900, 1500, 2200]}
+              sizes="100vw" forhold={8 / 21} />
+        <figcaption>Hele akademiet samlet — sammen er vi stærkere.</figcaption>
+      </figure>
+    </section>
 
     <section class="section">
       <div class="card cta">

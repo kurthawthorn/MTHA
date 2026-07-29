@@ -1,9 +1,8 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import { billede } from '../lib/billeder';
+import Foto from '../components/Foto.astro';
 import { saeson } from '../data/saeson';
-import { altFor, iKategori } from '../data/billeder';
+import { HVERDAGEN } from '../data/fotoslots';
 
 const faciliteter = [
   { key: 'drone-2', h: 'Morsø Multipark',
@@ -21,17 +20,15 @@ const faciliteter = [
 ];
 
 const traening = ['traening-hal', 'traening-styrke'];
-const socialt = iKategori('fotos', 'socialt').map((f) => f.key);
-const top = billede('hold-udenfor');
 ---
 
 <Base titel="Om akademiet"
       beskrivelse="Mors-Thy Håndbold Akademi kombinerer elitehåndbold med ungdomsuddannelse i Nykøbing Mors.">
   <div class="wrap">
-    {top && (
+    {(
       <div class="topfoto">
-        <Image src={top} alt={altFor('hold-udenfor')} widths={[900, 1500, 2200]}
-               sizes="100vw" quality={80} loading="eager" />
+        <Foto noegle="hold-udenfor" bredder={[900, 1500, 2200]}
+              sizes="100vw" forhold={8 / 21} kvalitet={80} ivrig />
       </div>
     )}
 
@@ -66,15 +63,12 @@ const top = billede('hold-udenfor');
     <section class="section">
       <div class="section__head"><h2>Fysisk udvikling</h2></div>
       <div class="par">
-        {traening.map((k) => {
-          const f = billede(k);
-          return f ? (
-            <figure class="par__i">
-              <Image src={f} alt={altFor(k)} widths={[460, 820]}
-                     sizes="(max-width: 700px) 92vw, 460px" quality={80} loading="lazy" />
-            </figure>
-          ) : null;
-        })}
+        {traening.map((k) => (
+          <figure class="par__i">
+            <Foto noegle={k} bredder={[460, 820]} forhold={3 / 4}
+                  sizes="(max-width: 700px) 92vw, 460px" kvalitet={80} />
+          </figure>
+        ))}
       </div>
     </section>
 
@@ -93,42 +87,32 @@ const top = billede('hold-udenfor');
     <section class="section">
       <div class="section__head"><h2>Faciliteter</h2></div>
       <div class="grid grid--3">
-        {faciliteter.map((f) => {
-          const foto = billede(f.key);
-          return (
+        {faciliteter.map((f) => (
             <div class="card fk">
               <div class="fk__foto">
-                {foto && (
-                  <Image src={foto} alt={altFor(f.key)} widths={[380, 660]}
-                         sizes="(max-width: 700px) 92vw, 340px" quality={78} loading="lazy" />
-                )}
+                <Foto noegle={f.key} bredder={[380, 660]} forhold={10 / 16}
+                      sizes="(max-width: 700px) 92vw, 340px" />
               </div>
               <div class="fk__txt">
                 <h3>{f.h}</h3>
                 <p>{f.p}</p>
               </div>
             </div>
-          );
-        })}
+        ))}
       </div>
     </section>
 
-    {socialt.length > 0 && (
-      <section class="section">
-        <div class="section__head"><h2>Hverdagen</h2></div>
-        <div class="galleri">
-          {socialt.map((k) => {
-            const f = billede(k);
-            return f ? (
-              <div class="galleri__i">
-                <Image src={f} alt={altFor(k)} widths={[300, 560]}
-                       sizes="(max-width: 700px) 45vw, 240px" quality={78} loading="lazy" />
-              </div>
-            ) : null;
-          })}
-        </div>
-      </section>
-    )}
+    <section class="section">
+      <div class="section__head"><h2>Hverdagen</h2></div>
+      <div class="galleri">
+        {HVERDAGEN.map((k) => (
+          <div class="galleri__i">
+            <Foto noegle={k} bredder={[300, 560]} forhold={4 / 3}
+                  sizes="(max-width: 700px) 45vw, 240px" />
+          </div>
+        ))}
+      </div>
+    </section>
   </div>
 </Base>
 

@@ -24,9 +24,36 @@ i stedet for fotos.
 | `tools/` | `split_logo.py`, `fetch_assets.py`, `assets.json` |
 | `poc/` | Astro-prototypen |
 
-## Billeder og dokumenter ligger ikke i git
+## Bygningen henter ikke længere billeder fra m-tha.dk
 
-`tools/fetch_assets.py` henter **149 billeder og 3 PDF'er** fra m-tha.dk:
+Alle billeder ligger nu i Sanity — portrætter, logoer, nyhedsfotos og de 18
+redaktionelle fotos. Bygningen henter kun **de tre underskrevne PDF'er**, som er
+filer og ikke indhold.
+
+Sådan så det ud før, målt på en kørsel:
+
+| | Før | Nu |
+|---|---|---|
+| Filer hentet fra m-tha.dk | 149 billeder + 3 PDF'er | 3 PDF'er |
+| Tid brugt på det | 36 s af 65 s | ~2 s |
+| Kunne Lars skifte forsidefotoet? | Nej | Ja, i studioet |
+
+De 149 filer var i sig selv spild: **13 af dem blev brugt.** Portrætterne og
+logoerne kom allerede fra Sanitys CDN, så de blev hentet uden at nogen så på dem.
+
+Værre var det andet: et nyt forsidebillede krævede at nogen lagde en fil på det
+**gamle** site med det rigtige filnavn, for at det nye kunne hente den. De ligger
+nu i Sanity som 18 navngivne pladser — “Forsiden — det store billede øverst”,
+“Holdfoto U19” — flyttet dertil af `sanity/migrer-fotos.mjs`.
+
+`poc/src/components/Foto.astro` er det ene sted der ved hvordan et foto hentes:
+Sanity først, den lokale fil som reserve, ellers en pladsholder.
+
+## Filerne bag ligger stadig ikke i git
+
+`tools/fetch_assets.py` kan hente **149 billeder og 3 PDF'er** fra m-tha.dk. Den
+skal køres én gang før `migrer-fotos.mjs`, og ellers kun hvis man vil have
+reservebillederne lokalt:
 
 | Gruppe | Antal | Hvad |
 |---|---|---|
@@ -87,7 +114,7 @@ kun nødvendige for Thisted Forsikring.
 | `/` | Forside med DM-foto, nyheder, årgange, træning, faciliteter |
 | `/nyheder` + `/nyheder/[slug]` | Oversigt og enkelt nyhed |
 | `/hold/u17`, `/hold/u19` | Trup med holdfoto og filtrering |
-| `/spillere/[navn]` | 54 spillerprofiler med portræt, sponsorlogo og landsholdsmærke |
+| `/spillere/[navn]` | 54 spillerprofiler med portræt, sponsorlogo, nationalitet og landsholdsmærke |
 | `/staben` | 25 personer i akademiets egne tre sektioner |
 | `/sponsorer` | 44 sponsorer + 6 partnere, alle med aktivt link |
 | `/bliv-elev` | Optagelse, uddannelse, priser, ansøgning |
@@ -178,6 +205,33 @@ udskudt fil, der kun findes fordi Presentation mode skal kunne tale med siden.
 Selve overlejringen — 784 KB, med React i — hentes **kun** hvis siden ligger i
 en iframe, altså kun for en redaktør inde i studioet. En besøgende anmoder
 aldrig om den. Se `poc/src/components/VisuelRedigering.astro`.
+
+## Flagene
+
+52 europæiske lande plus “Øvrige” ligger som SVG i `poc/src/assets/flag/` —
+26,5 kB tilsammen, altså mindre end ét portræt. Danmark er 181 bytes.
+
+De hentes ind af `poc/tools/hent-flag.mjs` fra pakken `country-flag-icons`
+(MIT), og de ligger i git af samme grund som skrifterne: bygningen skal ikke
+kunne knække fordi en pakke ændrer mappestruktur, og et ændret flag skal kunne
+ses i en diff.
+
+**Ikke emoji.** 🇩🇰 ser forskelligt ud på hver platform, og på Windows vises det
+som bogstaverne “DK” i en kasse — altså slet ikke som et flag.
+
+**Ikke hjemmetegnet.** Halvdelen af Europas flag er kors og trefarvede bånd, som
+er nemme. Men Montenegro, Cypern, Slovenien, San Marino og Kosovo har
+våbenskjolde og landkort, og en hjemmelavet forenkling af et andet lands flag er
+ikke en forenkling — den er et forkert flag.
+
+Flaget er 13 px bredt på et spillerkort. Ingen kan skelne Slovakiet fra
+Slovenien i den størrelse, og det skal de heller ikke: mærket er ét element for
+en skærmlæser, og `aria-label` skriver landet ud. **Flaget er en farvesignatur —
+labelen er oplysningen.**
+
+Landelisten står ét sted, `poc/src/data/nationer.ts`, og læses både af sitet og
+af rullelisten i Sanity. Et land tilføjes med én linje plus et kald til
+`hent-flag.mjs`.
 
 ## Portrætterne beskæres nedefra
 

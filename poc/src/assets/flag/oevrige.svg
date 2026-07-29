@@ -1,0 +1,19 @@
+<!--
+  ØVRIGE — ikke et land, men svaret "eleven er ikke fra Europa".
+
+  Bevidst IKKE et rigtigt flag: en dæmpet plade med en jordklode. Den kan ikke
+  forveksles med et lands flag, og den siger det den skal — at nationaliteten
+  er kendt af akademiet, men ikke findes i rullelisten. Selve landet står som
+  tekst i feltet ved siden af.
+
+  Samme viewBox som de øvrige flag (513 × 342), så mærket ser ens ud uanset
+  hvilket flag der står i det.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342">
+  <path fill="#4A4E6B" d="M0 0h513v342H0z"/>
+  <circle cx="256.5" cy="171" r="116" fill="#FFF"/>
+  <g fill="#4A4E6B">
+    <path d="M148 141h217v24H148zM148 189h217v24H148z"/>
+  </g>
+  <ellipse cx="256.5" cy="171" rx="46" ry="116" fill="none" stroke="#4A4E6B" stroke-width="22"/>
+</svg>

@@ -195,6 +195,27 @@ export default defineConfig({
 
             S.divider(),
 
+            // Billederne staar over vaerdierne, fordi et forsidefoto skiftes
+            // oftere end en formulering.
+            S.listItem()
+              .title('Billeder')
+              .child(
+                S.list()
+                  .title('Billeder')
+                  .items([
+                    S.listItem().title('Alle pladser').child(
+                      S.documentTypeList('foto').title('Billeder på sitet')
+                        .defaultOrdering([{ field: 'noegle', direction: 'asc' }]),
+                    ),
+                    // Et foto uden alt-tekst er usynligt for en skaermlaeser og
+                    // for Google — og designtjekket stopper bygningen paa det.
+                    S.listItem().title('⚠ Mangler alt-tekst').child(
+                      S.documentList().title('Mangler alt-tekst')
+                        .filter('_type == "foto" && !defined(alt) && dekorativ != true'),
+                    ),
+                  ]),
+              ),
+
             S.listItem()
               .title('Værdier')
               .child(S.documentTypeList('vaerdi').title('De fire værdier')

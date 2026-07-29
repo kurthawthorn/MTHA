@@ -8,6 +8,7 @@ import {
   sponsorerPaaNiveau, SEKTION_NAVNE,
 } from '../data/akademi';
 import { saeson } from '../data/saeson';
+import { NATION_NAVN } from '../data/nationer';
 import { billede } from '../lib/billeder';
 
 /**
@@ -37,6 +38,9 @@ const spillerFelter: Felt[] = [
   { navn: 'Fødselsår', vaerdi: String(sp.foedselsaar), slags: 'stam', type: 'tal',
     hjaelp: 'Det vigtigste felt — holdet udregnes herudfra. Ændres aldrig' },
   { navn: 'Moderklub', vaerdi: sp.moderklub, slags: 'stam', type: 'tekst' },
+  { navn: 'Nationalitet', vaerdi: NATION_NAVN[sp.nationalitet] ?? sp.nationalitet,
+    slags: 'stam', type: 'valg',
+    hjaelp: 'Rulleliste med hele Europa. Bestemmer flaget på landsholdsmærket' },
   { navn: 'Rygnummer', vaerdi: String(sp.rygnummer), slags: 'saeson', type: 'tal' },
   { navn: 'Position', vaerdi: sp.position, slags: 'saeson', type: 'valg' },
   { navn: 'Uddannelse', vaerdi: sp.uddannelse, slags: 'saeson', type: 'valg' },

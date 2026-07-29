@@ -1,9 +1,7 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import Foto from '../components/Foto.astro';
 import { boliger, boligFordele } from '../data/oekonomi';
-import { billede } from '../lib/billeder';
-import { altFor } from '../data/billeder';
 
 const kr = (n: number) => `${n.toLocaleString('da-DK')} kr.`;
 const rabat = (b: typeof boliger[number]) =>
@@ -31,15 +29,12 @@ const fotos = ['traneholm-indgang', 'traneholm-koekken', 'traneholm-ophold'];
 
     <section class="section">
       <div class="galleri">
-        {fotos.map((k) => {
-          const f = billede(k);
-          return f ? (
-            <figure class="galleri__i">
-              <Image src={f} alt={altFor(k)} widths={[420, 760]}
-                     sizes="(max-width: 720px) 92vw, 360px" quality={80} loading="lazy" />
-            </figure>
-          ) : null;
-        })}
+        {fotos.map((k) => (
+          <figure class="galleri__i">
+            <Foto noegle={k} bredder={[420, 760]} forhold={3 / 4}
+                  sizes="(max-width: 720px) 92vw, 360px" kvalitet={80} />
+          </figure>
+        ))}
       </div>
     </section>
 

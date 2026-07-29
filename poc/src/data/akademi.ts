@@ -98,6 +98,24 @@ export interface Spiller {
   landshold: boolean;
   /** Valgfri præcisering, fx "U18". Står på mærket når det er udfyldt. */
   landsholdNiveau?: string;
+  /**
+   * ISO-kode fra `nationer.ts`, eller `oevrige`. Bestemmer hvilket flag der
+   * står på landsholdsmærket, og vises som tekst på profilen.
+   *
+   * Bemærk at det er statsborgerskab, ikke hvilket forbund der har udtaget
+   * spilleren. De to kan pege på hvert sit land — se `Landsholdsmaerke`.
+   */
+  nationalitet: string;
+  /** Landets navn når `nationalitet` er `oevrige`. Fx "Kina". */
+  nationalitetAndet?: string;
+  /**
+   * Sand når nogen faktisk har VALGT nationaliteten i studioet.
+   *
+   * `nationalitet` er altid udfyldt, fordi den falder tilbage på Danmark — det
+   * skal den, ellers ville flaget mangle. Men en standardværdi er ikke et
+   * faktum om et rigtigt menneske, og profilen skal kunne sige forskellen.
+   */
+  nationalitetSat: boolean;
   aktiv: boolean;
 }
 
@@ -132,6 +150,7 @@ type SanitySpiller = {
   fotoHotspot?: Hotspot | null;
   holdOverstyring?: string;
   landshold?: boolean; landsholdNiveau?: string;
+  nationalitet?: string; nationalitetAndet?: string;
 };
 type SanityPerson = {
   id?: string;
@@ -152,6 +171,7 @@ const Q_SPILLERE = `*[_type == "spiller" && aktiv != false] {
   "id": _id,
   navn, "slug": slug.current, foedselsaar, rygnummer, position,
   moderklub, uddannelse, landshold, landsholdNiveau,
+  nationalitet, nationalitetAndet,
   "sponsorId": sponsor->_id, "sponsorNavn": sponsor->navn,
   "fotoUrl": portraet.asset->url,
   "fotoHotspot": portraet.hotspot{x, y},
@@ -298,6 +318,12 @@ export const spillere: Spiller[] = spi.data
        der ikke noget mærke — et gæt her ville pynte på en spillers cv. */
     landshold: s.landshold === true,
     landsholdNiveau: s.landsholdNiveau,
+    /* Danmark som standard. Det er svaret i langt de fleste tilfælde, og det
+       er også initialValue i studioet — så de 54 der blev migreret før feltet
+       fandtes, får det rigtige flag uden at nogen skal ind i hver profil. */
+    nationalitet: s.nationalitet ?? 'DK',
+    nationalitetAndet: s.nationalitetAndet,
+    nationalitetSat: Boolean(s.nationalitet),
     aktiv: true,
   }))
   .filter((s) => s.slug)

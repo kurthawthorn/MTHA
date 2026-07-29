@@ -9,6 +9,8 @@ import { billede } from '../../lib/billeder';
 import { billedUrl, billedSrcset, portraetAnker } from '../../lib/sanity';
 import { initials } from '../../lib/slug';
 import { redigerbar } from '../../lib/redigering';
+import { flagSvg } from '../../lib/flag';
+import { NATION_NAVN, OEVRIGE } from '../../data/nationer';
 
 export const getStaticPaths = (() =>
   spillere.map((s) => ({ params: { spiller: s.slug }, props: { s } }))
@@ -26,6 +28,16 @@ const foto = fraSanity ? undefined : billede(s.fotoKey);
 const anker = portraetAnker(s.fotoHotspot);
 /* Klik-til-felt i Sanitys Presentation mode. Se lib/redigering.ts. */
 const red = (felt: string) => redigerbar('spiller', s.docId, felt);
+
+/*
+ * Nationaliteten som tekst. Er landet uden for listen, bruges det navn
+ * redaktøren har skrevet — og har ingen skrevet noget, vises feltet slet ikke.
+ * "Øvrige" er et brugbart svar i en rulleliste, men det er ikke en oplysning
+ * man sætter på et menneske.
+ */
+const nationNavn = s.nationalitet === OEVRIGE
+  ? s.nationalitetAndet?.trim()
+  : NATION_NAVN[s.nationalitet];
 ---
 
 <Base titel={s.navn}
@@ -54,7 +66,10 @@ const red = (felt: string) => redigerbar('spiller', s.docId, felt);
           <span class="profil__init" aria-hidden="true">{initials(s.navn)}</span>
         )}
         {s.landshold && (
-          <Landsholdsmaerke niveau={s.landsholdNiveau} stoerrelse="stor" />
+          <Landsholdsmaerke niveau={s.landsholdNiveau}
+                            nation={s.nationalitet}
+                            nationAndet={s.nationalitetAndet}
+                            stoerrelse="stor" />
         )}
         <span class="profil__nr num" aria-hidden="true"
               data-sanity={red('rygnummer')}>{s.rygnummer}</span>
@@ -70,6 +85,17 @@ const red = (felt: string) => redigerbar('spiller', s.docId, felt);
           <div><dt>Fødselsår</dt><dd class="num" data-sanity={red('foedselsaar')}>{s.foedselsaar}</dd></div>
           <div><dt>Moderklub</dt><dd data-sanity={red('moderklub')}>{s.moderklub}</dd></div>
           <div><dt>Uddannelse</dt><dd data-sanity={red('uddannelse')}>{s.uddannelse}</dd></div>
+          {nationNavn && (
+            <div>
+              <dt>Nationalitet</dt>
+              <dd class="nation" data-sanity={red('nationalitet')}>
+                {/* Flaget er pynt — landenavnet ved siden af er oplysningen.
+                    Derfor aria-hidden inde i SVG'en, se lib/flag.ts. */}
+                <span class="nation__flag" set:html={flagSvg(s.nationalitet)} />
+                {nationNavn}
+              </dd>
+            </div>
+          )}
         </dl>
 
         {/*
@@ -100,10 +126,17 @@ const red = (felt: string) => redigerbar('spiller', s.docId, felt);
           </aside>
         )}
 
+        {/*
+          Nationaliteten nævnes eksplicit, fordi feltet står med Danmark som
+          standard og ikke fordi nogen har oplyst det. Det er en oplysning om
+          et rigtigt menneske, og så skal der stå hvor den kommer fra — ellers
+          ser en standardværdi ud som et faktum.
+        */}
         <p class="demo">
           Navn, årgang, portræt og personlig sponsor er hentet fra m-tha.dk.
           Position, rygnummer, fødselsår, moderklub og uddannelse er
           eksempeldata i denne prototype.
+          {!s.nationalitetSat && ' Nationalitet står som Danmark indtil akademiet har udfyldt den.'}
         </p>
 
         {h && <a href={`/hold/${h.id}`} class="btn btn--ghost">← Hele truppen</a>}
@@ -172,6 +205,17 @@ const red = (felt: string) => redigerbar('spiller', s.docId, felt);
     letter-spacing: 0.12em; font-size: 0.62rem; font-weight: 600; color: var(--text-faint);
   }
   .fakta dd { margin: 0; font-weight: 600; font-size: 0.95rem; }
+
+  /* Nationaliteten er det ene faktum der har et billede. Flaget står i
+     tekstens højde, så rækken ikke bliver højere end de andre. */
+  .nation { display: flex; align-items: center; gap: 0.45rem; }
+  .nation__flag { display: flex; height: 0.95em; flex: none; }
+  .nation__flag :global(svg) {
+    height: 100%; width: auto; display: block;
+    border-radius: 1px;
+    /* Kant, saa Polen, Finland og Groenland ikke flyder ud i den hvide plade */
+    box-shadow: 0 0 0 1px var(--line);
+  }
 
   /*
    * Fem felter i to spalter giver en tom celle nederst til hoejre. Fordi

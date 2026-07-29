@@ -38,8 +38,8 @@ Sanity Studio  ──webhook──▶  GitHub Actions  ──▶  GitHub Pages
 - `sanity/` — studioet. Ti dokumenttyper. Alt indhold ligger her, intet i kode.
   `sanity/presentation/` er forhåndsvisningen — se nedenfor.
 - `tools/` — scripts der henter billeder og logoer fra m-tha.dk.
-- Bygningen henter kun de 20 redaktionelle fotos fra m-tha.dk; portrætter,
-  logoer og nyhedsbilleder kommer fra Sanitys CDN.
+- **Bygningen henter ingen billeder fra m-tha.dk.** Alt ligger i Sanity. Kun de
+  tre underskrevne PDF'er hentes, fordi de er filer og ikke indhold.
 
 **Hvorfor der står React i `poc/package.json`.** Overlejringen til Sanitys
 Presentation mode (`@sanity/visual-editing`) er bygget med React, og den bundles
@@ -50,7 +50,7 @@ statisk og har stadig ingen komponenter der hydreres.
 
 ## Det du skal vide før du rører noget
 
-Otte ting kostede tid at finde. De er alle rettet, men forklaringen er værd at
+Ni ting kostede tid at finde. De er alle rettet, men forklaringen er værd at
 kende, fordi de kan komme igen.
 
 **1. Astros byggecache lyver om udgivelser.**
@@ -98,7 +98,17 @@ var på plads, overskriftshierarkiet var korrekt. Det var bare grimt. **Kopierer
 du markup mellem to `.astro`-filer, så tag reglerne med — eller læg dem i
 `global.css`.**
 
-**8. `data-sanity`, ikke “stega”.**
+**8. Bygningen hentede 149 filer for at bruge 13.**
+Workflowet kørte `python tools/fetch_assets.py` uden argumenter, altså ALLE
+grupper: 149 billeder og 3 PDF'er, hver gang. HANDOFF påstod at kun de 20
+redaktionelle fotos blev hentet — det passede ikke. Portrætterne og logoerne kom
+allerede fra Sanitys CDN, så de 129 blev hentet uden at nogen så på dem.
+
+Det kostede 36 af bygningens 65 sekunder. De 18 fotos ligger nu i Sanity, og
+trinnet henter kun PDF'erne. **Læs efter i workflowet, ikke i den her fil, hvis
+du er i tvivl om hvad der faktisk sker.**
+
+**9. `data-sanity`, ikke “stega”.**
 Sanity kan mærke redigerbar tekst på to måder. Stega indlejrer usynlige tegn i
 selve teksten — nemt at slå til, men tegnene ryger med ud i sidetitler,
 alt-tekster, meta-beskrivelser og den strukturerede data Google læser, og de
@@ -121,9 +131,10 @@ Presentation mode ikke rammer. Ruterne er nemme at få forkert, fordi der både 
 en basissti (`/MTHA/`) og skråstreg til slut i spil — og en fejl er tavs:
 forhåndsvisningen virker, felterne skifter bare ikke med.
 
-Tjekkene erstatter ikke øjne på siden. Fire fejl er nu fundet af brugeren eller
+Tjekkene erstatter ikke øjne på siden. Fem fejl er nu fundet af brugeren eller
 ved at kigge, ikke af scripterne: modalen på mobilen, manglende marginer, de
-afskårne hoveder på portrætterne, og den ustylede blok på forsiden.
+afskårne hoveder på portrætterne, den ustylede blok på forsiden, og de fem
+roller der stod som `Fysioterapeut </d`.
 
 Ét tal blev også rettet i selve tjekket: “JavaScript på forsiden” talte kun
 indholdet mellem `<script>` og `</script>`. Da overlejringen kom til som en
@@ -210,7 +221,26 @@ hvis der dukker HTML-rester op i indhold nogen andet steds.
 - `sanity/.env` indeholder et skrivetoken og er dækket af `.gitignore`.
   **Committ det aldrig.**
 
-### 4. Presentation mode er bygget — med én kendt begrænsning
+### 4. Billederne ligger nu i Sanity — 18 pladser
+
+Fanen **Billeder** i studioet har 18 navngivne pladser: “Forsiden — det store
+billede øverst”, “Holdfoto U19”, “Faciliteter — fælleskøkkenet”. Lars vælger
+pladsen, trækker et foto ind og trykker Udgiv.
+
+Flyttet dertil af `sanity/migrer-fotos.mjs`. **Kør den ikke igen uden grund** —
+den springer over pladser der har et billede, men `--tving` overskriver, og så
+ryger et foto Lars har skiftet.
+
+To ting mangler stadig:
+
+- **Galleriet “Hverdagen” er seks faste pladser, ikke et galleri.** Før hentede
+  det alle fotos i kategorien `socialt`, altså et vilkårligt antal. Nu er det
+  seks. Ærligere over for layoutet — gitteret er bygget til seks — men Lars kan
+  ikke tilføje et syvende billede. Et rigtigt galleri er den næste ting at bygge.
+- **`dm-guldhatte` og `drone-1` har ingen plads.** De blev hentet fra m-tha.dk,
+  men vises ikke nogen steder. Skal de bruges, skal der først være et sted.
+
+### 5. Presentation mode er bygget — med én kendt begrænsning
 
 Fanen **“Se siden”** i studioet viser hjemmesiden ved siden af felterne.
 Navigationen går begge veje: åbner Lars en spiller, springer forhåndsvisningen
@@ -233,7 +263,7 @@ Det live site kan blive som det er.
 **Sig begrænsningen højt når du viser det til Lars.** Ellers ser han et felt der
 ikke slår igennem, og konkluderer at værktøjet er i stykker.
 
-### 5. Ting der er skrevet, men ikke bygget
+### 6. Ting der er skrevet, men ikke bygget
 
 - **Instagram-import.** Feltet `kilde` skelner allerede mellem `cms` og
   `instagram`. Anbefalingen var at vente: skriv i Sanity indtil I kan se at
@@ -260,7 +290,7 @@ ikke slår igennem, og konkluderer at værktøjet er i stykker.
   swipe — men 40 % af boligtabellen er skjult uden varsel. En skyggekant i
   siden ville sige det.
 
-### 6. Fundet i akademiets eget materiale — bør nævnes for Lars
+### 7. Fundet i akademiets eget materiale — bør nævnes for Lars
 
 - **Prisen for ophold står i tre versioner:** 2.495 kr. på m-tha.dk, 2.395 kr.
   i forældrebrochuren, 2.255 kr. i visionsbrochuren.
@@ -284,6 +314,9 @@ npm install
 npm run dev                              # http://localhost:3333
 npm run tjek                             # måler ruterne i Presentation mode
 npm run deploy                           # tjekker + udgiver til mtha.sanity.studio
+
+node migrer-fotos.mjs                    # tørkørsel — viser hvad den ville gøre
+node migrer-fotos.mjs --skriv            # ENGANGSFLYTNING, er allerede kørt
 ```
 
 **Sådan så mobillayoutet efter ved 375 px.** Der er ingen browser i bygningen,
