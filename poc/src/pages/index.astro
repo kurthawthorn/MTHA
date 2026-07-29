@@ -321,10 +321,19 @@ const faciliteter = [
   }
   a.card:hover .holdkort__foto :global(img) { transform: scale(1.03); }
   .holdkort__txt {
-    padding: 0.9rem 1.1rem 1.05rem;
+    padding: var(--rum-3) var(--rum-4) var(--rum-4);
     display: flex; flex-direction: column; gap: 0.28rem;
     border-top: 2px solid var(--orange);
   }
+
+  /*
+   * Kortene under "Det vi bygger på" og "Uddannelse" havde INGEN padding.
+   * Reglen fandtes kun på /vaerdier, ikke her, så teksten lå klods op ad
+   * kanten. `.card` i global.css sætter kun ramme og baggrund — ikke luft.
+   */
+  .vkort { padding: var(--rum-5); gap: var(--rum-1); }
+  .vkort h3 { font-size: 1.02rem; }
+  .vkort p { font-size: 0.94rem; color: var(--text-dim); }
   .holdkort__top { display: flex; align-items: center; gap: 0.7rem;
                    justify-content: space-between; flex-wrap: wrap; }
   .holdkort h3 { font-size: 1.05rem; }
@@ -344,7 +353,7 @@ const faciliteter = [
   .fk { padding: 0; }
   .fk__foto { aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface-2); }
   .fk__foto :global(img) { width: 100%; height: 100%; object-fit: cover; }
-  .fk__txt { padding: 0.85rem 1rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+  .fk__txt { padding: var(--rum-3) var(--rum-4) var(--rum-4); display: flex; flex-direction: column; gap: 0.25rem; }
   .fk h3 { font-size: 1rem; }
   .fk p { font-size: 0.9rem; color: var(--text-dim); }
 </style>

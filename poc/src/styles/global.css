@@ -128,6 +128,29 @@
                -apple-system, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'Cascadia Code', Consolas, ui-monospace, 'SF Mono', monospace;
 
+  /* ── Afstandsskala ──────────────────────────────────────────────────
+     Bygget paa 4 px, fordi al typografi og alle beroeringsmaal er det.
+
+     HVORFOR EN SKALA
+       Foer fandtes 49 forskellige rem-vaerdier paa tvaers af 464 steder:
+       0.08, 0.1, 0.12, 0.14, 0.15, 0.16, 0.18 ... alle valgt paa oejemaal.
+       Naar naboafstande afviger med 2 px, ser det ikke bevidst ud — det ser
+       skoedesloest ud, uden at man kan pege paa hvorfor.
+
+       Skalaen bruges til STRUKTUR: sektioner, overskrifter, kortenes
+       indvendige luft. De helt smaa afstande inde i en komponent (0.1-0.3rem,
+       fx mellem et navn og en aargang) er bevidst ikke rullet ind — de
+       hoerer til finjusteringen af en enkelt blok, ikke til sidens rytme.
+     ─────────────────────────────────────────────────────────────────── */
+  --rum-1: 0.25rem;   /*  4px  inde i en tekstgruppe */
+  --rum-2: 0.5rem;    /*  8px  mellem naert beslaegtede ting */
+  --rum-3: 0.75rem;   /* 12px */
+  --rum-4: 1rem;      /* 16px  standardafstand */
+  --rum-5: 1.5rem;    /* 24px  kortenes indvendige luft */
+  --rum-6: 2rem;      /* 32px  mellem grupper */
+  --rum-7: 3rem;      /* 48px  mellem sektioner */
+  --rum-8: 4rem;      /* 64px  store spring */
+
   --wrap: 1140px;
   --radius: 4px;
   --shadow: 0 1px 2px rgb(23 24 56 / 6%), 0 10px 30px -16px rgb(23 24 56 / 22%);
@@ -201,15 +224,17 @@ a { color: var(--navy-600); text-underline-offset: 2px; }
 }
 @media (prefers-color-scheme: dark) { .eyebrow { color: var(--orange); } }
 
-.section { padding-block: clamp(2.4rem, 5vw, 4rem); }
+.section { padding-block: clamp(var(--rum-6), 5vw, var(--rum-8)); }
 .section__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 1.4rem;
-  padding-bottom: 0.7rem;
+  /* Var 1.4rem. For lidt: stregen klaebede til kortene under, saa
+     overskriften saa ud til at hoere til dem frem for at staa over dem. */
+  margin-bottom: var(--rum-5);
+  padding-bottom: var(--rum-3);
   border-bottom: 2px solid var(--navy);
 }
 .section__head h2 { font-size: clamp(1.35rem, 2.8vw, 1.9rem); }
@@ -257,7 +282,7 @@ a.card:hover {
   box-shadow: var(--shadow);
 }
 
-.grid { display: grid; gap: 1.1rem; }
+.grid { display: grid; gap: var(--rum-4); }
 .grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
 .grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
 
