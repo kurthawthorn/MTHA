@@ -489,6 +489,7 @@ På [sanity.io/manage/project/g4s1nwak/api/webhooks](https://sanity.io/manage/pr
 | Trigger on | Create, Update, Delete |
 | HTTP method | `POST` |
 | API version | **`v2025-02-19`** — den nyeste i rullelisten |
+| Filter | `!(_type match "system.*") && !(_type match "sanity.*")` — se nedenfor |
 | Projection | `{"event_type":"sanity-udgivelse"}` |
 | Trigger when versions are modified | **fravalgt** |
 | Secret | **tom** |
@@ -507,8 +508,39 @@ delt op, så `Authorization:` bliver et ugyldigt headernavn.
 **`Bearer ` skal med i VALUE**, med mellemrum efter. Uden skemaet svarer
 GitHub 401, selvom tokenet er rigtigt.
 
-Sæt **Filter** til `!(_type match "system.*")`, så interne systemdokumenter
-ikke starter en bygning.
+### Filteret — hvad der IKKE skal starte en bygning
+
+```
+!(_type match "system.*") && !(_type match "sanity.*")
+```
+
+Begge halvdele er nødvendige, og de dækker hver sit. Målt på datasættet
+29. juli 2026 — 148 af de 431 dokumenter er billedaktiver:
+
+| Dokumenttype | Antal | Hvornår den skrives | Fanges af |
+|---|---|---|---|
+| `system.group`, `system.retention` | 12 | af Sanity selv | `system.*` |
+| `system.schema` | 1 | ved hvert `npm run deploy` af studioet | `system.*` |
+| `sanity.imageAsset` | **148** | **hver gang nogen uploader et billede** | `sanity.*` |
+| `sanity.previewUrlSecret` | 0 | hvis nogen deler en forhåndsvisning fra “Se siden” | `sanity.*` |
+
+**`sanity.imageAsset` er den der koster.** Uploader Lars et nyt forsidefoto,
+skriver Sanity først aktivet — det starter en bygning — og når han bagefter
+trykker Udgiv, starter der én mere. Halvdelen af de bygninger er spildte, og de
+lægger sig i kø efter hinanden, så et Udgiv der plejer at tage 44 sekunder kan
+tage det dobbelte.
+
+**Hvorfor det er et filter der udelukker, og ikke en liste over hvad der tælles
+med.** Man kunne skrive `_type in ["nyhed", "spiller", …]`. Det ville være
+strammere — men den dag der kommer en ny dokumenttype, og nogen glemmer at føje
+den til listen, ville rettelser i den type **holde op med at gå live uden at
+sige noget**. Med et filter der udelukker, er den værste fejl en bygning for
+meget: det koster ingenting og står i Actions-loggen. Vælg altid den fejl der
+larmer.
+
+> **Tjek feltet før du retter det.** Udløste et `npm run deploy` af studioet en
+> bygning, er det ikke fordi `system.*` mangler noget — den fanger
+> `system.schema`. Så står filterfeltet formentlig helt tomt.
 
 **Tre faldgruber på den skærm:**
 
