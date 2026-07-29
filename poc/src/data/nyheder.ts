@@ -31,6 +31,9 @@ export interface Blok {
 }
 
 export interface Nyhed {
+  /** Sanity-dokumentets `_id`. Mangler når nyheden kom fra markdown-reserven.
+      Bruges kun til Presentation mode — se `lib/redigering.ts`. */
+  docId?: string;
   slug: string;
   titel: string;
   dato: Date;
@@ -90,6 +93,7 @@ export function markdownTilBlokke(krop: string): Blok[] {
 /* ── Hent ─────────────────────────────────────────────────────────────── */
 
 const Q_NYHEDER = `*[_type == "nyhed"] | order(dato desc) {
+  "docId": _id,
   "slug": slug.current, titel, dato, kategori, resume, kilde, fremhaevet,
   "holdId": hold->_id,
   "fotoUrl": foto.asset->url,
@@ -132,6 +136,8 @@ export const nyheder: Nyhed[] = svar.data
   .filter((n) => n.slug && n.titel)
   .map((n) => ({
     ...n,
+    /* Markdown-reserven har ingen dokumenter at åbne. */
+    docId: svar.fraSanity ? n.docId : undefined,
     dato: new Date(n.dato),
     holdId: n.holdId?.replace(/^hold-/, ''),
     kilde: n.kilde ?? 'cms',

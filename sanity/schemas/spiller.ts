@@ -104,6 +104,40 @@ export default defineType({
       type: 'string',
       options: { list: ['STX', 'HHX', 'HF'], layout: 'radio', direction: 'horizontal' },
     }),
+    /*
+     * LANDSHOLD — et ja/nej, der tegner et mærke på portrættet.
+     *
+     * Feltet er et boolean og ikke en fritekst, fordi det skal kunne bruges
+     * til noget: sitet sætter dannebrogsmærket øverst til højre på billedet,
+     * og listen "Landsholdsspillere" i menuen tælles af det. Stod der en
+     * sætning i et tekstfelt, kunne ingen af de to ting laves.
+     *
+     * Der er INGEN standardværdi. En spiller er ikke landsholdsspiller før
+     * nogen har sagt det — og det her er en oplysning der står på et ungt
+     * menneskes cv, så et gæt fra systemets side ville være forkert.
+     */
+    defineField({
+      name: 'landshold',
+      title: 'Har spillet på landsholdet',
+      type: 'boolean',
+      description:
+        'Slå til når spilleren har været udtaget til et dansk ungdoms- eller ' +
+        'A-landshold. Så kommer der et dannebrogsmærke øverst til højre på ' +
+        'portrættet — både på profilen og på spillerkortet i truppen.',
+    }),
+    defineField({
+      name: 'landsholdNiveau',
+      title: 'Hvilket landshold',
+      type: 'string',
+      description:
+        'Valgfrit. Fx "U18". Står med på mærket når det er udfyldt; ellers ' +
+        'står der bare "Landshold".',
+      // Feltet er meningsløst når kontakten er slået fra — så skjul det frem
+      // for at lade det stå og invitere til at blive udfyldt alligevel.
+      hidden: ({ document }) => !document?.landshold,
+      validation: (Rule) => Rule.max(14).warning('Hold det kort — der er lidt plads på mærket'),
+    }),
+
     defineField({
       name: 'sponsor',
       title: 'Personlig sponsor',
@@ -126,12 +160,14 @@ export default defineType({
   // Listen i redigeringsvinduet: navn, hold og nummer — så man kan finde folk
   preview: {
     select: { titel: 'navn', aar: 'foedselsaar', nr: 'rygnummer',
-              media: 'portraet', aktiv: 'aktiv', op: 'holdOverstyring.navn' },
-    prepare: ({ titel, aar, nr, media, aktiv, op }) => ({
+              media: 'portraet', aktiv: 'aktiv', op: 'holdOverstyring.navn',
+              landshold: 'landshold', niveau: 'landsholdNiveau' },
+    prepare: ({ titel, aar, nr, media, aktiv, op, landshold, niveau }) => ({
       title: `${nr ? `#${nr} ` : ''}${titel}`,
       subtitle: [
         aar ? `Årgang ${aar}` : 'Mangler fødselsår',
         op ? `spiller på ${op}` : null,
+        landshold ? `${niveau || 'landshold'} 🇩🇰` : null,
         aktiv ? null : 'STOPPET',
       ].filter(Boolean).join(' · '),
       media,

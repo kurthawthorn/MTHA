@@ -65,41 +65,94 @@ export async function hentEllerFallback<T>(
 
 /* ── Billeder fra Sanitys CDN ─────────────────────────────────────────── */
 
+/** Redaktørens markering af hvad billedet handler om. 0–1 på hver akse. */
+export interface Hotspot { x: number; y: number }
+
+export interface Billedvalg {
+  /** Bredde i pixels. */
+  b: number;
+  /** Højde i pixels. Sættes den, beskæres billedet til netop det forhold. */
+  h?: number;
+  kvalitet?: number;
+  /**
+   * Hvor beskæringen holder fast, når billedets eget forhold ikke passer til
+   * det forhold der bliver bedt om.
+   *
+   *   center       midten. Standard, og det Sanity gør af sig selv.
+   *   top          øverste kant. Til portrætter uden hotspot — se nedenfor.
+   *   bottom       nederste kant.
+   *   focalpoint   redaktørens hotspot. Kræver `fp`.
+   */
+  anker?: 'center' | 'top' | 'bottom' | 'focalpoint';
+  /** Hotspottet fra Sanity. Kun meningsfuldt sammen med `anker: 'focalpoint'`. */
+  fp?: Hotspot;
+}
+
 /**
  * Bygger en billed-URL med transformationer.
  *
  * Sanity beskærer og komprimerer selv på deres CDN, så der hentes ikke noget
- * ned under bygningen. `crop=focalpoint` bruger det punkt redaktøren har
- * markeret i studioet — derfor rammer beskæringen ansigtet hver gang.
+ * ned under bygningen.
+ *
+ * FEJLEN DER LÅ HER — og som kostede hovedet på 54 portrætter
+ *   Der stod `crop=focalpoint` uden `fp-x` og `fp-y`. Men Sanitys billed-API
+ *   læser IKKE hotspottet af sig selv; det skal sendes med som parametre.
+ *   Uden dem falder `focalpoint` tilbage på 0,5 / 0,5 — altså midten.
+ *
+ *   Det så ud som om hotspot-funktionen virkede. Den var i praksis slået fra,
+ *   og på et portræt er midten det værst mulige sted at holde fast: alle 54
+ *   fotos er 600 × 900, og en beskæring til 3 : 4 skar derfor 5,6 % af toppen
+ *   væk — netop der hvor hovedet er, fordi der næsten ingen luft er over det.
+ *
+ *   Nu sendes hotspottet med når det findes, og `portraetAnker()` holder fast
+ *   i TOPPEN når det ikke gør. Så kan et portræt ikke miste hovedet, uanset om
+ *   nogen har husket at markere ansigtet.
  */
 export function billedUrl(
   url: string | undefined,
-  o: { b: number; h?: number; kvalitet?: number } = { b: 600 },
+  o: Billedvalg = { b: 600 },
 ): string | undefined {
   if (!url) return undefined;
+  const anker = o.anker ?? (o.fp ? 'focalpoint' : 'center');
   const p = new URLSearchParams({
     w: String(o.b),
     auto: 'format',
     q: String(o.kvalitet ?? 78),
     fit: 'crop',
-    crop: 'focalpoint',
+    crop: anker,
   });
   if (o.h) p.set('h', String(o.h));
+  if (anker === 'focalpoint' && o.fp) {
+    /* Sanity vil have tal mellem 0 og 1, med højst tre decimaler. */
+    p.set('fp-x', o.fp.x.toFixed(3));
+    p.set('fp-y', o.fp.y.toFixed(3));
+  }
   return `${url}?${p}`;
 }
+
+/**
+ * Beskæringen til et portræt: redaktørens hotspot hvis der findes et, ellers
+ * den øverste kant.
+ *
+ * Toppen frem for midten, fordi et portræt er et menneske der står op. Skæres
+ * der i toppen, forsvinder hovedet; skæres der i bunden, forsvinder noget af
+ * trøjen. Det er ikke et svært valg — men det skal træffes ét sted, og det er
+ * her.
+ */
+export const portraetAnker = (fp?: Hotspot): Pick<Billedvalg, 'anker' | 'fp'> =>
+  fp ? { anker: 'focalpoint', fp } : { anker: 'top' };
 
 /** srcset i flere bredder, så telefonen ikke henter et skærmbillede. */
 export function billedSrcset(
   url: string | undefined,
   bredder: number[],
-  forhold?: number,
-  kvalitet?: number,
+  o: { forhold?: number; kvalitet?: number } & Pick<Billedvalg, 'anker' | 'fp'> = {},
 ): string | undefined {
   if (!url) return undefined;
   return bredder
     .map((b) => {
-      const h = forhold ? Math.round(b * forhold) : undefined;
-      return `${billedUrl(url, { b, h, kvalitet })} ${b}w`;
+      const h = o.forhold ? Math.round(b * o.forhold) : undefined;
+      return `${billedUrl(url, { ...o, b, h })} ${b}w`;
     })
     .join(', ');
 }

@@ -7,6 +7,7 @@ import { billede } from '../../lib/billeder';
 import { billedUrl, billedSrcset } from '../../lib/sanity';
 import { danishDate } from '../../lib/slug';
 import { getHold } from '../../data/akademi';
+import { redigerbar } from '../../lib/redigering';
 import { Image } from 'astro:assets';
 
 export const getStaticPaths = (() =>
@@ -17,6 +18,8 @@ const { n } = Astro.props;
 const h = n.holdId ? getHold(n.holdId) : undefined;
 const fraSanity = n.fotoUrl;
 const lokal = fraSanity ? undefined : billede(n.fotoKey);
+/* Klik-til-felt i Sanitys Presentation mode. Se lib/redigering.ts. */
+const red = (felt: string) => redigerbar('nyhed', n.docId, felt);
 ---
 
 <Base titel={n.titel} beskrivelse={n.resume}>
@@ -30,12 +33,12 @@ const lokal = fraSanity ? undefined : billede(n.fotoKey);
     <article class="artikel">
       <header class="artikel__top">
         <div class="artikel__meta">
-          <span class="pill">{n.kategori}</span>
-          <time datetime={n.dato.toISOString()}>{danishDate(n.dato)}</time>
+          <span class="pill" data-sanity={red('kategori')}>{n.kategori}</span>
+          <time datetime={n.dato.toISOString()} data-sanity={red('dato')}>{danishDate(n.dato)}</time>
           {n.kilde === 'instagram' && <span class="via">hentet fra Instagram</span>}
         </div>
-        <h1>{n.titel}</h1>
-        <p class="lead">{n.resume}</p>
+        <h1 data-sanity={red('titel')}>{n.titel}</h1>
+        <p class="lead" data-sanity={red('resume')}>{n.resume}</p>
         {h && <a href={`/hold/${h.id}`} class="artikel__hold">{h.navn} · årgang {h.aargang}</a>}
       </header>
 
@@ -43,9 +46,10 @@ const lokal = fraSanity ? undefined : billede(n.fotoKey);
         <figure class="artikel__foto">
           {fraSanity ? (
             <img src={billedUrl(fraSanity, { b: 1100, kvalitet: 82 })}
-                 srcset={billedSrcset(fraSanity, [700, 1100, 1600], undefined, 82)}
+                 srcset={billedSrcset(fraSanity, [700, 1100, 1600], { kvalitet: 82 })}
                  sizes="(max-width: 800px) 94vw, 700px"
-                 alt={n.titel} loading="eager" decoding="async" />
+                 alt={n.titel} data-sanity={red('foto')}
+                 loading="eager" decoding="async" />
           ) : (
             <Image src={lokal!} alt={n.titel} widths={[700, 1100, 1600]}
                    sizes="(max-width: 800px) 94vw, 700px" quality={82} loading="eager" />
@@ -53,7 +57,7 @@ const lokal = fraSanity ? undefined : billede(n.fotoKey);
         </figure>
       )}
 
-      <div class="artikel__krop">
+      <div class="artikel__krop" data-sanity={red('indhold')}>
         <RigTekst blokke={n.indhold} />
       </div>
     </article>

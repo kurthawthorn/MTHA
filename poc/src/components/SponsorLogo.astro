@@ -3,12 +3,36 @@ import { Image } from 'astro:assets';
 import type { Sponsor } from '../data/akademi';
 import { billede } from '../lib/billeder';
 import { billedUrl, billedSrcset } from '../lib/sanity';
+import { redigerbar } from '../lib/redigering';
 
 interface Props {
   sponsor: Sponsor;
   hoejde?: number;
+  /**
+   * Mindre luft omkring logoet. Til de smaa visninger — spillerkortet i
+   * truppen — hvor den fulde polstring ville gøre pladen større end logoet.
+   */
+  kompakt?: boolean;
+  /**
+   * Slås fra når logoet står inde i et andet link. Et <a> inde i et <a> er
+   * ugyldig HTML, og browserne retter det op på hver sin måde — resultatet er
+   * at en del af det ydre link holder op med at kunne klikkes. Det er præcis
+   * situationen på spillerkortet, som selv er et link til profilen.
+   */
+  linkbar?: boolean;
+  /**
+   * Sæt til true for at gøre logoet klikbart i Sanitys Presentation mode, så
+   * det åbner SPONSORDOKUMENTET.
+   *
+   * Slået fra som standard, fordi logoet ofte står inde i en anden
+   * sammenhæng: på et spillerkort er det rigtige felt at redigere spillerens
+   * "Personlig sponsor", ikke sponsorens logo. Var mærket altid på, ville det
+   * inderste vinde, og et klik ville føre til det forkerte sted.
+   */
+  redigerbart?: boolean;
 }
-const { sponsor, hoejde = 44 } = Astro.props;
+const { sponsor, hoejde = 44, kompakt = false, linkbar = true,
+        redigerbart = false } = Astro.props;
 
 /**
  * Billedet kan komme tre steder fra, i denne rækkefølge:
@@ -22,19 +46,22 @@ const { sponsor, hoejde = 44 } = Astro.props;
 const fraSanity = sponsor.logoUrl;
 const lokal = fraSanity ? undefined : billede(sponsor.logoKey);
 
-const Tag = sponsor.url ? 'a' : 'div';
+const somLink = linkbar && Boolean(sponsor.url);
+const Tag = somLink ? 'a' : 'div';
 const bredder = [hoejde * 3, hoejde * 6];
+const red = redigerbart ? redigerbar('sponsor', sponsor.docId, 'logo') : undefined;
 ---
 
-<Tag class="logo"
-     href={sponsor.url}
-     rel={sponsor.url ? 'noopener' : undefined}
-     target={sponsor.url ? '_blank' : undefined}
+<Tag class:list={['logo', kompakt && 'logo--kompakt']}
+     href={somLink ? sponsor.url : undefined}
+     rel={somLink ? 'noopener' : undefined}
+     target={somLink ? '_blank' : undefined}
      style={`--h:${hoejde}px`}
-     title={sponsor.navn}>
+     title={sponsor.navn}
+     data-sanity={red}>
   {fraSanity ? (
     <img src={billedUrl(fraSanity, { b: hoejde * 6, kvalitet: 88 })}
-         srcset={billedSrcset(fraSanity, bredder, undefined, 88)}
+         srcset={billedSrcset(fraSanity, bredder, { kvalitet: 88 })}
          sizes={`${hoejde * 4}px`}
          alt={sponsor.navn} loading="lazy" decoding="async" />
   ) : lokal ? (
@@ -61,6 +88,12 @@ const bredder = [hoejde * 3, hoejde * 6];
     transition: border-color 0.15s, transform 0.15s;
   }
   a.logo:hover { border-color: var(--navy-300); transform: translateY(-2px); }
+
+  /* Kompakt: kun den luft der skal til for at logoet ikke rører rammen. */
+  .logo--kompakt {
+    padding: 0.22rem 0.36rem;
+    height: calc(var(--h) + 0.62rem);
+  }
 
   .logo :global(img), .logo img {
     max-height: var(--h);

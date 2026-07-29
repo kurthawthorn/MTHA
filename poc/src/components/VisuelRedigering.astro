@@ -1,0 +1,42 @@
+---
+/**
+ * TÆNDER OVERLEJRINGEN — men kun i studioet.
+ *
+ * Uden dette er Presentation mode et vindue med hjemmesiden i. Siden kan ikke
+ * fortælle studioet hvor man er henne, så navigationen går kun én vej: man kan
+ * klikke sig frem i forhåndsvisningen, men felterne følger ikke med, og
+ * værktøjet melder at det ikke kan få forbindelse.
+ *
+ * Med den tændt kommer tre ting:
+ *   1. studioet ved hvilken side der vises, og åbner selv det rigtige dokument
+ *   2. de mærkede elementer får en ramme man kan klikke på
+ *   3. et Udgiv genindlæser forhåndsvisningen af sig selv
+ *
+ * HVORFOR DET KOSTER 0 BYTES FOR BESØGENDE
+ *   Overlejringen er stor — den indeholder React. Derfor hentes den bag en
+ *   `import()`, som kun kaldes hvis siden ligger i et andet vindue. En
+ *   almindelig besøgende kører de fire linjer nedenfor, får `false`, og
+ *   henter aldrig andet. Astro lægger selv resten i en separat fil, som
+ *   ingen anmoder om.
+ *
+ *   Derfor står dette IKKE bag en bygningstilstand. Der findes kun én version
+ *   af sitet — samme filer for Lars og for besøgende — og så kan man ikke
+ *   komme til at udgive den forkerte.
+ */
+---
+
+<script>
+  /*
+   * `window.self !== window.top` er sandt i en iframe. Det er ikke et bevis
+   * for at det ER Sanity — men det behøver det ikke være: kommer der ingen
+   * modpart at snakke med, gør overlejringen ingenting og tegner intet.
+   * Selve forbindelsen kontrollerer selv afsenderens origin.
+   */
+  if (window.self !== window.top) {
+    import('@sanity/visual-editing')
+      .then(({ enableVisualEditing }) => enableVisualEditing())
+      .catch(() => {
+        /* Kan filen ikke hentes, skal siden stadig kunne læses. */
+      });
+  }
+</script>

@@ -152,6 +152,25 @@ tjek('ingen emoji som ikoner',
  */
 const taelIAlle = (re) => alle.reduce((n, h) => n + (h.match(re) ?? []).length, 0);
 
+/*
+ * LÆKKET MARKUP I INDHOLD.
+ *
+ * Udtrækket fra m-tha.dk klippede stabens roller over midt i et HTML-tag, så
+ * fem af dem stod på sitet som "Fysioterapeut </d" og "Koordinator EUC
+ * Nordvest <". Det havde ligget der siden det første udtræk.
+ *
+ * Et `<` i indhold bliver `&lt;` i den byggede HTML. Der findes ikke ét
+ * legitimt sted på sitet hvor et mindre-end-tegn hører til i en tekst, så det
+ * er et rent signal: findes det, er der markup der er sivet ind i data.
+ *
+ * Tjekket findes fordi fejlen var USYNLIG for alt andet. Kontrasten var fin,
+ * alt-teksterne var på plads, hierarkiet var korrekt. Det stod bare noget
+ * forkert, og det blev først fundet ved at kigge på /staben ved 375 px.
+ */
+const lækket = taelIAlle(/&lt;\/?[a-zA-Z]{0,6}(?![a-zA-Z])/g);
+tjek('ingen HTML-rester i indhold', lækket === 0,
+  lækket ? `${lækket} sted(er) med &lt; i en tekst` : '');
+
 const udenAlt = taelIAlle(/<img(?![^>]*\salt(?:=|[\s>]))[^>]*>/g);
 tjek('alle billeder har alt-tekst', udenAlt === 0,
   udenAlt ? `${udenAlt} uden alt` : '');
@@ -201,8 +220,31 @@ tjek('lazy loading under folden',
 tjek('bredde+højde på billeder (mod layoutspring)',
   (forside.match(/<img[^>]*width=/g) ?? []).length > 0);
 
-const scripts = [...forside.matchAll(/<script(?![^>]*ld\+json)[^>]*>([\s\S]*?)<\/script>/g)];
-console.log(`        JavaScript på forsiden: ${scripts.reduce((n, m) => n + m[1].length, 0)} bytes`);
+/*
+ * JavaScript paa forsiden — INKLUSIV de eksterne moduler.
+ *
+ * Foer taltes kun indholdet mellem <script> og </script>. Da overlejringen til
+ * Sanitys Presentation mode kom til, blev den lagt i en separat fil og
+ * indsat med src — og tjekket blev derfor ved med at melde 983 bytes, mens
+ * browseren hentede 2,7 kB. Et tal der ikke aendrer sig naar virkeligheden
+ * goer, er vaerre end intet tal: man tror man har maalt noget.
+ */
+const inlineJs = [...forside.matchAll(/<script(?![^>]*(?:ld\+json|\ssrc=))[^>]*>([\s\S]*?)<\/script>/g)]
+  .reduce((n, m) => n + m[1].length, 0);
+
+const eksterneJs = [...forside.matchAll(/<script[^>]*\ssrc="([^"]+)"/g)]
+  .map((m) => m[1].replace(/^.*\/_astro\//, ''))
+  .reduce((n, fil) => {
+    try {
+      return n + readFileSync(join(dist, '_astro', fil)).length;
+    } catch {
+      return n; /* filen ligger et andet sted; tael den ikke med paa gaet */
+    }
+  }, 0);
+
+console.log(`        JavaScript på forsiden: ${inlineJs + eksterneJs} bytes ` +
+  `(${inlineJs} indlejret + ${eksterneJs} hentet)`);
+console.log('        Overlejringen til Presentation mode hentes kun i en iframe');
 
 const ialt = fejl + problemer;
 console.log(`\n${ialt ? `${ialt} ting at se på` : 'Alt i orden'}\n`);

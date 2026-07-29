@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "sanity dev",
     "start": "sanity dev",
-    "build": "sanity build",
-    "deploy": "sanity deploy",
-    "migrer": "node migrer.mjs"
+    "build": "npm run tjek && sanity build",
+    "deploy": "npm run tjek && sanity deploy",
+    "migrer": "node migrer.mjs",
+    "tjek": "node --experimental-strip-types tools/tjek-ruter.mjs"
   },
   "dependencies": {
     "@sanity/vision": "^6",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@sanity/client": "^7",
+    "path-to-regexp": "^6.3.0",
     "typescript": "^5"
   }
 }

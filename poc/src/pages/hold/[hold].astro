@@ -6,6 +6,7 @@ import SpillerKort from '../../components/SpillerKort.astro';
 import SpillerModal from '../../components/SpillerModal.astro';
 import { hold, truppen } from '../../data/akademi';
 import { billede } from '../../lib/billeder';
+import { redigerbar } from '../../lib/redigering';
 
 export const getStaticPaths = (() =>
   hold.map((h) => ({ params: { hold: h.id }, props: { h } }))) satisfies GetStaticPaths;
@@ -18,6 +19,9 @@ const holdFoto = billede(h.fotoKey);
 // Det er hele pointen med at have data i felter frem for i billedfiler.
 const positioner = [...new Set(trup.map((s) => s.position))];
 const aargange = [...new Set(trup.map((s) => s.foedselsaar))].sort();
+
+/* Klik-til-felt i Sanitys Presentation mode. Se lib/redigering.ts. */
+const red = (felt: string) => redigerbar('hold', h.docId, felt);
 ---
 
 <Base titel={`${h.navn} — årgang ${h.aargang}`}
@@ -36,8 +40,11 @@ const aargange = [...new Set(trup.map((s) => s.foedselsaar))].sort();
 
     <header class="holdtop">
       <div>
-        <span class="eyebrow">Årgang {h.aargang} · {h.raekke}</span>
-        <h1>{h.navn}</h1>
+        <span class="eyebrow">
+          <span data-sanity={red('foedselsaar')}>Årgang {h.aargang}</span>
+          {' · '}<span data-sanity={red('raekke')}>{h.raekke}</span>
+        </span>
+        <h1 data-sanity={red('navn')}>{h.navn}</h1>
         <p class="lead num">{trup.length} spillere i truppen{h.traener ? ` · træner ${h.traener}` : ''}</p>
       </div>
       <div class="holdtop__skift">
@@ -124,12 +131,17 @@ const aargange = [...new Set(trup.map((s) => s.foedselsaar))].sort();
   .krumme a { color: var(--text-dim); text-decoration: none; }
   .krumme a:hover { text-decoration: underline; }
 
+  /* 21 : 8 er et bredt panoramaformat, og det passer til et holdfoto med 25
+     mennesker paa række — men kun paa en skærm. Ved 375 px blev det en 128 px
+     hoej strimmel hvor ingen ansigter kunne skelnes. Under 700 px er det
+     derfor 16 : 9, saa fotoet faar hoejde nok til at man kan se holdet. */
   .holdfoto {
     margin-top: 0.8rem;
     aspect-ratio: 21 / 8; overflow: hidden;
     border-radius: var(--radius); border: 1px solid var(--line-soft);
     background: var(--navy-800);
   }
+  @media (max-width: 700px) { .holdfoto { aspect-ratio: 16 / 9; } }
   .holdfoto :global(img) { width: 100%; height: 100%; object-fit: cover; }
 
   .holdtop {

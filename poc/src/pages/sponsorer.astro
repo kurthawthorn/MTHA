@@ -54,7 +54,7 @@ const medPersonlige = [...personlige.entries()]
         <span class="antal num">{top.length}</span>
       </div>
       <div class="logogrid logogrid--stor">
-        {top.map((s) => <SponsorLogo sponsor={s} hoejde={60} />)}
+        {top.map((s) => <SponsorLogo sponsor={s} hoejde={60} redigerbart />)}
       </div>
     </section>
 
@@ -64,7 +64,7 @@ const medPersonlige = [...personlige.entries()]
         <span class="antal num">{oevrige.length} virksomheder</span>
       </div>
       <div class="logogrid">
-        {oevrige.map((s) => <SponsorLogo sponsor={s} hoejde={46} />)}
+        {oevrige.map((s) => <SponsorLogo sponsor={s} hoejde={46} redigerbart />)}
       </div>
       <p class="note">
         Logoerne er akademiets egne filer fra m-tha.dk, og hvert enkelt linker
@@ -81,7 +81,7 @@ const medPersonlige = [...personlige.entries()]
           <span class="antal num">{partnere.length}</span>
         </div>
         <div class="logogrid logogrid--stor">
-          {partnere.map((s) => <SponsorLogo sponsor={s} hoejde={52} />)}
+          {partnere.map((s) => <SponsorLogo sponsor={s} hoejde={52} redigerbart />)}
         </div>
       </section>
     )}

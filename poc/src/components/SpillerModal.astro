@@ -158,14 +158,18 @@
   /* Profilen kommer fra /spillere/… og har sine egne scopede klasser, så
      layoutet gentages her — kun det modalen har brug for. */
   .sm__krop :global(.profil) { display: contents; }
+  /* Samme forhold og samme bundstilling som paa profilsiden — se --portraet
+     i global.css. Var det 3 : 4 her, ville modalen skaere hovedet af paa
+     netop de spillere man klikker paa i truppen. */
   .sm__krop :global(.profil__foto) {
     float: left; width: min(15rem, 42%); margin: 0 1.4rem 0.8rem 0;
-    aspect-ratio: 3 / 4; position: relative; overflow: hidden;
+    aspect-ratio: var(--portraet); position: relative; overflow: hidden;
     border-radius: var(--radius); border: 1px solid var(--line-soft);
     background: linear-gradient(178deg, #fff, #EBEDF6);
   }
   .sm__krop :global(.profil__foto img) {
-    width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%;
+    width: 100%; height: 100%;
+    object-fit: contain; object-position: 50% 100%;
   }
   .sm__krop :global(.profil__nr) {
     position: absolute; left: 0; bottom: 0;
@@ -199,12 +203,14 @@
     background: var(--orange-100); border: 1px solid var(--line-soft);
     border-left: 3px solid var(--orange); border-radius: var(--radius);
     padding: 0.85rem 1rem;
-    display: flex; flex-wrap: wrap; gap: 0.9rem;
-    align-items: center; justify-content: space-between;
+    display: grid; gap: 0.55rem;
   }
-  .sm__krop :global(.sponsorboks__txt) {
-    display: flex; flex-direction: column; gap: 0.18rem; flex: 1 1 14rem;
+  /* Samme opbygning som paa profilsiden: maerkat, saa logo og forklaring. */
+  .sm__krop :global(.sponsorboks__ind) {
+    display: flex; flex-wrap: wrap; gap: 0.8rem 1.1rem; align-items: center;
   }
+  .sm__krop :global(.sponsorboks__ind > .logo) { flex: none; }
+  .sm__krop :global(.sponsorboks p) { flex: 1 1 13rem; }
   .sm__krop :global(.sponsorboks strong) {
     font-family: var(--font-display); font-size: 1.05rem;
     text-transform: uppercase; letter-spacing: 0.02em;
@@ -222,5 +228,10 @@
   @media (max-width: 560px) {
     .sm__krop { padding: 1.1rem 1.1rem 1.2rem; }
     .sm__krop :global(.profil__foto) { float: none; width: 62%; margin: 0 0 1rem; }
+    /* Fem felter i to spalter efterlader en tom celle, og fordi gitterets
+       mellemrum tegnes af foraelderens baggrund, staar den som en graa kasse.
+       Samme rettelse som paa profilsiden — se [spiller].astro. */
+    .sm__krop :global(.fakta) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sm__krop :global(.fakta > div:last-child:nth-child(odd)) { grid-column: 1 / -1; }
   }
 </style>

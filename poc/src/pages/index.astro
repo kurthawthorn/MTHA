@@ -80,7 +80,7 @@ const faciliteter = [
         {seneste.map((n) => (
           <NyhedsKort slug={n.slug} titel={n.titel} dato={n.dato}
                       kategori={n.kategori} resume={n.resume} kilde={n.kilde}
-                      fotoKey={n.fotoKey} fotoUrl={n.fotoUrl} />
+                      fotoKey={n.fotoKey} fotoUrl={n.fotoUrl} docId={n.docId} />
         ))}
       </div>
     </section>
@@ -309,6 +309,53 @@ const faciliteter = [
   .hero__tal dd {
     margin: 0; font-family: var(--font-display); font-weight: 700;
     font-size: 1.45rem; line-height: 1.1;
+  }
+
+  /*
+   * "17 AF 19 SPILLERE I LIGATRUPPEN KOMMER HERFRA"
+   *
+   * Blokken havde INGEN styling. Markupen var kopieret fra /vaerdier, men
+   * CSS'en blev efterladt — og i Astro er styling scopet pr. fil, så reglerne
+   * på /vaerdier gælder ikke her. Resultatet var at akademiets stærkeste
+   * argument stod som fire linjer understreget blå linktekst midt på
+   * forsiden. Det så ud som en fejl i indlæsningen.
+   *
+   * Fundet ved at kigge på siden ved 375 px. Ingen af de automatiske tjek
+   * kunne fange det: kontrasten var fin, alt-teksterne var på plads, og
+   * overskriftshierarkiet var korrekt. Det var bare grimt.
+   *
+   * Forskellen fra /vaerdier: her er blokken et LINK, så tekstfarve og
+   * understregning skal nulstilles, og der skal være en hover-tilstand.
+   */
+  .bevis {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 1.2rem 2.2rem;
+    background: var(--navy); color: #fff;
+    border-radius: var(--radius);
+    padding: var(--rum-5) var(--rum-5);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  }
+  .bevis:hover { background: var(--navy-800); border-color: var(--orange); }
+  .bevis:active { transform: translateY(1px); }
+
+  .bevis__tal { display: flex; flex-direction: column; line-height: 0.92; flex: none; }
+  .bevis__tal strong {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(3.2rem, 11vw, 5.4rem); color: var(--orange);
+  }
+  .bevis__tal span {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 0.88rem; color: #A8ABDC;
+  }
+
+  .bevis__txt { flex: 1 1 20rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .bevis__txt h2 { font-size: clamp(1.25rem, 3.4vw, 1.6rem); }
+  .bevis__txt p { color: #D6D7F0; max-width: 52ch; font-size: 0.95rem; }
+  .bevis__link {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.09em; font-size: 0.78rem; font-weight: 600;
+    color: var(--orange); margin-top: 0.2rem;
   }
 
   .holdkort { padding: 0; }

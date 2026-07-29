@@ -3,8 +3,9 @@ import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { personer, iSektion, SEKTION_NAVNE } from '../data/akademi';
 import { billede } from '../lib/billeder';
-import { billedUrl, billedSrcset } from '../lib/sanity';
+import { billedUrl, billedSrcset, portraetAnker } from '../lib/sanity';
 import { initials } from '../lib/slug';
+import { redigerbar } from '../lib/redigering';
 
 /* Sektionerne er dem der faktisk står på m-tha.dk — fundet ved at læse
    overskrifterne i deres HTML, ikke gættet ud fra rollen. */
@@ -36,25 +37,31 @@ const grupper = (['professionel', 'ansat', 'bestyrelse'] as const)
           {g.folk.map((p) => {
             const fraSanity = p.fotoUrl;
             const foto = fraSanity ? undefined : billede(p.fotoKey);
+            /* Samme portrætter som spillerne — 600 × 900 og næsten ingen luft
+               over hovedet. Derfor samme beskæring. Se portraetAnker(). */
+            const anker = portraetAnker(p.fotoHotspot);
+            const red = (felt: string) => redigerbar('person', p.docId, felt);
             return (
               <article class="card pk">
                 <div class:list={['pk__foto', !foto && !fraSanity && 'pk__foto--tom']}>
                   {fraSanity ? (
-                    <img src={billedUrl(fraSanity, { b: 300, h: 400 })}
-                         srcset={billedSrcset(fraSanity, [180, 300], 4 / 3)}
-                         sizes="180px" alt={p.navn} loading="lazy" decoding="async" />
+                    <img src={billedUrl(fraSanity, { b: 300, h: 450, ...anker })}
+                         srcset={billedSrcset(fraSanity, [180, 300], { forhold: 3 / 2, ...anker })}
+                         sizes="180px" alt={p.navn} data-sanity={red('portraet')}
+                         loading="lazy" decoding="async" />
                   ) : foto ? (
                     <Image src={foto} alt={p.navn} widths={[180, 300]}
-                           sizes="180px" quality={82} loading="lazy" />
+                           sizes="180px" quality={82} loading="lazy"
+                           data-sanity={red('portraet')} />
                   ) : (
                     <span aria-hidden="true">{initials(p.navn)}</span>
                   )}
                 </div>
                 <div class="pk__txt">
-                  <h3>{p.navn}</h3>
+                  <h3 data-sanity={red('navn')}>{p.navn}</h3>
                   {p.rolle
-                    ? <p class="pk__rolle">{p.rolle}</p>
-                    : <p class="pk__mangler">Rolle udfyldes af akademiet</p>}
+                    ? <p class="pk__rolle" data-sanity={red('rolle')}>{p.rolle}</p>
+                    : <p class="pk__mangler" data-sanity={red('rolle')}>Rolle udfyldes af akademiet</p>}
                 </div>
               </article>
             );
@@ -77,15 +84,31 @@ const grupper = (['professionel', 'ansat', 'bestyrelse'] as const)
   .top h1 { font-size: clamp(1.9rem, 4.8vw, 3rem); }
   .antal { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-faint); }
 
-  .personer { grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 1fr));
+  /*
+   * 168px var 14px for meget.
+   *
+   * Ved 375 px er indholdsbredden 335 px. To spalter kræver 2 x 168 + 13,6 px
+   * mellemrum = 349,6 px, og saa faldt gitteret ned i ÉN spalte: ét portraet
+   * paa 335 x 536 px pr. person, 25 gange. Truppen brugte 158 px og laa
+   * dermed lige under graensen — derfor stod de to sider forskelligt uden at
+   * nogen havde besluttet det.
+   *
+   * 150 px giver to spalter ved 375 px med luft til overs, og aendrer intet
+   * paa en skaerm, hvor gitteret alligevel fylder ud.
+   */
+  .personer { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
               gap: 0.85rem; }
   .pk { padding: 0; }
+  /* Samme forhold og bundstilling som spillerkortet — se --portraet i
+     global.css. Var det kun rettet på spillerne, ville halvdelen af sitet
+     skære hovedet af på de samme fotos. */
   .pk__foto {
-    aspect-ratio: 3 / 4; overflow: hidden;
+    aspect-ratio: var(--portraet); overflow: hidden;
     background: linear-gradient(178deg, #FFFFFF 0%, #EEF0F7 100%);
   }
   .pk__foto :global(img), .pk__foto img {
-    width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%;
+    width: 100%; height: 100%;
+    object-fit: contain; object-position: 50% 100%;
   }
   .pk__foto--tom {
     display: grid; place-items: center;

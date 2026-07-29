@@ -86,7 +86,6 @@ const path = Astro.url.pathname;
     border-bottom: 3px solid var(--navy);
     transition: box-shadow 0.2s ease;
   }
-  .hdr.er-rullet { box-shadow: 0 6px 22px -12px rgb(11 13 46 / 45%); }
   .hdr__in {
     display: flex;
     align-items: center;
@@ -95,7 +94,25 @@ const path = Astro.url.pathname;
     flex-wrap: wrap;
     transition: padding-block 0.22s ease;
   }
-  .hdr.er-rullet .hdr__in { padding-block: 0.45rem; }
+  /*
+   * SAMMENTRÆKNINGEN GÆLDER KUN NÅR HEADEREN KLÆBER.
+   *
+   * Den findes for at en fastgjort bjælke ikke skal spise plads fra
+   * indholdet. Under 700 px klæber den ikke længere (se nederst), og der
+   * ville sammentrækningen gøre skade i stedet for gavn: headeren ligger
+   * øverst i sidens flow, så en ændring af dens højde midt i en rulning
+   * flytter alt indholdet opad — og siden hopper under fingeren.
+   */
+  @media (min-width: 701px) {
+    .hdr.er-rullet { box-shadow: 0 6px 22px -12px rgb(11 13 46 / 45%); }
+    .hdr.er-rullet .hdr__in { padding-block: 0.45rem; }
+    .hdr.er-rullet .hdr__logo img { height: 52px; }
+    .hdr.er-rullet .hdr__sponsor img { height: 26px; }
+    /* Ordet "Hovedsponsor" ryger ud i kompakt tilstand — logoet taler selv */
+    .hdr.er-rullet .hdr__sponsor span {
+      font-size: 0; opacity: 0; height: 0; overflow: hidden;
+    }
+  }
 
   /* Mærke-lockup: MTHA og hovedsponsoren side om side */
   .hdr__maerke {
@@ -112,7 +129,6 @@ const path = Astro.url.pathname;
     width: auto; height: 78px;
     transition: height 0.22s ease;
   }
-  .hdr.er-rullet .hdr__logo img { height: 52px; }
 
   /* Den lodrette streg gør de to mærker til én enhed frem for to løse logoer */
   .hdr__sponsor {
@@ -134,11 +150,6 @@ const path = Astro.url.pathname;
   .hdr__sponsor img {
     width: auto; height: 34px;
     transition: height 0.22s ease;
-  }
-  .hdr.er-rullet .hdr__sponsor img { height: 26px; }
-  /* Ordet "Hovedsponsor" ryger ud i kompakt tilstand — logoet taler selv */
-  .hdr.er-rullet .hdr__sponsor span {
-    font-size: 0; opacity: 0; height: 0; overflow: hidden;
   }
 
   nav { margin-left: auto; }
@@ -191,11 +202,45 @@ const path = Astro.url.pathname;
     nav a { font-size: 0.78rem; }
     .hdr__cta { margin-left: auto; }
   }
+  /*
+   * TELEFON.
+   *
+   * To ting rettet efter en gennemgang ved 375 px:
+   *
+   * 1. HEADEREN KLÆBEDE IKKE LÆNGERE.
+   *    Menuen har syv punkter, og de kan ikke være på én linje under ca.
+   *    700 px — de falder ned i to. Sammen med mærke og sponsorlogo blev den
+   *    klæbende bjælke 156 px høj, og 120 px i sammentrukket tilstand. På en
+   *    telefon med 812 px viewport betyder det at en femtedel af skærmen var
+   *    permanent optaget af navigation, mens man læste.
+   *
+   *    Derfor ruller headeren væk på telefonen. Menuen er stadig ét swipe
+   *    væk i sidefoden, som har alle genveje.
+   *
+   *    Den RIGTIGE løsning er en foldemenu, så bjælken kan blive ved at klæbe
+   *    og være 60 px høj. Den er ikke lavet her, fordi den kræver en
+   *    knap-tilstand der skal annonceres korrekt for skærmlæsere, og det er
+   *    et selvstændigt stykke arbejde. Dette er rettelsen af det der er galt,
+   *    ikke forbedringen.
+   *
+   * 2. "HOVEDSPONSOR" STOD I 8,3 PX.
+   *    0,52rem er under enhver grænse for læsbarhed — det var en streg, ikke
+   *    et ord. Ordet ryger derfor helt ud under 480 px; logoet siger selv
+   *    hvad det er, præcis som når headeren er sammentrukket.
+   */
+  @media (max-width: 700px) {
+    .hdr { position: static; }
+    nav ul { gap: 0.55rem 1rem; }
+  }
+
   @media (max-width: 560px) {
     .hdr__logo img { height: 52px; }
     .hdr__maerke { gap: 0.8rem; }
     .hdr__sponsor { padding-left: 0.8rem; }
     .hdr__sponsor img { height: 26px; }
-    .hdr__sponsor span { font-size: 0.52rem; }
+  }
+
+  @media (max-width: 480px) {
+    .hdr__sponsor span { display: none; }
   }
 </style>

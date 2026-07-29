@@ -3,10 +3,12 @@ import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import SponsorLogo from '../../components/SponsorLogo.astro';
+import Landsholdsmaerke from '../../components/Landsholdsmaerke.astro';
 import { spillere, holdFor, getSponsor } from '../../data/akademi';
 import { billede } from '../../lib/billeder';
-import { billedUrl, billedSrcset } from '../../lib/sanity';
+import { billedUrl, billedSrcset, portraetAnker } from '../../lib/sanity';
 import { initials } from '../../lib/slug';
+import { redigerbar } from '../../lib/redigering';
 
 export const getStaticPaths = (() =>
   spillere.map((s) => ({ params: { spiller: s.slug }, props: { s } }))
@@ -19,6 +21,11 @@ const sponsor = getSponsor(s.sponsorId);
 const sponsorNavn = sponsor?.navn ?? s.sponsorNavn;
 const fraSanity = s.fotoUrl;
 const foto = fraSanity ? undefined : billede(s.fotoKey);
+/* Beskæringen: redaktørens hotspot hvis der er et, ellers toppen — så hovedet
+   ikke skæres af. Se portraetAnker() i lib/sanity.ts. */
+const anker = portraetAnker(s.fotoHotspot);
+/* Klik-til-felt i Sanitys Presentation mode. Se lib/redigering.ts. */
+const red = (felt: string) => redigerbar('spiller', s.docId, felt);
 ---
 
 <Base titel={s.navn}
@@ -33,43 +40,63 @@ const foto = fraSanity ? undefined : billede(s.fotoKey);
     <article class="profil">
       <div class:list={['profil__foto', !foto && !fraSanity && 'profil__foto--tom']}>
         {fraSanity ? (
-          <img src={billedUrl(fraSanity, { b: 520, h: 693, kvalitet: 86 })}
-               srcset={billedSrcset(fraSanity, [320, 520, 600], 4 / 3, 86)}
+          <img src={billedUrl(fraSanity, { b: 520, h: 780, kvalitet: 86, ...anker })}
+               srcset={billedSrcset(fraSanity, [320, 520, 600],
+                                    { forhold: 3 / 2, kvalitet: 86, ...anker })}
                sizes="(max-width: 760px) 70vw, 300px"
-               alt={s.navn} loading="eager" decoding="async" />
+               alt={s.navn} data-sanity={red('portraet')}
+               loading="eager" decoding="async" />
         ) : foto ? (
           <Image src={foto} alt={s.navn} widths={[320, 520, 600]}
-                 sizes="(max-width: 760px) 70vw, 300px" quality={86} loading="eager" />
+                 sizes="(max-width: 760px) 70vw, 300px" quality={86} loading="eager"
+                 data-sanity={red('portraet')} />
         ) : (
           <span class="profil__init" aria-hidden="true">{initials(s.navn)}</span>
         )}
-        <span class="profil__nr num" aria-hidden="true">{s.rygnummer}</span>
+        {s.landshold && (
+          <Landsholdsmaerke niveau={s.landsholdNiveau} stoerrelse="stor" />
+        )}
+        <span class="profil__nr num" aria-hidden="true"
+              data-sanity={red('rygnummer')}>{s.rygnummer}</span>
       </div>
 
       <div class="profil__info">
         <span class="eyebrow">{h ? `${h.navn} · Årgang ${h.aargang}` : `Årgang ${s.foedselsaar}`}</span>
-        <h1>{s.navn}</h1>
+        <h1 data-sanity={red('navn')}>{s.navn}</h1>
 
         <dl class="fakta">
-          <div><dt>Position</dt><dd>{s.position}</dd></div>
-          <div><dt>Rygnummer</dt><dd class="num">{s.rygnummer}</dd></div>
-          <div><dt>Fødselsår</dt><dd class="num">{s.foedselsaar}</dd></div>
-          <div><dt>Moderklub</dt><dd>{s.moderklub}</dd></div>
-          <div><dt>Uddannelse</dt><dd>{s.uddannelse}</dd></div>
+          <div><dt>Position</dt><dd data-sanity={red('position')}>{s.position}</dd></div>
+          <div><dt>Rygnummer</dt><dd class="num" data-sanity={red('rygnummer')}>{s.rygnummer}</dd></div>
+          <div><dt>Fødselsår</dt><dd class="num" data-sanity={red('foedselsaar')}>{s.foedselsaar}</dd></div>
+          <div><dt>Moderklub</dt><dd data-sanity={red('moderklub')}>{s.moderklub}</dd></div>
+          <div><dt>Uddannelse</dt><dd data-sanity={red('uddannelse')}>{s.uddannelse}</dd></div>
         </dl>
 
+        {/*
+          Sponsoren stod foer som navnet i store bogstaver med logoet ude til
+          hoejre. Nu er logoet det der ses, og navnet er gaaet ind i logoets
+          alt-tekst. En virksomhed genkendes paa sit maerke — det er hele
+          grunden til at de har et.
+
+          Er sponsoren ikke oprettet i registret endnu, findes der intet logo.
+          Saa staar navnet, frem for en tom kasse.
+        */}
         {sponsorNavn && (
-          <aside class="sponsorboks">
-            <div class="sponsorboks__txt">
-              <span class="eyebrow">Personlig sponsor</span>
-              <strong>{sponsorNavn}</strong>
+          <aside class="sponsorboks" data-sanity={red('sponsor')}>
+            {/* Mærkatet staar foerst i dokumentet, ikke ude til siden. Ved
+                375 px falder boksen i én spalte, og saa moedte man logoet
+                foer man fik at vide hvad det var. */}
+            <span class="eyebrow">Personlig sponsor</span>
+            <div class="sponsorboks__ind">
+              {sponsor
+                ? <SponsorLogo sponsor={sponsor} hoejde={54} />
+                : <strong>{sponsorNavn}</strong>}
               <p>
                 Logoet hentes fra sponsorregistret. Skifter sponsoren navn eller
                 logo, opdateres det ét sted og slår igennem på alle de spillere
                 de støtter — og i sidefoden.
               </p>
             </div>
-            {sponsor && <SponsorLogo sponsor={sponsor} hoejde={46} />}
           </aside>
         )}
 
@@ -97,15 +124,19 @@ const foto = fraSanity ? undefined : billede(s.fotoKey);
   }
   @media (min-width: 760px) { .profil { grid-template-columns: 19rem minmax(0, 1fr); } }
 
+  /* Forholdet og bundstillingen er forklaret ved --portraet i global.css:
+     boksen er en smule hoejere end billedet, saa der bliver luft OVER
+     hovedet frem for et snit gennem det. */
   .profil__foto {
-    aspect-ratio: 3 / 4; position: relative; overflow: hidden;
+    aspect-ratio: var(--portraet); position: relative; overflow: hidden;
     border-radius: var(--radius);
     border: 1px solid var(--line-soft);
     background: linear-gradient(178deg, #FFFFFF 0%, #EBEDF6 100%);
     max-width: 19rem;
   }
   .profil__foto :global(img), .profil__foto img {
-    width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%;
+    width: 100%; height: 100%;
+    object-fit: contain; object-position: 50% 100%;
   }
   .profil__foto--tom {
     display: grid; place-items: center;
@@ -142,6 +173,21 @@ const foto = fraSanity ? undefined : billede(s.fotoKey);
   }
   .fakta dd { margin: 0; font-weight: 600; font-size: 0.95rem; }
 
+  /*
+   * Fem felter i to spalter giver en tom celle nederst til hoejre. Fordi
+   * gitterets mellemrum tegnes af foraelderens baggrund, stod den tomme plads
+   * som en graa kasse — den saa ud som et felt der manglede indhold.
+   *
+   * Under 460 px ved vi at der er praecis to spalter, og saa kan det sidste
+   * felt fylde raekken ud. Reglen staar bevidst i en media query: paa en
+   * skaerm falder de fem felter paa én linje, og der ville et felt der
+   * spaender over hele bredden vaere en fejl frem for en rettelse.
+   */
+  @media (max-width: 460px) {
+    .fakta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fakta > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  }
+
   .sponsorboks {
     width: 100%; margin-top: 0.5rem;
     background: var(--orange-100);
@@ -149,14 +195,19 @@ const foto = fraSanity ? undefined : billede(s.fotoKey);
     border-left: 3px solid var(--orange);
     border-radius: var(--radius);
     padding: 0.9rem 1rem;
-    display: flex; flex-wrap: wrap; gap: 1rem;
-    align-items: center; justify-content: space-between;
+    display: grid; gap: 0.6rem;
   }
-  .sponsorboks__txt { display: flex; flex-direction: column; gap: 0.22rem;
-                      flex: 1 1 15rem; }
+  /* Logoet og forklaringen side om side naar der er plads, ellers under
+     hinanden. `flex: none` paa logoet, saa pladen ikke bliver strakt. */
+  .sponsorboks__ind {
+    display: flex; flex-wrap: wrap; gap: 0.9rem 1.2rem; align-items: center;
+  }
+  .sponsorboks__ind > :global(.logo) { flex: none; }
+  /* Bruges kun naar sponsoren ikke er oprettet i registret, og der derfor
+     ikke findes noget logo at vise. */
   .sponsorboks strong { font-family: var(--font-display); font-size: 1.15rem;
                         text-transform: uppercase; letter-spacing: 0.02em; }
-  .sponsorboks p { font-size: 0.85rem; color: var(--text-dim); }
+  .sponsorboks p { font-size: 0.85rem; color: var(--text-dim); flex: 1 1 14rem; }
 
   .demo { font-size: 0.8rem; color: var(--text-faint); max-width: 62ch; }
 </style>

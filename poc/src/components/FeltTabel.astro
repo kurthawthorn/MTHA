@@ -76,7 +76,14 @@ const { felter } = Astro.props;
     border-radius: 2px; padding: 0.2rem 0.5rem; min-width: 8rem;
   }
   .felt__vaerdi--tal { font-variant-numeric: tabular-nums; min-width: 5rem; }
-  .felt__vaerdi--url { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 400; }
+  /* En lang URL uden mellemrum har ingen steder at brydes, saa den skubbede
+     ud over skaermkanten — og blev klippet af `overflow: hidden` paa kortet,
+     saa resten af adressen var uopnaaelig ved 375 px. `anywhere` bryder
+     midt i ordet naar der ikke findes noget bedre sted. */
+  .felt__vaerdi--url {
+    font-family: var(--font-mono); font-size: 0.82rem; font-weight: 400;
+    overflow-wrap: anywhere;
+  }
   .felt__vaerdi--valg {
     background: var(--paper); border: 1px solid var(--line);
     border-radius: 2px; padding: 0.2rem 1.6rem 0.2rem 0.5rem; position: relative;

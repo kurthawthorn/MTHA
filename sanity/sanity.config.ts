@@ -1,7 +1,11 @@
 import { defineConfig } from 'sanity';
 import { structureTool } from 'sanity/structure';
+import { presentationTool } from 'sanity/presentation';
 import { visionTool } from '@sanity/vision';
 import { schemaTypes } from './schemas';
+import { steder } from './presentation/steder';
+import { dokumenter } from './presentation/dokumenter';
+import { START_URL, TILLADTE_ORIGINS } from './presentation/site';
 
 /**
  * Redigeringsvinduet til Mors-Thy Håndbold Akademi.
@@ -30,6 +34,44 @@ export default defineConfig({
   dataset: 'production',
 
   plugins: [
+    /*
+     * PRESENTATION — hjemmesiden ved siden af felterne.
+     *
+     * Det Kurt savnede: man retter et felt i venstre side og ser siden i
+     * højre. Åbner man en spiller, springer forhåndsvisningen selv til netop
+     * den spillers profil; klikker man på en spiller ude på siden, skifter
+     * felterne til den spiller. De to retninger er defineret i
+     * `presentation/steder.ts` og `presentation/dokumenter.ts`.
+     *
+     * DEN ENE BEGRÆNSNING, SAGT HØJT
+     *   Forhåndsvisningen viser den UDGIVNE side, ikke kladden. Sitet er
+     *   statisk — hver side er en færdig fil på GitHub Pages, bygget da nogen
+     *   sidst trykkede Udgiv — og der findes ingen server der kan tegne en
+     *   kladde. Rettelser dukker altså op i forhåndsvisningen ca. to minutter
+     *   efter Udgiv, ikke mens man skriver.
+     *
+     *   Det er en bevidst afvejning, ikke en mangel der er overset:
+     *   kladdevisning kræver en server der kan læse kladder, altså et token i
+     *   drift og hosting med kørende kode. Prisen ville være hele grunden til
+     *   at løsningen er gratis og ikke kan gå ned. Skal det ændres, er vejen
+     *   en forhåndsvisning på Vercel eller Cloudflare ved siden af — det live
+     *   site kan blive som det er.
+     *
+     *   Til gengæld virker NAVIGATIONEN og klik-til-felt med det samme, og det
+     *   er det man bruger værktøjet til: at finde det rigtige felt uden at
+     *   vide hvad dokumentet heder.
+     */
+    presentationTool({
+      title: 'Se siden',
+      previewUrl: { initial: START_URL },
+      /* Hvilke adresser iframen må indlæse. Se `presentation/site.ts`. */
+      allowOrigins: TILLADTE_ORIGINS,
+      resolve: {
+        locations: steder,
+        mainDocuments: dokumenter,
+      },
+    }),
+
     structureTool({
       structure: (S) =>
         S.list()
@@ -55,6 +97,16 @@ export default defineConfig({
                       S.documentList()
                         .title('Aktive spillere')
                         .filter('_type == "spiller" && aktiv == true')
+                        .defaultOrdering([{ field: 'navn', direction: 'asc' }]),
+                    ),
+                    // Landsholdsmærket er den ene oplysning på en spiller der
+                    // pynter udad. Derfor skal den kunne efterses samlet — en
+                    // markering der er sat ved en fejl, er svær at opdage når
+                    // den kun kan ses ét dokument ad gangen.
+                    S.listItem().title('Landsholdsspillere').child(
+                      S.documentList()
+                        .title('Har spillet på landsholdet')
+                        .filter('_type == "spiller" && landshold == true')
                         .defaultOrdering([{ field: 'navn', direction: 'asc' }]),
                     ),
                     S.listItem().title('Stoppet').child(
@@ -96,6 +148,17 @@ export default defineConfig({
                     S.listItem().title('⚠ Mangler rolle').child(
                       S.documentList().title('Mangler rolle')
                         .filter('_type == "person" && !defined(rolle)'),
+                    ),
+                    /*
+                     * Udtrækket fra m-tha.dk klippede fem roller over midt i et
+                     * HTML-tag: "Fysioterapeut </d", "Koordinator EUC Nordvest <".
+                     * Sitet renser dem ved visning, men de bør rettes ved kilden.
+                     * Slet tegnene fra og med '<' — og skriv resten af titlen,
+                     * hvis den også mangler et ord.
+                     */
+                    S.listItem().title('⚠ Rolle med HTML-rester').child(
+                      S.documentList().title('Roller med HTML-rester fra udtrækket')
+                        .filter('_type == "person" && rolle match "*<*"'),
                     ),
                   ]),
               ),

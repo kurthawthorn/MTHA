@@ -1,6 +1,6 @@
 # Handoff — MTHA
 
-Status ved sessionens afslutning, 28. juli 2026. Skrevet til den næste der
+Status ved sessionens afslutning, 29. juli 2026. Skrevet til den næste der
 skal arbejde videre, uanset om det er et menneske eller en ny AI-session.
 
 ---
@@ -34,15 +34,23 @@ Sanity Studio  ──webhook──▶  GitHub Actions  ──▶  GitHub Pages
  (indholdet)                  (bygger med Astro)     (det live site)
 ```
 
-- `poc/` — Astro-sitet. 76 sider, statisk, ~29 KB forside, 983 bytes JavaScript.
+- `poc/` — Astro-sitet. 76 sider, statisk, ~31 KB forside, 2,7 kB JavaScript.
 - `sanity/` — studioet. Ti dokumenttyper. Alt indhold ligger her, intet i kode.
+  `sanity/presentation/` er forhåndsvisningen — se nedenfor.
 - `tools/` — scripts der henter billeder og logoer fra m-tha.dk.
 - Bygningen henter kun de 20 redaktionelle fotos fra m-tha.dk; portrætter,
   logoer og nyhedsbilleder kommer fra Sanitys CDN.
 
+**Hvorfor der står React i `poc/package.json`.** Overlejringen til Sanitys
+Presentation mode (`@sanity/visual-editing`) er bygget med React, og den bundles
+derfor med. Den ligger i en separat fil på 784 KB, som **kun** hentes hvis siden
+ligger i en iframe — altså kun for en redaktør inde i studioet. En besøgende
+kører fire linjer der giver `false` og henter aldrig andet. Sitet er stadig
+statisk og har stadig ingen komponenter der hydreres.
+
 ## Det du skal vide før du rører noget
 
-Fem ting kostede tid at finde. De er alle rettet, men forklaringen er værd at
+Otte ting kostede tid at finde. De er alle rettet, men forklaringen er værd at
 kende, fordi de kan komme igen.
 
 **1. Astros byggecache lyver om udgivelser.**
@@ -68,15 +76,60 @@ viewporten, og `vh` regner med den største.
 Den oprindelige display-skrift var Bahnschrift — som ikke findes på iOS,
 Android eller macOS. Nu bruges selvhostet Barlow Condensed i `poc/public/skrift/`.
 
-## Tjekket der kører af sig selv
+**6. Sanity sender ikke hotspottet af sig selv.**
+`crop=focalpoint` i en billed-URL betyder ikke “brug redaktørens hotspot”. Punktet
+skal med som `fp-x` og `fp-y`, ellers falder Sanity tilbage på midten. Det stod
+i både kode og vejledning at hotspot-funktionen virkede; den var i praksis slået
+fra i et halvt år. Fordi alle 79 portrætter er 600 × 900 med 1–2 % luft over
+hovedet, skar en beskæring om midten toppen af hovedet af på hvert enkelt.
 
-`poc/tools/tjek-design.mjs` kører som del af `npm run build` og **stopper
+Nu hentes `portraet.hotspot{x, y}` med i forespørgslen, og findes der ikke noget
+hotspot, holdes beskæringen fast i **toppen**. Se `portraetAnker()` i
+`poc/src/lib/sanity.ts`.
+
+**7. Astros scopede CSS følger ikke markupen når man kopierer den.**
+Blokken “17 af 19 spillere i ligatruppen kommer herfra” var kopieret fra
+`/vaerdier` til forsiden — men CSS'en blev efterladt, og i Astro gælder en fils
+`<style>` kun i den fil. Akademiets stærkeste argument stod derfor som fire
+linjer understreget blå linktekst midt på forsiden.
+
+Ingen af de automatiske tjek kunne fange det: kontrasten var fin, alt-teksterne
+var på plads, overskriftshierarkiet var korrekt. Det var bare grimt. **Kopierer
+du markup mellem to `.astro`-filer, så tag reglerne med — eller læg dem i
+`global.css`.**
+
+**8. `data-sanity`, ikke “stega”.**
+Sanity kan mærke redigerbar tekst på to måder. Stega indlejrer usynlige tegn i
+selve teksten — nemt at slå til, men tegnene ryger med ud i sidetitler,
+alt-tekster, meta-beskrivelser og den strukturerede data Google læser, og de
+følger med når nogen kopierer et navn ud af siden.
+
+Her bruges `data-sanity`-attributter i stedet. De ligger uden for teksten,
+koster ca. 90 tegn pr. mærket element, og der findes ingen bygningstilstand der
+kan blive glemt i den forkerte stilling. Se `poc/src/lib/redigering.ts`.
+
+## Tjekkene der kører af sig selv
+
+**`poc/tools/tjek-design.mjs`** kører som del af `npm run build` og **stopper
 bygningen** hvis noget er galt. Den måler farvekontrast, alt-tekster,
 overskriftshierarki, berøringsmål og sidens vægt — altså det man ikke kan se
 ved at kigge.
 
-Den erstatter ikke øjne på siden. To fejl blev fundet af brugeren, ikke af
-scriptet: modalen på mobilen og manglende marginer.
+**`sanity/tools/tjek-ruter.mjs`** kører som del af `npm run build` og
+`npm run deploy` i `sanity/`, og **stopper udgivelsen** hvis en rute i
+Presentation mode ikke rammer. Ruterne er nemme at få forkert, fordi der både er
+en basissti (`/MTHA/`) og skråstreg til slut i spil — og en fejl er tavs:
+forhåndsvisningen virker, felterne skifter bare ikke med.
+
+Tjekkene erstatter ikke øjne på siden. Fire fejl er nu fundet af brugeren eller
+ved at kigge, ikke af scripterne: modalen på mobilen, manglende marginer, de
+afskårne hoveder på portrætterne, og den ustylede blok på forsiden.
+
+Ét tal blev også rettet i selve tjekket: “JavaScript på forsiden” talte kun
+indholdet mellem `<script>` og `</script>`. Da overlejringen kom til som en
+ekstern fil, blev tallet ved med at melde 983 bytes mens browseren hentede
+2.739. **Et tal der ikke ændrer sig når virkeligheden gør, er værre end intet
+tal** — man tror man har målt noget.
 
 ## Åbne punkter
 
@@ -107,7 +160,44 @@ U17-1 har desuden ingen `raekkefoelge`, så dens plads i rækken er tilfældig,
 og et auto-genereret id, så adressen bliver `/hold/d268b965-…`. Overvej at
 oprette den på ny med et pænt id.
 
-### 2. Sikkerhed og persondata
+### 2. Fem roller i staben er klippet over — skal rettes i studioet
+
+Udtrækket fra m-tha.dk klippede stabens roller over midt i et HTML-tag. Fem af
+de 25 stod derfor på sitet som:
+
+| Person | Står som | Skal formentlig være |
+|---|---|---|
+| Anders Hove | `Fysioterapeut </d` | Fysioterapeut |
+| Sara Kankelborg Poulsen | `Fysioterapeut </d` | Fysioterapeut |
+| Helle F. Thøgersen | `Fysioterapeut </` | Fysioterapeut |
+| Maja Rysz Clausen | `Fysioterapeut og diætist </` | Fysioterapeut og diætist |
+| Elsebeth Overgaard | `Koordinator EUC Nordvest <` | Koordinator EUC Nordvest |
+
+Kilden er rettet i `tools/assets.json` og `poc/src/data/roster.json`, og sitet
+renser resterne ved visning, så det ser rigtigt ud nu. **Men Sanity indeholder
+stadig de gamle værdier**, og dem kan kun en redaktør rette — derfor er de ikke
+ændret her. Listen **Staben → ⚠ Rolle med HTML-rester** i studioet finder dem.
+
+Kør IKKE `migrer.mjs` for at rette det. Den skriver alle 132 dokumenter og 129
+billeder om, og ville overskrive de hotspots og felter nogen har sat i studioet
+siden. Fem felter rettes hurtigere i hånden.
+
+**To ting mere, som er værd at kigge på men IKKE er rettet:**
+
+- Jesper Kjær Nannerup står som `Koordinator Morsø Gymnasium ST` — præcis 30
+  tegn, altså formentlig klippet over midt i `STX`. Det er et gæt, og derfor
+  ikke rettet. **Spørg akademiet.**
+- Rune Lanng står som `Cheftræner u17` med lille u, mens de andre skriver
+  `U19`. Ren stavemåde, men det ses.
+
+Bemærk at værdierne i Sanity IKKE er de samme som i `tools/assets.json` — nogle
+er blevet ryddet op undervejs. `assets.json` er kun reservekilden; **Sanity er
+sandheden**. Slå altid op i Sanity før du beskriver hvad der står på sitet.
+
+Bygningen skriver nu en advarsel i loggen, og designtjekket stopper bygningen
+hvis der dukker HTML-rester op i indhold nogen andet steds.
+
+### 3. Sikkerhed og persondata
 
 - Repoet er **offentligt**, og adressen `kurthawthorn.github.io/MTHA` er gætbar.
 - Der ligger portrætter af **54 mindreårige** samt opdigtede oplysninger om dem
@@ -120,11 +210,31 @@ oprette den på ny med et pænt id.
 - `sanity/.env` indeholder et skrivetoken og er dækket af `.gitignore`.
   **Committ det aldrig.**
 
-### 3. Ting der er skrevet, men ikke bygget
+### 4. Presentation mode er bygget — med én kendt begrænsning
 
-- **Presentation mode** i Sanity — visuel redigering hvor Lars ser siden ved
-  siden af felterne. Kurt savnede netop det. Forudsætningen er på plads: alt
-  indhold ligger i Sanity.
+Fanen **“Se siden”** i studioet viser hjemmesiden ved siden af felterne.
+Navigationen går begge veje: åbner Lars en spiller, springer forhåndsvisningen
+til den spillers profil; klikker han på et navn ude på siden, åbnes netop det
+felt. Filerne ligger i `sanity/presentation/`, og hele redaktørforklaringen står
+i `sanity/README.md`.
+
+**Forhåndsvisningen viser den UDGIVNE side, ikke kladden.** Sitet er statisk —
+hver side er en færdig fil bygget da nogen sidst trykkede Udgiv — og der findes
+ingen server der kan tegne en kladde. Rettelser dukker op ca. to minutter efter
+Udgiv, ikke mens man skriver.
+
+Det er en bevidst afvejning. Kladdevisning kræver en server der kan læse
+kladder, altså et token i drift og hosting med kørende kode — og det er præcis
+den udgift og driftsopgave løsningen ellers ikke har. **Vejen videre, hvis det
+skal med:** en forhåndsvisning på Vercel eller Cloudflare ved siden af, hvor
+`previewUrl.previewMode.enable` peger på en rute der slår kladdetilstand til.
+Det live site kan blive som det er.
+
+**Sig begrænsningen højt når du viser det til Lars.** Ellers ser han et felt der
+ikke slår igennem, og konkluderer at værktøjet er i stykker.
+
+### 5. Ting der er skrevet, men ikke bygget
+
 - **Instagram-import.** Feltet `kilde` skelner allerede mellem `cms` og
   `instagram`. Anbefalingen var at vente: skriv i Sanity indtil I kan se at
   studioet står stille. Instagram Basic Display API lukkede december 2024;
@@ -134,8 +244,23 @@ oprette den på ny med et pænt id.
 - **Positioner, moderklub og uddannelse på de 54 spillere.** Bevidst ikke
   migreret; det var eksempeldata, og det ville være forkert at lade dem se
   ægte ud. Skal udfyldes af akademiet.
+- **Landsholdsmarkeringen er ikke sat på nogen spiller.** Feltet, mærket og
+  listen i studioet virker og er efterprøvet — men ingen af de 54 er markeret,
+  fordi ingen har oplyst hvem der har spillet landshold. Det er ikke et felt man
+  gætter på: det står på et ungt menneskes cv. **Lars slår det til.**
+- **En foldemenu i headeren på telefon.** Menuen har syv punkter og falder i to
+  linjer under ca. 700 px. Sammen med mærke og sponsorlogo blev den klæbende
+  bjælke 156 px høj — en femtedel af skærmen, permanent. Rettelsen er at
+  headeren ruller væk på telefon. Den rigtige løsning er en foldemenu, så
+  bjælken kan blive ved at klæbe og være 60 px høj; den kræver en knap-tilstand
+  der annonceres korrekt for skærmlæsere, og det er et selvstændigt stykke
+  arbejde.
+- **Tabellerne på `/bolig` og `/uddannelse` ruller vandret på telefon** inde i
+  `.tblwrap`, uden at der er noget der viser det. Mekanikken virker — man kan
+  swipe — men 40 % af boligtabellen er skjult uden varsel. En skyggekant i
+  siden ville sige det.
 
-### 4. Fundet i akademiets eget materiale — bør nævnes for Lars
+### 6. Fundet i akademiets eget materiale — bør nævnes for Lars
 
 - **Prisen for ophold står i tre versioner:** 2.495 kr. på m-tha.dk, 2.395 kr.
   i forældrebrochuren, 2.255 kr. i visionsbrochuren.
@@ -157,8 +282,20 @@ npm run build                            # bygger + kører designtjekket
 cd C:\Python\MTHA\sanity
 npm install
 npm run dev                              # http://localhost:3333
-npm run deploy                           # udgiver til mtha.sanity.studio
+npm run tjek                             # måler ruterne i Presentation mode
+npm run deploy                           # tjekker + udgiver til mtha.sanity.studio
 ```
+
+**Sådan så mobillayoutet efter ved 375 px.** Der er ingen browser i bygningen,
+så gennemgangen blev lavet med Chrome via DevTools-protokollen: fuldsides
+skærmbilleder med `--force-prefers-reduced-motion` (ellers står halvdelen af
+siden med `opacity: 0`, fordi indtoningerne ikke er udløst), plus en måling af
+hvert element der stikker ud over viewporten. Scripterne lå i en midlertidig
+mappe og er ikke committet — de tog under en time at skrive igen, hvis nogen
+skal gøre det samme. Det vigtige er de to indstillinger:
+`Emulation.setDeviceMetricsOverride` skal sættes **igen efter** navigationen,
+ellers gælder den ikke, og `captureBeyondViewport` henter ikke `loading="lazy"`
+-billeder — tomme billedfelter i et skærmbillede er derfor ikke en fejl.
 
 **Vigtigt:** Sanity CLI's login vil binde port 4321 til sit callback. Stop
 Astro-serveren først, ellers får du 401.

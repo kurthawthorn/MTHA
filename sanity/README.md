@@ -77,13 +77,15 @@ Indhold
 ├── Hold og årgange
 ├── Spillere
 │   ├── Alle aktive
+│   ├── Landsholdsspillere       ← så en markering kan efterses samlet
 │   ├── Stoppet
 │   └── ⚠ Mangler fødselsår      ← fanger den fejl der koster et hold
 ├── Staben
 │   ├── Professionelle
 │   ├── Ansatte
 │   ├── Bestyrelsen              ← akademiets egne tre sektioner
-│   └── ⚠ Mangler rolle
+│   ├── ⚠ Mangler rolle
+│   └── ⚠ Rolle med HTML-rester  ← fem roller er klippet over i udtrækket
 ├── Sponsorer
 │   ├── Hovedsponsor
 │   ├── Topsponsorer
@@ -93,9 +95,18 @@ Indhold
 └── Sæson, priser og satser      ← ét dokument
 ```
 
-De tre ⚠-lister er ikke pynt. Uden fødselsår har en spiller intet hold og
-falder ud af truppen — den fejl er ellers usynlig, indtil nogen spørger
-hvorfor der mangler en spiller.
+⚠-listerne er ikke pynt. Uden fødselsår har en spiller intet hold og falder ud
+af truppen — den fejl er ellers usynlig, indtil nogen spørger hvorfor der
+mangler en spiller.
+
+**⚠ Rolle med HTML-rester** finder fem roller der blev klippet over midt i et
+HTML-tag da indholdet blev hentet fra m-tha.dk: `Fysioterapeut </d`,
+`Koordinator EUC Nordvest <`. Sitet renser resterne ved visning, så det ser
+rigtigt ud — men de bør rettes ved kilden. Slet tegnene fra og med `<`.
+
+Se også `Koordinator Morsø Gymnasium ST` — præcis 30 tegn, altså formentlig
+klippet over midt i `STX`. Det er ikke rettet, fordi det er et gæt. Spørg
+akademiet.
 
 ## Sådan hænger en spiller og et billede sammen
 
@@ -142,6 +153,18 @@ Hvad der sker automatisk ved upload:
 3. Billedet komprimeres til WebP i flere størrelser
 4. Skiftes fotoet, opdateres det alle steder på én gang
 
+> **Hotspottet virkede ikke før 29. juli 2026.** Sitet byggede billed-URL'erne
+> med `crop=focalpoint`, men sendte ikke selve punktet med — og så falder Sanity
+> tilbage på midten. Alle 79 portrætter er 600 × 900 med næsten ingen luft over
+> hovedet, så en beskæring om midten skar toppen af hovedet af.
+>
+> Nu sendes punktet med, og er der ikke sat noget hotspot, holdes der fast i
+> **toppen** af billedet i stedet for midten. Et portræt kan derfor ikke miste
+> hovedet, uanset om nogen har husket at markere ansigtet.
+>
+> Markerer man alligevel ansigtet, styrer man beskæringen præcist — det er
+> stadig værd at gøre på et foto der ikke er et almindeligt studieportræt.
+
 Kortlægningen fra `33.png` til det rigtige navn er lavet **én gang** maskinelt
 ud af den nuværende side, og ligger i `tools/assets.json`. Den skal aldrig
 laves igen.
@@ -169,6 +192,80 @@ sekunder mens nogen skriver.
 Vis Lars det her først. Det er den ting der ellers får folk til at tro at de
 ikke har rettigheder.
 
+## Se siden mens du redigerer — “Se siden”
+
+Øverst i studioet er der nu en fane ved siden af **Indhold**, der heder
+**Se siden**. Den viser hjemmesiden i højre side og felterne i venstre.
+
+Den kan tre ting, og de går begge veje:
+
+| Man gør | Så sker der |
+|---|---|
+| Åbner en spiller under **Indhold** og trykker **Se siden** | forhåndsvisningen springer selv til netop den spillers profil |
+| Klikker på en spiller ude i forhåndsvisningen | felterne til venstre skifter til den spiller |
+| Klikker på et navn, et billede eller en sponsor på siden | netop det felt åbnes |
+
+Nederst i venstre side står **“Hvor vises dette”** med alle de sider dokumentet
+optræder på. En nyhed står fx tre steder: på sin egen side, på nyhedsoversigten
+og på forsiden blandt de tre nyeste. Man kan klikke sig mellem dem.
+
+### Den ene begrænsning — læs den, ellers ser det ud som en fejl
+
+**Forhåndsvisningen viser den udgivne side, ikke din kladde.**
+
+Skriver du i et felt, ændrer siden til højre sig ikke. Den skifter ca. to
+minutter efter du har trykket **Udgiv**.
+
+Det er ikke en fejl der er overset. Hjemmesiden er *statisk*: hver af de 76
+sider er en færdig fil, bygget da nogen sidst trykkede Udgiv, og der findes
+ingen server der kan tegne en side der ikke er udgivet endnu. Netop derfor
+koster sitet ingenting at have, kan ikke gå ned, og kan ikke blive langsomt.
+
+Skal kladdevisning med, er vejen en separat forhåndsvisning på Vercel eller
+Cloudflare ved siden af. Det live site kan blive som det er. Det kræver et
+token i drift og hosting med kørende kode — altså den udgift og den
+driftsopgave løsningen ellers ikke har.
+
+**Det værktøjet ER godt til**, også uden kladdevisning: at finde det rigtige
+felt. Man peger på det ude på siden i stedet for at skulle vide hvad dokumentet
+heder. Og man kan se konsekvensen af en rettelse — retter du ét beløb i
+sæsondokumentet, viser listen at det slår igennem på tre sider.
+
+### Sådan peger man forhåndsvisningen på din egen maskine
+
+Kører du Astro lokalt og arbejder på layoutet, kan forhåndsvisningen vise din
+egen server i stedet for det live site. Læg to linjer i `sanity/.env`, som er
+dækket af `.gitignore`:
+
+```
+SANITY_STUDIO_SITE_ORIGIN=http://localhost:4321
+SANITY_STUDIO_SITE_BASIS=
+```
+
+`SITE_BASIS` skal være tom, fordi Astro lokalt kører på roden, mens GitHub
+Pages lægger sitet under `/MTHA/`. Uden dem peger værktøjet på det live site,
+og det er det rigtige for Lars.
+
+> **Husk:** stop Astro-serveren før du kører `sanity login`. Sanity CLI binder
+> port 4321 til sit callback, og ellers får du 401.
+
+### Hvad der kan gå i stykker, og hvordan man ser det
+
+Ruterne — koblingen fra en adresse til et dokument — er det led der er
+nemmest at få forkert, fordi der både er en basissti (`/MTHA/`) og skråstreg
+til slut i spil. Fejler de, sker der ikke noget synligt: forhåndsvisningen
+virker, felterne skifter bare ikke med.
+
+Derfor måles de:
+
+```bash
+cd sanity
+npm run tjek
+```
+
+Tjekket kører automatisk som del af `npm run build` og `npm run deploy`, og
+**stopper udgivelsen** hvis en rute ikke rammer. Se `tools/tjek-ruter.mjs`.
+
 ## De fire ting man gør
 
 ### Ny spiller — ca. 40 sekunder
@@ -177,6 +274,21 @@ ikke har rettigheder.
 position, moderklub, uddannelse, sponsor → **Udgiv**.
 
 Straks på det rigtige hold, i truppen, i filtrene og i forsidens tælling.
+
+### Marker en landsholdsspiller
+
+Slå **Har spillet på landsholdet** til på spilleren. Så kommer der et
+dannebrogsmærke øverst til højre på portrættet — både på spillerkortet i
+truppen og på profilsiden.
+
+Udfylder man også **Hvilket landshold** (fx `U18`), står det på mærket; ellers
+står der bare “Landshold”. Feltet er skjult indtil kontakten er slået til.
+
+Der er ingen standardværdi, og intet gættes. Det er en oplysning der står på et
+ungt menneskes cv, og den skal komme fra akademiet.
+
+Listen **Spillere → Landsholdsspillere** viser alle der er markeret, så en
+markering sat ved en fejl kan findes igen.
 
 ### Ny sponsor — ca. 30 sekunder
 
@@ -234,11 +346,23 @@ komme til at passe dårligt.
 | Fil | Dokument | Bemærk |
 |---|---|---|
 | `nyhed.ts` | Nyhed | Færrest mulige felter — bruges oftest |
-| `spiller.ts` | Spiller | Fødselsår er påkrævet; holdet udregnes af det |
+| `spiller.ts` | Spiller | Fødselsår er påkrævet; holdet udregnes af det. `landshold` tegner dannebrogsmærket |
 | `hold.ts` | Hold | Defineret ved årgange, ikke ved en spillerliste |
 | `person.ts` | Person | Trænere, ansatte og bestyrelse i **én** model |
 | `sponsor.ts` | Sponsor | Ved ikke selv hvem den støtter |
 | `saeson.ts` | Sæson | Ét dokument med alle priser og satser |
+
+### Forhåndsvisningen
+
+| Fil | Hvad |
+|---|---|
+| `presentation/site.ts` | Hvor sitet ligger — origin og basissti, og hvordan man peger på localhost |
+| `presentation/steder.ts` | Hvor vises dette dokument? Én liste pr. dokumenttype |
+| `presentation/dokumenter.ts` | Den anden vej: fra en adresse til dokumentet |
+| `tools/tjek-ruter.mjs` | Måler at ruterne rammer. Stopper `build` og `deploy` |
+
+Ude på sitet hører `poc/src/lib/redigering.ts` og
+`poc/src/components/VisuelRedigering.astro` til samme mekanik.
 
 **Person er én model med vilje.** Jesper Kjær Nannerup er både
 bestyrelsesmedlem og uddannelseskoordinator på Morsø Gymnasium. Med tre

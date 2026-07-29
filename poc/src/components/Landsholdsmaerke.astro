@@ -1,0 +1,89 @@
+---
+/**
+ * LANDSHOLDSMÆRKET — dannebrog øverst til højre på portrættet.
+ *
+ * Vises kun når `landshold` er slået til på spilleren i studioet. Der er
+ * ingen udregning og intet gæt bag: enten har akademiet sagt det, eller der
+ * står ikke noget. Se `sanity/schemas/spiller.ts`.
+ *
+ * HVORFOR EN SVG OG IKKE ET BILLEDE
+ *   Et flag i to farver og to rektangler er 180 bytes som SVG. Som PNG skulle
+ *   det hentes i to opløsninger, ligge i `public/`, og en dag blive glemt når
+ *   nogen rydder op i mappen. Det skalerer også skarpt i alle størrelser og
+ *   følger tekstens størrelse af sig selv, fordi højden er sat i `em`.
+ *
+ *   Målene er dannebrogs officielle: 37 : 28, med korsarme på 4 enheder,
+ *   den lodrette 12 enheder fra venstre kant.
+ *
+ * PLACERINGEN LIGGER HER
+ *   Mærket er `position: absolute`, så det forudsætter en forælder med
+ *   `position: relative` — det har alle fire portrætbokse. Placeringen står
+ *   bevidst i komponenten frem for på hvert kaldested: "øverst til højre på
+ *   billedet" er mærkets definition, ikke en indstilling.
+ *
+ * TILGÆNGELIGHED
+ *   `role="img"` med `aria-label` gør flag og tekst til ÉT element for en
+ *   skærmlæser. Uden det ville "U18" blive læst alene, og det siger ikke
+ *   nogen noget. Teksten er derfor `aria-hidden` — den er den visuelle
+ *   halvdel af samme oplysning, ikke en ekstra.
+ */
+interface Props {
+  /** Fx "U18". Tomt felt giver teksten "Landshold". */
+  niveau?: string;
+  /** `lille` på spillerkortet i truppen, `stor` på profilsiden. */
+  stoerrelse?: 'lille' | 'stor';
+}
+const { niveau, stoerrelse = 'lille' } = Astro.props;
+
+const tekst = niveau?.trim() || 'Landshold';
+const beskrivelse = niveau?.trim()
+  ? `Landsholdsspiller, ${niveau.trim()}`
+  : 'Landsholdsspiller';
+---
+
+<span class:list={['lhm', `lhm--${stoerrelse}`]}
+      role="img" aria-label={beskrivelse} title={beskrivelse}>
+  <svg class="lhm__flag" viewBox="0 0 37 28" aria-hidden="true" focusable="false">
+    <rect width="37" height="28" fill="#C8102E" />
+    <path d="M0 12h37v4H0zM12 0h4v28h-4z" fill="#fff" />
+  </svg>
+  <span class="lhm__txt" aria-hidden="true">{tekst}</span>
+</span>
+
+<style>
+  .lhm {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42em;
+    /* Navy plade med hvid tekst: 10,5 : 1 i kontrast, og den kan stå på et
+       lyst studieportræt uden at forsvinde. Et hvidt mærke ville. */
+    background: var(--navy);
+    color: #fff;
+    border-bottom-left-radius: 3px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Flaget følger tekstens størrelse, så de to aldrig kommer ud af trit. */
+  .lhm__flag {
+    height: 0.85em;
+    width: auto;
+    display: block;
+    border-radius: 1px;
+  }
+
+  .lhm--lille { font-size: 0.6rem; padding: 0.26rem 0.42rem 0.28rem; }
+  .lhm--stor {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    padding: 0.34rem 0.6rem 0.38rem;
+  }
+</style>

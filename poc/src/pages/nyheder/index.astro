@@ -29,7 +29,8 @@ const fraInstagram = nyheder.filter((n) => n.kilde === 'instagram').length;
         {nyheder.map((n) => (
           <NyhedsKort slug={n.slug} titel={n.titel} dato={n.dato}
                       kategori={n.kategori} resume={n.resume} kilde={n.kilde}
-                      fotoKey={n.fotoKey} fotoUrl={n.fotoUrl} niveau={2} />
+                      fotoKey={n.fotoKey} fotoUrl={n.fotoUrl} docId={n.docId}
+                      niveau={2} />
         ))}
       </div>
     </section>

@@ -87,7 +87,7 @@ kun nødvendige for Thisted Forsikring.
 | `/` | Forside med DM-foto, nyheder, årgange, træning, faciliteter |
 | `/nyheder` + `/nyheder/[slug]` | Oversigt og enkelt nyhed |
 | `/hold/u17`, `/hold/u19` | Trup med holdfoto og filtrering |
-| `/spillere/[navn]` | 54 spillerprofiler med portræt og personlig sponsor |
+| `/spillere/[navn]` | 54 spillerprofiler med portræt, sponsorlogo og landsholdsmærke |
 | `/staben` | 25 personer i akademiets egne tre sektioner |
 | `/sponsorer` | 44 sponsorer + 6 partnere, alle med aktivt link |
 | `/bliv-elev` | Optagelse, uddannelse, priser, ansøgning |
@@ -168,10 +168,30 @@ Otte ting akademiet bør se på, alle fundet ved at trække indhold ud af PDF'er
 | | m-tha.dk i dag | Prototypen |
 |---|---|---|
 | Forside, blokerende | 672 KB HTML alene, før 213 billeder | 152–346 KB inkl. hero-foto |
-| Forside, HTML | 687.871 bytes | 22 KB (5 KB gzip) |
-| JavaScript | 41 scripts | 0 |
-| Rigtige sider | 1 | 73 |
-| Byggetid | — | ~3 sek |
+| Forside, HTML | 687.871 bytes | 31 KB (7 KB gzip) |
+| JavaScript | 41 scripts | 2.739 bytes i 3 filer, alle udskudte |
+| Rigtige sider | 1 | 76 |
+| Byggetid | — | ~13 sek inkl. billedbehandling |
+
+De 2.739 bytes er 983 indlejrede (rullemenu, indtoning, filtre) plus 1.756 i én
+udskudt fil, der kun findes fordi Presentation mode skal kunne tale med siden.
+Selve overlejringen — 784 KB, med React i — hentes **kun** hvis siden ligger i
+en iframe, altså kun for en redaktør inde i studioet. En besøgende anmoder
+aldrig om den. Se `poc/src/components/VisuelRedigering.astro`.
+
+## Portrætterne beskæres nedefra
+
+Alle 79 portrætter er 600 × 900 px, og der er 1–2 % luft over hovedet. Derfor:
+
+- billedet bedes om i sit **eget** forhold, 2 : 3 — ingen lodret beskæring
+- boksen er en smule højere (5 : 8), og billedet bundstilles, så forskellen
+  bliver en smal lys stribe over hovedet
+- er der ikke sat et hotspot i Sanity, holdes beskæringen fast i **toppen**,
+  ikke i midten
+
+Forholdet står som `--portraet` i `poc/src/styles/global.css` og bruges af alle
+fire steder der viser et portræt: spillerkortet, profilen, modalen og staben.
+Ét tal, fordi en afvigelse ét sted netop er det man ikke opdager.
 
 ## Om dataene
 

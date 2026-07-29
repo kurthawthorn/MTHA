@@ -3,8 +3,11 @@ import { Image } from 'astro:assets';
 import type { Spiller } from '../data/akademi';
 import { getSponsor } from '../data/akademi';
 import { billede } from '../lib/billeder';
-import { billedUrl, billedSrcset } from '../lib/sanity';
+import { billedUrl, billedSrcset, portraetAnker } from '../lib/sanity';
 import { initials } from '../lib/slug';
+import { redigerbar } from '../lib/redigering';
+import Landsholdsmaerke from './Landsholdsmaerke.astro';
+import SponsorLogo from './SponsorLogo.astro';
 
 interface Props {
   /**
@@ -15,11 +18,18 @@ interface Props {
   niveau?: 2 | 3; spiller: Spiller }
 const { spiller, niveau = 3 } = Astro.props;
 const sponsor = getSponsor(spiller.sponsorId);
-const sponsorTekst = sponsor?.navn ?? spiller.sponsorNavn;
 /* Sanitys CDN foerst, den lokale fil som reserve. Se SponsorLogo. */
 const fraSanity = spiller.fotoUrl;
 const foto = fraSanity ? undefined : billede(spiller.fotoKey);
+/* Portraettet bedes om i billedets EGET forhold, 2 : 3. Beskaeringen holder
+   fast i redaktoerens hotspot hvis der er et, ellers i toppen — se
+   portraetAnker() i lib/sanity.ts. */
+const anker = portraetAnker(spiller.fotoHotspot);
 const Overskrift = `h${niveau}` as 'h2' | 'h3';
+
+/* Klik-til-felt i Sanitys Presentation mode. Undefined naar der ikke er et
+   dokument at aabne, fx naar sitet er bygget paa reservedata. */
+const red = (felt: string) => redigerbar('spiller', spiller.docId, felt);
 ---
 
 <a class="card sk"
@@ -28,44 +38,75 @@ const Overskrift = `h${niveau}` as 'h2' | 'h3';
    data-aar={spiller.foedselsaar}>
   <div class:list={['sk__foto', !foto && !fraSanity && 'sk__foto--tom']}>
     {fraSanity ? (
-      <img src={billedUrl(fraSanity, { b: 300, h: 400 })}
-           srcset={billedSrcset(fraSanity, [180, 300, 420], 4 / 3)}
+      <img src={billedUrl(fraSanity, { b: 300, h: 450, ...anker })}
+           srcset={billedSrcset(fraSanity, [180, 300, 420], { forhold: 3 / 2, ...anker })}
            sizes="(max-width: 640px) 45vw, 200px"
            alt={`${spiller.navn}, ${spiller.position}`}
+           data-sanity={red('portraet')}
            loading="lazy" decoding="async" />
     ) : foto ? (
       <Image src={foto} alt={`${spiller.navn}, ${spiller.position}`}
              widths={[180, 300, 420]} sizes="(max-width: 640px) 45vw, 200px"
-             quality={82} loading="lazy" />
+             quality={82} loading="lazy" data-sanity={red('portraet')} />
     ) : (
       <span class="sk__initialer" aria-hidden="true">{initials(spiller.navn)}</span>
     )}
-    <span class="sk__nr num" aria-hidden="true">{spiller.rygnummer}</span>
+    {spiller.landshold && (
+      <Landsholdsmaerke niveau={spiller.landsholdNiveau} stoerrelse="lille" />
+    )}
+    <span class="sk__nr num" aria-hidden="true" data-sanity={red('rygnummer')}
+      >{spiller.rygnummer}</span>
   </div>
   <div class="sk__body">
-    <Overskrift>{spiller.navn}</Overskrift>
-    <p class="sk__pos">{spiller.position}</p>
-    {sponsorTekst && <p class="sk__sponsor">{sponsorTekst}</p>}
+    <Overskrift data-sanity={red('navn')}>{spiller.navn}</Overskrift>
+    <p class="sk__pos" data-sanity={red('position')}>{spiller.position}</p>
+    {/*
+      Sponsoren stod foer som navnet i graa 0,66rem tekst. Nu staar logoet.
+      Det er den samme oplysning, men et logo genkendes uden at blive laest —
+      og det er hele pointen med at have en personlig sponsor paa et kort.
+      Navnet foelger med i logoets alt-tekst, saa det stadig kan laeses op.
+
+      linkbar={false}: kortet ER et <a>, og et link inde i et link er ugyldig
+      HTML. Browseren retter det op paa hver sin maade, og resultatet er at
+      halvdelen af kortet ikke kan klikkes.
+    */}
+    {sponsor ? (
+      <div class="sk__sponsor" data-sanity={red('sponsor')}>
+        <SponsorLogo sponsor={sponsor} hoejde={24} kompakt linkbar={false} />
+      </div>
+    ) : spiller.sponsorNavn ? (
+      /* Kender vi kun navnet — fx hvis sponsoren ikke er oprettet i registret
+         endnu — er navnet stadig bedre end ingenting. */
+      <p class="sk__sponsornavn" data-sanity={red('sponsor')}>{spiller.sponsorNavn}</p>
+    ) : null}
   </div>
 </a>
 
 <style>
   .sk { height: 100%; }
 
-  /* Portraetterne er studiefotos paa hvid bund. Derfor er billedfeltet lyst —
-     ikke navy med et hvidt billede midt i. Navy ligger i teksten nedenunder. */
+  /*
+   * Portraetterne er studiefotos paa hvid bund. Derfor er billedfeltet lyst —
+   * ikke navy med et hvidt billede midt i. Navy ligger i teksten nedenunder.
+   *
+   * `--portraet` er 5 : 8, en smule hoejere end billedets 2 : 3, og billedet
+   * bundstilles. Forskellen bliver en smal hvid stribe over hovedet i stedet
+   * for et snit gennem det. Se kommentaren ved --portraet i global.css.
+   */
   .sk__foto {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: var(--portraet);
     background: linear-gradient(178deg, #FFFFFF 0%, #EEF0F7 100%);
     position: relative;
     overflow: hidden;
   }
   .sk__foto :global(img), .sk__foto img {
     width: 100%; height: 100%;
-    object-fit: cover; object-position: 50% 12%;
+    object-fit: contain; object-position: 50% 100%;
     transition: transform 0.35s ease;
   }
   a.card:hover .sk__foto :global(img), a.card:hover .sk__foto img {
+    /* Skalerer om bunden, saa hovedet bliver i billedet naar det zoomer */
+    transform-origin: 50% 100%;
     transform: scale(1.035);
   }
 
@@ -93,7 +134,21 @@ const Overskrift = `h${niveau}` as 'h2' | 'h3';
   }
   .sk__body h2, .sk__body h3 { font-size: 0.84rem; letter-spacing: 0.01em; }
   .sk__pos { font-size: 0.76rem; color: var(--text-dim); }
+  /*
+   * Sponsorpladen fylder kortets bredde, med logoet centreret.
+   *
+   * Foerste forsoeg lod pladen faa sin bredde af logoet. Set ved 375 px, hvor
+   * kortene er 157 px brede, blev raekken af kort et rod: hvert kort sluttede
+   * med en lille kasse i en ny bredde, fordi logoerne har vidt forskellige
+   * formater. Én bredde for alle goer rytmen rolig — og det er samme greb som
+   * SponsorLogo selv bruger for at faa 50 logoer til at staa pænt.
+   */
   .sk__sponsor {
+    margin-top: 0.34rem; padding-top: 0.34rem;
+    border-top: 1px solid var(--line-soft);
+    display: grid;
+  }
+  .sk__sponsornavn {
     margin-top: 0.28rem; padding-top: 0.28rem;
     border-top: 1px solid var(--line-soft);
     font-size: 0.66rem; color: var(--text-faint);

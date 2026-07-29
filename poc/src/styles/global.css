@@ -151,6 +151,21 @@
   --rum-7: 3rem;      /* 48px  mellem sektioner */
   --rum-8: 4rem;      /* 64px  store spring */
 
+  /* ── Portrætter ──────────────────────────────────────────────────────
+     Alle 79 portrætter er 600 × 900 — altsaa 2 : 3 = 0,667 — og der er
+     naesten ingen luft over hovedet: haarets top ligger 1-2 % fra kanten.
+
+     Boksen er derfor bevidst LIDT hoejere end billedet (5 : 8 = 0,625).
+     Sammen med object-fit: contain og bundstilling bliver forskellen en
+     smal lys stribe OVER hovedet — frem for et snit gennem det, som det
+     var foer, da boksen var 3 : 4 og billedet blev beskaaret om midten.
+
+     Én vaerdi, fordi de fire steder der viser et portraet — spillerkort,
+     spillerprofil, modal og staben — skal have samme forhold. Ellers
+     bliver et hoved beskaaret paa netop det ene sted nogen glemte.
+     ─────────────────────────────────────────────────────────────────── */
+  --portraet: 5 / 8;
+
   --wrap: 1140px;
   --radius: 4px;
   --shadow: 0 1px 2px rgb(23 24 56 / 6%), 0 10px 30px -16px rgb(23 24 56 / 22%);

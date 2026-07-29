@@ -20,7 +20,7 @@
 
 import roster from './roster.json';
 import { saeson } from './saeson';
-import { hentEllerFallback } from '../lib/sanity';
+import { hentEllerFallback, type Hotspot } from '../lib/sanity';
 
 export type Position =
   | 'Målvogter' | 'Venstre fløj' | 'Venstre back'
@@ -28,8 +28,21 @@ export type Position =
 
 export type SponsorNiveau = 'hovedsponsor' | 'topsponsor' | 'sponsor' | 'partner';
 
+/**
+ * Dokumentets rå `_id` i Sanity.
+ *
+ * Sitet bruger overalt den korte nøgle uden præfiks — `u17`, ikke `hold-u17` —
+ * fordi den skal stå i adresselinjen. Men Presentation mode skal kunne pege på
+ * det RIGTIGE dokument, og der findes kun ét gyldigt id. Derfor bæres begge:
+ * `id` til adresser, `docId` til redigering. Se `lib/redigering.ts`.
+ *
+ * Feltet er valgfrit, fordi det ikke findes i reservedataene i `roster.json`.
+ * Kan Sanity ikke nås, bygges siden uden mærker — hvilket er det rigtige: der
+ * er intet dokument at åbne.
+ */
 export interface Sponsor {
   id: string;
+  docId?: string;
   navn: string;
   niveau: SponsorNiveau;
   /** Nøgle til logofilen i src/assets/logoer/ — reserve */
@@ -43,6 +56,7 @@ export interface Sponsor {
 
 export interface Hold {
   id: string;
+  docId?: string;
   navn: string;
   aargang: string;
   raekke: string;
@@ -51,12 +65,19 @@ export interface Hold {
 }
 
 export interface Spiller {
+  docId?: string;
   navn: string;
   slug: string;
   /** Nøgle til portrættet i src/assets/portraetter/ — reserve */
   fotoKey: string;
   /** Portræt fra Sanitys CDN — foretrækkes når det findes */
   fotoUrl?: string;
+  /**
+   * Hotspottet redaktøren har markeret på portrættet. Findes det, styrer det
+   * beskæringen; findes det ikke, holdes der fast i toppen så hovedet ikke
+   * skæres af. Se `portraetAnker()` i `lib/sanity.ts`.
+   */
+  fotoHotspot?: Hotspot;
   /**
    * Fødselsåret er kilden til holdtilknytning — et faktum der aldrig ændrer
    * sig, mens holdet skifter hver sæson. Se `holdFor()`.
@@ -70,15 +91,24 @@ export interface Spiller {
   uddannelse: 'STX' | 'HHX' | 'HF';
   sponsorId?: string;
   sponsorNavn?: string;
+  /**
+   * Sand når spilleren har spillet på et dansk ungdoms- eller A-landshold.
+   * Sætter dannebrogsmærket øverst til højre på portrættet. Se `Landsholdsmaerke`.
+   */
+  landshold: boolean;
+  /** Valgfri præcisering, fx "U18". Står på mærket når det er udfyldt. */
+  landsholdNiveau?: string;
   aktiv: boolean;
 }
 
 export interface Person {
+  docId?: string;
   navn: string;
   slug: string;
   rolle: string;
   fotoKey: string;
   fotoUrl?: string;
+  fotoHotspot?: Hotspot;
   telefon?: string;
   email?: string;
   /** Sektionen personen står i på m-tha.dk — ikke gættet. */
@@ -95,14 +125,19 @@ type SanitySponsor = { id: string; navn: string; niveau: string;
 type SanityHold = { id: string; navn: string; foedselsaar?: number[];
                     raekke?: string; traener?: string };
 type SanitySpiller = {
+  id?: string;
   navn: string; slug?: string; foedselsaar?: number; rygnummer?: number;
   position?: string; moderklub?: string; uddannelse?: string;
   sponsorId?: string; sponsorNavn?: string; fotoUrl?: string;
+  fotoHotspot?: Hotspot | null;
   holdOverstyring?: string;
+  landshold?: boolean; landsholdNiveau?: string;
 };
 type SanityPerson = {
+  id?: string;
   navn: string; slug?: string; rolle?: string; sektion?: string;
   telefon?: string; email?: string; fotoUrl?: string;
+  fotoHotspot?: Hotspot | null;
 };
 
 const Q_SPONSORER = `*[_type == "sponsor" && aktiv != false] | order(navn asc) {
@@ -114,17 +149,21 @@ const Q_HOLD = `*[_type == "hold"] | order(raekkefoelge asc) {
 }`;
 
 const Q_SPILLERE = `*[_type == "spiller" && aktiv != false] {
+  "id": _id,
   navn, "slug": slug.current, foedselsaar, rygnummer, position,
-  moderklub, uddannelse,
+  moderklub, uddannelse, landshold, landsholdNiveau,
   "sponsorId": sponsor->_id, "sponsorNavn": sponsor->navn,
   "fotoUrl": portraet.asset->url,
+  "fotoHotspot": portraet.hotspot{x, y},
   "holdOverstyring": holdOverstyring->_id
 }`;
 
 const Q_PERSONER = `*[_type == "person" && aktiv != false]
   | order(raekkefoelge asc, navn asc) {
+  "id": _id,
   navn, "slug": slug.current, rolle, sektion, telefon, email,
-  "fotoUrl": portraet.asset->url
+  "fotoUrl": portraet.asset->url,
+  "fotoHotspot": portraet.hotspot{x, y}
 }`;
 
 /* ── Reservedata, hvis Sanity ikke svarer ─────────────────────────────── */
@@ -160,6 +199,9 @@ export const fraSanity = sp.fraSanity && spi.fraSanity && pe.fraSanity;
 
 export const sponsorer: Sponsor[] = sp.data.map((s) => ({
   id: udenPraefiks(s.id),
+  /* Kun rigtige Sanity-id'er. Reservedataenes nøgler ligner et id, men peger
+     ikke på noget dokument — se `docId` på `Sponsor`. */
+  docId: sp.fraSanity ? s.id : undefined,
   navn: s.navn,
   niveau: (s.niveau as SponsorNiveau) ?? 'sponsor',
   logoKey: `logo-${udenPraefiks(s.id)}`,
@@ -181,6 +223,7 @@ export const hold: Hold[] = ho.data.map((h) => {
   const id = udenPraefiks(h.id);
   return {
     id,
+    docId: ho.fraSanity ? h.id : undefined,
     navn: h.navn,
     aargang: aargangTekst(h.foedselsaar),
     raekke: h.raekke ?? '',
@@ -235,10 +278,12 @@ const UDD = ['STX', 'HHX', 'HF'] as const;
 
 export const spillere: Spiller[] = spi.data
   .map((s, i) => ({
+    docId: spi.fraSanity ? s.id : undefined,
     navn: s.navn,
     slug: s.slug ?? '',
     fotoKey: `spiller-${s.slug ?? ''}`,
     fotoUrl: s.fotoUrl,
+    fotoHotspot: s.fotoHotspot ?? undefined,
     foedselsaar: s.foedselsaar ?? 0,
     holdOverstyring: s.holdOverstyring ? udenPraefiks(s.holdOverstyring) : undefined,
     rygnummer: s.rygnummer ?? i + 1,
@@ -249,6 +294,10 @@ export const spillere: Spiller[] = spi.data
     uddannelse: (s.uddannelse as Spiller['uddannelse']) ?? UDD[i % UDD.length]!,
     sponsorId: s.sponsorId ? udenPraefiks(s.sponsorId) : undefined,
     sponsorNavn: s.sponsorNavn,
+    /* Landshold er IKKE eksempeldata. Slås feltet ikke til i studioet, står
+       der ikke noget mærke — et gæt her ville pynte på en spillers cv. */
+    landshold: s.landshold === true,
+    landsholdNiveau: s.landsholdNiveau,
     aktiv: true,
   }))
   .filter((s) => s.slug)
@@ -256,13 +305,51 @@ export const spillere: Spiller[] = spi.data
 
 /* ── Staben ───────────────────────────────────────────────────────────── */
 
+/*
+ * FJERNER EN HALV HTML-TAG FRA ENDEN AF EN TEKST.
+ *
+ * Udtrækket fra m-tha.dk klippede stabens roller over midt i et tag. Fem af de
+ * 25 stod derfor på sitet som:
+ *
+ *   "Fysioterapeut </d"          "Fysioterapeut </"
+ *   "Koordinator EUC Nordvest <" "Assistenttræner U19-2 <spa"
+ *
+ * Det havde ligget der siden det første udtræk, og det blev først fundet ved
+ * at kigge på /staben ved 375 px.
+ *
+ * Kilden er rettet i `tools/assets.json` og `poc/src/data/roster.json`, men
+ * Sanity indeholder stadig de gamle værdier — og dem kan kun en redaktør
+ * rette. Derfor renses de også her, så sitet er rigtigt med det samme.
+ *
+ * Der GÆTTES ikke. Der slettes kun tegn der med sikkerhed ikke er en del af en
+ * stillingsbetegnelse. Én rolle er også klippet over midt i et ord —
+ * "Koordinator Morsø Gymnasium ST", formentlig "STX" — og den står som den er:
+ * et gæt der ser rigtigt ud er værre end en tekst der tydeligt mangler noget.
+ */
+const udenMarkuprester = (t: string) => t.replace(/\s*<\/?[a-zA-Z]{0,6}$/, '');
+
+{
+  const ramte = pe.data
+    .filter((p) => p.rolle && udenMarkuprester(p.rolle) !== p.rolle)
+    .map((p) => p.navn);
+  if (ramte.length) {
+    console.warn(
+      `  [staben] ${ramte.length} rolle(r) i Sanity indeholder HTML-rester fra ` +
+      `udtrækket: ${ramte.join(', ')}. De renses ved visning, men bør rettes i ` +
+      `studioet — se listen "⚠ Rolle med HTML-rester".`,
+    );
+  }
+}
+
 export const personer: Person[] = pe.data
   .map((p) => ({
+    docId: pe.fraSanity ? p.id : undefined,
     navn: p.navn,
     slug: p.slug ?? '',
-    rolle: p.rolle ?? '',
+    rolle: udenMarkuprester(p.rolle ?? ''),
     fotoKey: `person-${p.slug ?? ''}`,
     fotoUrl: p.fotoUrl,
+    fotoHotspot: p.fotoHotspot ?? undefined,
     telefon: p.telefon,
     email: p.email,
     sektion: (p.sektion as Person['sektion']) ?? 'bestyrelse',

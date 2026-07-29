@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import { billede } from '../lib/billeder';
 import { billedUrl, billedSrcset } from '../lib/sanity';
 import { danishDate } from '../lib/slug';
+import { redigerbar } from '../lib/redigering';
 
 interface Props {
   /**
@@ -11,6 +12,8 @@ interface Props {
    * ellers springes et niveau over i hierarkiet.
    */
   niveau?: 2 | 3;
+  /** Sanity-dokumentets `_id`. Kun til klik-til-felt — se lib/redigering.ts. */
+  docId?: string;
   slug: string;
   titel: string;
   dato: Date;
@@ -20,7 +23,9 @@ interface Props {
   fotoKey?: string;
   fotoUrl?: string;
 }
-const { slug, titel, dato, kategori, resume, kilde, fotoKey, fotoUrl, niveau = 3 } = Astro.props;
+const { slug, titel, dato, kategori, resume, kilde, fotoKey, fotoUrl,
+        docId, niveau = 3 } = Astro.props;
+const red = (felt: string) => redigerbar('nyhed', docId, felt);
 /* Sanitys CDN foerst, den lokale fil som reserve */
 const fraSanity = fotoUrl;
 const foto = fraSanity ? undefined : billede(fotoKey);
@@ -36,20 +41,20 @@ const Overskrift = `h${niveau}` as 'h2' | 'h3';
        style={`--v:${vinkel}deg`}>
     {fraSanity ? (
       <img src={billedUrl(fraSanity, { b: 520, h: 293, kvalitet: 80 })}
-           srcset={billedSrcset(fraSanity, [320, 520, 760], 9 / 16, 80)}
+           srcset={billedSrcset(fraSanity, [320, 520, 760], { forhold: 9 / 16, kvalitet: 80 })}
            sizes="(max-width: 700px) 92vw, 340px"
-           alt="" loading="lazy" decoding="async" />
+           alt="" data-sanity={red('foto')} loading="lazy" decoding="async" />
     ) : foto ? (
       <Image src={foto} alt="" widths={[320, 520, 760]}
              sizes="(max-width: 700px) 92vw, 340px" quality={80} loading="lazy" />
     ) : null}
-    <span class="pill">{kategori}</span>
+    <span class="pill" data-sanity={red('kategori')}>{kategori}</span>
     {kilde === 'instagram' && <span class="nk__auto">via Instagram</span>}
   </div>
   <div class="nk__body">
-    <Overskrift>{titel}</Overskrift>
-    <time datetime={dato.toISOString()}>{danishDate(dato)}</time>
-    <p>{resume}</p>
+    <Overskrift data-sanity={red('titel')}>{titel}</Overskrift>
+    <time datetime={dato.toISOString()} data-sanity={red('dato')}>{danishDate(dato)}</time>
+    <p data-sanity={red('resume')}>{resume}</p>
   </div>
 </a>
 
