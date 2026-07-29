@@ -1,4 +1,90 @@
 /* ==========================================================================
+   SKRIFTER — selvhostede, ikke Google Fonts
+   Barlow Condensed til overskrifter, Barlow til broedtekst. Valgt fordi de er
+   kondenserede og atletiske, hvilket passer til haandbold.
+
+   HVORFOR SELVHOSTET
+     * intet kald til Google fra besoegendes browser. Sitet handler om
+       mindreaarige, saa der skal ikke sendes data til tredjepart uden grund
+     * ingen ekstra DNS-opslag og forbindelse foer teksten kan tegnes
+     * skriften ser ens ud alle steder
+
+   HVORFOR OVERHOVEDET SKIFTE
+     Foer stod der 'Bahnschrift SemiCondensed' — som KUN findes paa Windows.
+     Paa iPhone og Android faldt den hele vejen ned til system-ui, der ikke er
+     kondenseret. Hele det atletiske udtryk forsvandt for de fleste
+     besoegende, og de fleste af dem er paa telefon.
+
+   font-display: swap betyder at teksten vises straks i en reserveskrift og
+   skifter naar Barlow er hentet. Bedre end usynlig tekst i et halvt sekund.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal; font-weight: 600; font-display: swap;
+  src: url('/skrift/barlow-condensed-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal; font-weight: 600; font-display: swap;
+  src: url('/skrift/barlow-condensed-600-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal; font-weight: 700; font-display: swap;
+  src: url('/skrift/barlow-condensed-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal; font-weight: 700; font-display: swap;
+  src: url('/skrift/barlow-condensed-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal; font-weight: 400; font-display: swap;
+  src: url('/skrift/barlow-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal; font-weight: 400; font-display: swap;
+  src: url('/skrift/barlow-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal; font-weight: 600; font-display: swap;
+  src: url('/skrift/barlow-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal; font-weight: 600; font-display: swap;
+  src: url('/skrift/barlow-600-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ==========================================================================
    MTHA — designtokens
    Farverne er samplet ud af akademiets officielle logofil
    MTHA_Logo_Endelig-ingen baggrund.png (702x356, aegte RGBA) — ikke gaettet,
@@ -18,27 +104,27 @@
   --navy-100: #E7E7F4;
 
   --orange: #EF8329;
-  --orange-600: #CC6A12;
+  --orange-600: #AB580F;
   --orange-100: #FBEEE1;
 
   --thisted: #0762A1;
   --thisted-light: #61A4D8;
 
   /* Neutraler traekker en smule mod navy, saa de ikke virker tilfaeldige */
-  --paper: #FBFBFD;
+  --paper: #F4F4FA;
   --surface: #FFFFFF;
   --surface-2: #F3F3F9;
   --line: #DEDEEC;
   --line-soft: #EAEAF3;
   --text: #171838;
   --text-dim: #55577C;
-  --text-faint: #8385A6;
+  --text-faint: #6B6C88;
 
   --good: #2E7A54;
 
-  --font-display: 'Bahnschrift SemiCondensed', 'Bahnschrift', 'DIN Condensed',
-                  'Oswald', 'Arial Narrow', system-ui, sans-serif;
-  --font-body: 'Segoe UI Variable Text', 'Segoe UI', system-ui,
+  --font-display: 'Barlow Condensed', 'Bahnschrift SemiCondensed',
+                  'Arial Narrow', system-ui, sans-serif;
+  --font-body: 'Barlow', 'Segoe UI Variable Text', 'Segoe UI', system-ui,
                -apple-system, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'Cascadia Code', Consolas, ui-monospace, 'SF Mono', monospace;
 
@@ -56,9 +142,9 @@
     --line-soft: #262953;
     --text: #EDEDF6;
     --text-dim: #A9ABCC;
-    --text-faint: #7C7FA4;
+    --text-faint: #8A8DB2;
     --navy-100: #23256F;
-    --navy-300: #6E71BE;
+    --navy-300: #8B8ECF;
     --orange-100: #3A2612;
     --good: #4FAE80;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 10px 30px -16px rgb(0 0 0 / 55%);

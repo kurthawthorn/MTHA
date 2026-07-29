@@ -5,6 +5,7 @@ import NyhedsKort from '../components/NyhedsKort.astro';
 import { hold, truppen, personer } from '../data/akademi';
 import { billede } from '../lib/billeder';
 import { nyheder } from '../data/nyheder';
+import { altFor } from '../data/billeder';
 import { MOTTO, ligatrupTal, forsideVaerdier, titler, uddannelser } from '../data/vaerdier';
 import { saeson } from '../data/saeson';
 
@@ -139,7 +140,9 @@ const faciliteter = [
           const foto = billede(k);
           return foto ? (
             <div class="stribe__i">
-              <Image src={foto} alt="" widths={[400, 700]}
+              {/* Striben har ingen billedtekst, saa alt-teksten er det eneste
+                  der fortaeller hvad man gaar glip af. Derfor ikke tom. */}
+              <Image src={foto} alt={altFor(k)} widths={[400, 700]}
                      sizes="(max-width: 700px) 92vw, 360px" quality={78} loading="lazy" />
             </div>
           ) : null;

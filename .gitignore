@@ -44,3 +44,5 @@ sanity/dist/
 sanity/.sanity/
 .env
 .env.local
+
+# Selvhostede skrifter hentes af tools/hent-skrifter (se poc/public/skrift)

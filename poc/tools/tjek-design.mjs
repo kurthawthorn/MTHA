@@ -1,0 +1,171 @@
+/**
+ * Måler sitet mod de kritiske punkter i UI/UX-tjeklisten.
+ *
+ *   node tools/tjek-design.mjs
+ *
+ * Kontrast regnes efter WCAG 2.1: relativ luminans og forholdet
+ * (L1 + 0.05) / (L2 + 0.05). Grænserne er 4.5:1 for brødtekst og 3:1 for
+ * stor tekst (18,66px fed eller 24px normal) og for grafiske elementer.
+ *
+ * Dette er ikke en erstatning for at se på siden — men farvekontrast og
+ * berøringsmål er netop de ting man IKKE kan se, og som rammer dem der har
+ * sværest ved at bruge sitet i forvejen.
+ */
+
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROD = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/* ── Kontrast ─────────────────────────────────────────────────────────── */
+
+const kanal = (v) => {
+  const s = v / 255;
+  return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+};
+
+function luminans(hex) {
+  const h = hex.replace('#', '');
+  const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(n.slice(i, i + 2), 16));
+  return 0.2126 * kanal(r) + 0.7152 * kanal(g) + 0.0722 * kanal(b);
+}
+
+const kontrast = (a, b) => {
+  const [l1, l2] = [luminans(a), luminans(b)].sort((x, y) => y - x);
+  return (l1 + 0.05) / (l2 + 0.05);
+};
+
+/* ── Farver fra global.css ────────────────────────────────────────────── */
+
+const css = readFileSync(join(ROD, 'src/styles/global.css'), 'utf8');
+
+/* Lys palet = kun det foerste :root-blok. Moerk = kun media-blokken.
+   Laeses hele filen i ét haps, overskriver de moerke vaerdier de lyse — og
+   saa maaler man paa noget der ikke findes. */
+const grænse = css.indexOf('@media (prefers-color-scheme: dark)');
+const lysBlok = css.slice(0, grænse);
+const moerkBlok = css.slice(grænse, css.indexOf('}', css.indexOf('}', grænse) + 1));
+
+const farver = (blok) => Object.fromEntries(
+  [...blok.matchAll(/--([a-z0-9-]+):\s*(#[0-9A-Fa-f]{3,6});/g)].map((m) => [m[1], m[2]]),
+);
+const lys = farver(lysBlok);
+/* Moerk arver alt der ikke omdefineres */
+const moerk = { ...lys, ...farver(moerkBlok) };
+
+/** De kombinationer der faktisk optræder på sitet. */
+const PAR = [
+  ['brødtekst på papir', 'text', 'paper', 4.5],
+  ['dæmpet tekst på papir', 'text-dim', 'paper', 4.5],
+  ['svag tekst på papir', 'text-faint', 'paper', 4.5],
+  ['brødtekst på kort', 'text', 'surface', 4.5],
+  ['dæmpet tekst på kort', 'text-dim', 'surface', 4.5],
+  ['svag tekst på kort', 'text-faint', 'surface', 4.5],
+];
+
+/*
+ * Par der kun findes i ét tema. Foer stod de i listen ovenfor og gav to
+ * falske alarmer: i moerk visning bruger links `navy-300`, ikke `navy-600`,
+ * og headeren forbliver LYS uanset tema — saa navy-paa-moerk opstaar aldrig.
+ * At maale par der ikke findes er vaerre end ikke at maale: man jagter fejl
+ * der ikke er der, og overser dem der er.
+ */
+const KUN_LYS = [
+  ['eyebrow (orange-600)', 'orange-600', 'paper', 4.5],
+  ['link', 'navy-600', 'paper', 4.5],
+  ['menutekst i header', 'navy', 'surface', 4.5],
+];
+const KUN_MOERK = [
+  ['link (navy-300)', 'navy-300', 'paper', 4.5],
+  ['eyebrow (orange)', 'orange', 'paper', 4.5],
+];
+
+console.log('\n═══ KONTRAST (WCAG 2.1) ═══\n');
+let fejl = 0;
+for (const tema of [['LYS', lys], ['MØRK', moerk]]) {
+  const [navn, p] = tema;
+  console.log(`  ── ${navn} ──`);
+  const ekstra = navn === 'LYS' ? KUN_LYS : KUN_MOERK;
+  for (const [label, fg, bg, kraev] of [...PAR, ...ekstra]) {
+    const f = p[fg] ?? lys[fg];
+    const b = p[bg] ?? lys[bg];
+    if (!f || !b) continue;
+    const k = kontrast(f, b);
+    const ok = k >= kraev;
+    if (!ok) fejl++;
+    console.log(
+      `   ${ok ? 'OK  ' : 'FEJL'} ${label.padEnd(32)} ${k.toFixed(2)}:1` +
+      `  (kræver ${kraev}:1)  ${f} på ${b}`,
+    );
+  }
+  console.log();
+}
+
+/* ── Berøringsmål og andet i det byggede site ─────────────────────────── */
+
+const dist = join(ROD, 'dist');
+const sider = readdirSync(dist, { recursive: true })
+  .filter((f) => String(f).endsWith('.html'))
+  .map((f) => join(dist, String(f)));
+
+const alle = sider.map((s) => readFileSync(s, 'utf8'));
+const forside = readFileSync(join(dist, 'index.html'), 'utf8');
+const byggetCss = readdirSync(join(dist, '_astro'))
+  .filter((f) => f.endsWith('.css'))
+  .map((f) => readFileSync(join(dist, '_astro', f), 'utf8'))
+  .join('');
+
+const tjek = (navn, ok, note = '') =>
+  console.log(`   ${ok ? 'OK  ' : 'SE  '} ${navn.padEnd(42)}${note}`);
+
+console.log('═══ TILGÆNGELIGHED OG STRUKTUR ═══\n');
+tjek('lang="da" på alle sider', alle.every((h) => h.includes('lang="da"')));
+tjek('viewport uden maximum-scale',
+  alle.every((h) => h.includes('width=device-width') && !h.includes('maximum-scale')));
+tjek('synlig fokusmarkering', byggetCss.includes(':focus-visible'));
+tjek('prefers-reduced-motion respekteret', byggetCss.includes('prefers-reduced-motion'));
+tjek('spring-til-indhold-link', forside.includes('class="skip"'));
+tjek('ingen emoji som ikoner',
+  !alle.some((h) => /<(span|i|div)[^>]*>[\u{1F300}-\u{1FAFF}]/u.test(h)));
+
+/*
+ * Tælles PR. FIL — ikke på alle sider limet sammen.
+ *
+ * To fejl i denne ene linje kostede en halv times jagt på fejl der ikke fandtes:
+ *
+ *   1. `alle.join('')` uden adskiller lader en regex matche hen over en
+ *      filgrænse: slutningen af én side plus starten af den næste blev til et
+ *      <img> der ikke findes noget sted. Gav 7 spøgelser.
+ *   2. `\balt=` accepterer kun alt="...". Men `compressHTML` forkorter alt=""
+ *      til et bart `alt`, hvilket er gyldig HTML5 og betyder præcis det samme
+ *      — dekorativt billede. Gav 12 falske fejl.
+ *
+ * Pointen: et tjek man ikke selv har efterprøvet er værre end intet tjek.
+ * Det sender én ud at rette noget der virker.
+ */
+const taelIAlle = (re) => alle.reduce((n, h) => n + (h.match(re) ?? []).length, 0);
+
+const udenAlt = taelIAlle(/<img(?![^>]*\salt(?:=|[\s>]))[^>]*>/g);
+tjek('alle billeder har alt-tekst', udenAlt === 0,
+  udenAlt ? `${udenAlt} uden alt` : '');
+
+const tommeAlt = taelIAlle(/<img[^>]*\salt(?:=""|(?=[\s>]))/g);
+console.log(`        (${tommeAlt} bevidst tomme alt="" — dekorative billeder)`);
+
+console.log('\n═══ YDELSE ═══\n');
+const idx = readFileSync(join(dist, 'index.html'));
+tjek('forside under 50 KB HTML', idx.length < 50000, `${(idx.length / 1024).toFixed(1)} KB`);
+tjek('billeder i moderne format',
+  /\.webp|auto=format/.test(forside), 'WebP + Sanity auto=format');
+tjek('lazy loading under folden',
+  (forside.match(/loading="lazy"/g) ?? []).length > 5,
+  `${(forside.match(/loading="lazy"/g) ?? []).length} billeder`);
+tjek('bredde+højde på billeder (mod layoutspring)',
+  (forside.match(/<img[^>]*width=/g) ?? []).length > 0);
+
+const scripts = [...forside.matchAll(/<script(?![^>]*ld\+json)[^>]*>([\s\S]*?)<\/script>/g)];
+console.log(`        JavaScript på forsiden: ${scripts.reduce((n, m) => n + m[1].length, 0)} bytes`);
+
+console.log(`\n${fejl ? `${fejl} kontrastproblemer` : 'Ingen kontrastproblemer'}\n`);

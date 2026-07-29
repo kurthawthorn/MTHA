@@ -35,6 +35,17 @@ const kanonisk = new URL(Astro.url.pathname, Astro.site);
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
     <!--
+      Forudindlaes de to skrifter der bruges oeverst paa hver side, saa
+      overskrifter og broedtekst ikke skifter udseende midt i laesningen.
+      Kun latin-udgaven: den daekker dansk. latin-ext hentes kun hvis en side
+      faktisk bruger tegn derfra.
+    -->
+    <link rel="preload" href="/skrift/barlow-condensed-700-latin.woff2"
+          as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/skrift/barlow-400-latin.woff2"
+          as="font" type="font/woff2" crossorigin />
+
+    <!--
       Prototypen må ikke indekseres. Den viser portrætter af mindreårige og
       eksempeldata, og den er ikke akademiets officielle hjemmeside.
       robots.txt blokerer crawlere; denne linje sikrer at et link der alligevel

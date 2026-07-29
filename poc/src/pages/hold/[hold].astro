@@ -29,7 +29,7 @@ const aargange = [...new Set(trup.map((s) => s.foedselsaar))].sort();
 
     {holdFoto && (
       <div class="holdfoto">
-        <Image src={holdFoto} alt="" widths={[900, 1400, 2200]}
+        <Image src={holdFoto} alt={`${h.navn} — hele truppen, årgang ${h.aargang}`} widths={[900, 1400, 2200]}
                sizes="100vw" quality={80} loading="eager" />
       </div>
     )}
