@@ -112,14 +112,23 @@ const uddannelser = [
           ansøgningen både i indbakken på info@m-tha.dk og i CMS'et, så intet
           forsvinder i et spamfilter.
         </p>
-        <div class="ansoeg__rk">
-          <label>Spillerens navn<input type="text" name="navn" autocomplete="name" /></label>
-          <label>Fødselsår<input type="number" name="aar" min="2004" max="2016" /></label>
-        </div>
-        <div class="ansoeg__rk">
-          <label>Forælders e-mail<input type="email" name="email" autocomplete="email" /></label>
+        <fieldset class="ansoeg__gruppe">
+          <legend>Om spilleren</legend>
+          <div class="ansoeg__rk">
+          <label>Spillerens navn <abbr title="skal udfyldes">*</abbr>
+            <input type="text" name="navn" autocomplete="name" required /></label>
+          <label>Fødselsår <abbr title="skal udfyldes">*</abbr>
+            <input type="number" name="aar" min="2004" max="2016" required /></label>
+          </div>
+        </fieldset>
+        <fieldset class="ansoeg__gruppe">
+          <legend>Kontakt</legend>
+          <div class="ansoeg__rk">
+          <label>Forælders e-mail <abbr title="skal udfyldes">*</abbr>
+            <input type="email" name="email" autocomplete="email" required /></label>
           <label>Telefon<input type="tel" name="tlf" autocomplete="tel" /></label>
-        </div>
+          </div>
+        </fieldset>
         <div class="ansoeg__rk">
           <label>Moderklub<input type="text" name="klub" /></label>
           <label>Ønsket uddannelse
@@ -216,8 +225,26 @@ const uddannelser = [
   .ansoeg input, .ansoeg select, .ansoeg textarea {
     font-family: var(--font-body); font-size: 0.95rem; color: var(--text);
     background: var(--surface); border: 1px solid var(--line);
-    border-radius: var(--radius); padding: 0.5rem 0.6rem;
+    border-radius: var(--radius); padding: 0.6rem;
     text-transform: none; letter-spacing: normal;
+    /* Var 37 px. Et indtastningsfelt paa en telefon skal kunne rammes lige
+       saa praecist som en knap. */
+    min-height: 44px;
+  }
+
+  /* Felterne grupperes semantisk, saa en skaermlaeser kan sige "Om spilleren:
+     Foedselsaar" frem for bare "Foedselsaar". */
+  .ansoeg__gruppe {
+    border: 0; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: var(--rum-2);
+  }
+  .ansoeg__gruppe legend {
+    font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 0.66rem; font-weight: 700;
+    color: var(--text); padding: 0; margin-bottom: var(--rum-1);
+  }
+  .ansoeg abbr {
+    color: var(--orange-600); text-decoration: none; font-weight: 700;
   }
   .ansoeg textarea { resize: vertical; }
   .ansoeg button { align-self: flex-start; margin-top: 0.3rem; }
