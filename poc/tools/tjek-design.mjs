@@ -117,8 +117,13 @@ const byggetCss = readdirSync(join(dist, '_astro'))
   .map((f) => readFileSync(join(dist, '_astro', f), 'utf8'))
   .join('');
 
-const tjek = (navn, ok, note = '') =>
+/* Tael fejl, saa scriptet kan afslutte med en fejlkode. Uden det ville
+   GitHub Actions se en groen bygning selvom tjekket fandt noget. */
+let problemer = 0;
+const tjek = (navn, ok, note = '') => {
+  if (!ok) problemer++;
   console.log(`   ${ok ? 'OK  ' : 'SE  '} ${navn.padEnd(42)}${note}`);
+};
 
 console.log('═══ TILGÆNGELIGHED OG STRUKTUR ═══\n');
 tjek('lang="da" på alle sider', alle.every((h) => h.includes('lang="da"')));
@@ -161,6 +166,23 @@ console.log(`        (${tommeAlt} bevidst tomme alt="" — dekorative billeder)`
  *
  * Målt før rettelsen: .btn 36px, .chip 22px, menupunkter 24px. Alt under 44.
  */
+/*
+ * Overskriftshierarki. Skærmlæserbrugere navigerer på overskrifter, så et
+ * spring fra h1 til h3 betyder at et niveau mangler i sidens disposition.
+ * Fangede 61 spring første gang: sidefodens h3 på sider uden nogen h2.
+ */
+console.log('\n═══ OVERSKRIFTER ═══\n');
+const springer = alle.filter((h) => {
+  const n = [...h.matchAll(/<h([1-6])[ >]/g)].map((m) => Number(m[1]));
+  return n.some((v, i) => i > 0 && v - n[i - 1] > 1);
+}).length;
+tjek('intet spring i hierarkiet', springer === 0,
+  springer ? `${springer} sider springer et niveau over` : '');
+
+const forkertH1 = alle.filter((h) => (h.match(/<h1[ >]/g) ?? []).length !== 1).length;
+tjek('præcis én h1 pr. side', forkertH1 === 0,
+  forkertH1 ? `${forkertH1} sider afviger` : '');
+
 console.log('\n═══ BERØRINGSMÅL ═══\n');
 tjek('knapper har min-height 44px', /\.btn[^{]*\{[^}]*min-height:44px/.test(byggetCss));
 tjek('usynligt trykfelt på små elementer',
@@ -182,4 +204,15 @@ tjek('bredde+højde på billeder (mod layoutspring)',
 const scripts = [...forside.matchAll(/<script(?![^>]*ld\+json)[^>]*>([\s\S]*?)<\/script>/g)];
 console.log(`        JavaScript på forsiden: ${scripts.reduce((n, m) => n + m[1].length, 0)} bytes`);
 
-console.log(`\n${fejl ? `${fejl} kontrastproblemer` : 'Ingen kontrastproblemer'}\n`);
+const ialt = fejl + problemer;
+console.log(`\n${ialt ? `${ialt} ting at se på` : 'Alt i orden'}\n`);
+
+/*
+ * Fejlkode 1 stopper bygningen.
+ *
+ * Et tjek der kun skriver i loggen bliver overset — især i CI, hvor ingen
+ * læser 200 linjer output på en grøn bygning. Et tjek der stopper bygningen
+ * bliver rettet. Det er hele forskellen på et værktøj der virker og et der
+ * ligger og ser pænt ud.
+ */
+if (ialt) process.exit(1);

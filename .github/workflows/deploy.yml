@@ -73,7 +73,11 @@ jobs:
         working-directory: poc
         run: npm ci
 
-      - name: Byg
+      # `npm run build` rydder cachen, bygger OG koerer tools/tjek-design.mjs.
+      # Tjekket afslutter med fejlkode 1 hvis noget er galt, saa en fejl i
+      # kontrast, alt-tekster, overskrifter eller beroeringsmaal stopper
+      # udgivelsen frem for at ligge og se paen ud i loggen.
+      - name: Byg og tjek
         working-directory: poc
         env:
           # GitHub Pages lægger projekt-repos på /REPO/. Begge værdier kommer
